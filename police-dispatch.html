@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispatch — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #030a14;
+            --panel: rgba(4,12,26,0.97);
+            --blue: #1a56db;
+            --blue-light: #3b82f6;
+            --blue-dim: rgba(26,86,219,0.15);
+            --blue-border: rgba(26,86,219,0.22);
+            --gold: #c9a227;
+            --gold-dim: rgba(201,162,39,0.15);
+            --gold-border: rgba(201,162,39,0.25);
+            --text: #c5d8f0;
+            --muted: #4a7a9b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --purple: #a855f7;
+            --orange: #f97316;
+            --gray: #6b7280;
+        }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Exo 2', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(26,86,219,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26,86,219,0.035) 1px, transparent 1px);
+            background-size: 36px 36px;
+            animation: gridDrift 40s linear infinite;
+        }
+        @keyframes gridDrift { 0%{background-position:0 0} 100%{background-position:36px 36px} }
+
+        /* HEADER */
+        header {
+            height: 58px;
+            background: rgba(3,10,20,0.99);
+            border-bottom: 1px solid var(--blue-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 18px; flex-shrink: 0; position: relative; z-index: 100;
+        }
+        header::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), var(--blue), transparent);
+            opacity: 0.5;
+        }
+        .hdr-left { display: flex; align-items: center; gap: 14px; }
+        .hdr-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+        .hdr-logo img { width: 32px; height: 38px; filter: drop-shadow(0 0 8px rgba(201,162,39,0.45)); }
+        .hdr-title { font-family: 'Rajdhani', sans-serif; }
+        .hdr-title .main { font-size: 17px; font-weight: 700; letter-spacing: 3px; color: #fff; text-shadow: 0 0 15px rgba(201,162,39,0.4); display: block; line-height: 1; }
+        .hdr-title .sub { font-size: 9px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; display: block; }
+        .hdr-divider { width: 1px; height: 30px; background: var(--blue-border); }
+        .hdr-badge { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; background: var(--gold-dim); border: 1px solid var(--gold-border); padding: 3px 10px; border-radius: 2px; }
+        .hdr-clock { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 600; letter-spacing: 2px; color: var(--blue-light); text-shadow: 0 0 12px rgba(59,130,246,0.4); padding: 0 16px; border-left: 1px solid var(--blue-border); border-right: 1px solid var(--blue-border); }
+        .hdr-right { display: flex; align-items: center; gap: 10px; }
+        .hdr-user { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+        .hdr-user span { color: var(--text); font-weight: 600; }
+        .btn { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; border: none; border-radius: 2px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover { background: var(--blue-light); box-shadow: 0 0 16px rgba(26,86,219,0.4); }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-gold:hover { background: #d4ac33; box-shadow: 0 0 16px rgba(201,162,39,0.35); }
+        .btn-danger { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .btn-danger:hover { background: rgba(239,68,68,0.22); }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--blue-border); }
+        .btn-ghost:hover { color: var(--text); border-color: var(--blue-light); }
+
+        .alert-bar {
+            background: rgba(201,162,39,0.09);
+            border-bottom: 1px solid var(--gold-border);
+            padding: 5px 20px;
+            font-size: 10px; color: #fcd34d; letter-spacing: 1px;
+            text-align: center; flex-shrink: 0; z-index: 1;
+        }
+
+        /* LAYOUT */
+        .app-body { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 248px; flex-shrink: 0;
+            background: var(--panel);
+            border-right: 1px solid var(--blue-border);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sidebar-hdr {
+            padding: 11px 13px;
+            border-bottom: 1px solid var(--blue-border);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-hdr h3 { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-light); }
+        .badge-count {
+            background: var(--blue-dim); color: var(--blue-light);
+            border: 1px solid var(--blue-border);
+            font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: auto;
+        }
+        .sidebar-scroll { flex: 1; overflow-y: auto; padding: 7px; }
+        .sidebar-scroll::-webkit-scrollbar { width: 3px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 2px; }
+
+        .staff-card {
+            padding: 8px 10px; margin-bottom: 5px;
+            background: rgba(26,86,219,0.06);
+            border: 1px solid var(--blue-border);
+            border-radius: 3px; cursor: grab; transition: all 0.15s; position: relative;
+        }
+        .staff-card:hover { background: var(--blue-dim); border-color: var(--blue-light); transform: translateX(2px); }
+        .staff-card:active { cursor: grabbing; }
+        .staff-name { font-weight: 600; font-size: 13px; color: #dbeafe; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .staff-role { font-size: 10px; letter-spacing: 1px; }
+        .role-officier .staff-role { color: #fbbf24; }
+        .role-supervision .staff-role { color: #a78bfa; }
+        .role-agent .staff-role { color: #60a5fa; }
+        .role-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+        .role-officier .role-dot { background: #fbbf24; }
+        .role-supervision .role-dot { background: #a78bfa; }
+        .role-agent .role-dot { background: #60a5fa; }
+        .staff-badge { font-size: 8px; letter-spacing: 1px; color: var(--gold); font-weight: 700; background: var(--gold-dim); padding: 1px 5px; border-radius: 2px; white-space: nowrap; }
+        .staff-matricule { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+        .dispatcher-zone { padding: 8px 10px; border-top: 1px solid var(--blue-border); }
+        .dispatcher-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        .dispatcher-slot {
+            min-height: 46px;
+            background: rgba(201,162,39,0.04);
+            border: 1px dashed var(--gold-border);
+            border-radius: 3px; padding: 4px;
+        }
+
+        /* CENTER */
+        .center-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .units-grid {
+            flex: 1; overflow-y: auto; padding: 13px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); gap: 11px;
+            align-content: start;
+        }
+        .units-grid::-webkit-scrollbar { width: 4px; }
+        .units-grid::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 2px; }
+
+        /* UNIT CARDS */
+        .unit-card {
+            background: var(--panel);
+            border: 1px solid var(--blue-border);
+            border-radius: 5px; overflow: hidden;
+            transition: all 0.2s; position: relative;
+        }
+        .unit-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--blue-light); transition: background 0.2s; }
+
+        .unit-card.statut-intervention::before { background: var(--red); }
+        .unit-card.statut-intervention { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); }
+        .unit-card.statut-patrouille::before { background: var(--green); }
+        .unit-card.statut-patrouille { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.04); }
+        .unit-card.statut-en_route::before { background: var(--yellow); }
+        .unit-card.statut-en_route { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.03); }
+        .unit-card.statut-danger::before { background: var(--purple); }
+        .unit-card.statut-danger { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.06); animation: dangerPulse 1.5s ease-in-out infinite; }
+        @keyframes dangerPulse { 0%,100%{box-shadow:0 0 0 rgba(168,85,247,0)} 50%{box-shadow:0 0 18px rgba(168,85,247,0.4)} }
+        .unit-card.statut-disponible::before { background: var(--blue-light); }
+        .unit-card.statut-hors_service::before { background: var(--gray); }
+        .unit-card.statut-hors_service { opacity: 0.75; }
+
+        .unit-header { padding: 8px 10px 7px 13px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--blue-border); }
+        .unit-icon { width: 28px; height: 28px; background: var(--blue-dim); border: 1px solid var(--blue-border); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .unit-info { flex: 1; min-width: 0; }
+        .unit-name { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #fff; }
+        .unit-vehicle { font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+        .unit-status-badge { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 5px; border-radius: 2px; white-space: nowrap; }
+        .badge-intervention { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+        .badge-patrouille   { background: rgba(34,197,94,0.18); color: #86efac; border: 1px solid rgba(34,197,94,0.35); }
+        .badge-en_route     { background: rgba(245,158,11,0.18); color: #fcd34d; border: 1px solid rgba(245,158,11,0.35); }
+        .badge-danger       { background: rgba(168,85,247,0.22); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.45); animation: dangerBadge 1s ease infinite; }
+        @keyframes dangerBadge { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .badge-disponible   { background: rgba(26,86,219,0.18); color: #93c5fd; border: 1px solid rgba(26,86,219,0.35); }
+        .badge-hors_service { background: rgba(107,114,128,0.18); color: #9ca3af; border: 1px solid rgba(107,114,128,0.35); }
+
+        .unit-members { min-height: 52px; padding: 6px 8px; }
+        .unit-members-empty { font-size: 10px; color: rgba(74,122,155,0.4); text-align: center; padding: 10px; letter-spacing: 1px; }
+        .unit-footer { padding: 6px 8px; border-top: 1px solid var(--blue-border); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+
+        .btn-xs {
+            font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+            padding: 3px 7px; border: 1px solid var(--blue-border); border-radius: 2px;
+            background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .btn-xs:hover { color: var(--text); border-color: var(--blue-light); background: var(--blue-dim); }
+
+        .loc-select {
+            flex: 1; min-width: 0; font-family: 'Exo 2', sans-serif; font-size: 10px;
+            background: rgba(26,86,219,0.05); border: 1px solid var(--blue-border);
+            color: var(--text); padding: 3px 6px; border-radius: 2px; outline: none; cursor: pointer;
+        }
+        .loc-select:focus { border-color: var(--blue-light); }
+        .loc-select option { background: #050d1a; }
+
+        .zip-row { display: flex; align-items: center; gap: 5px; padding: 4px 8px 5px; border-top: 1px solid var(--blue-border); }
+        .zip-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; white-space: nowrap; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+        .zip-input {
+            width: 65px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+            background: rgba(26,86,219,0.06); border: 1px solid var(--blue-border);
+            color: #fff; padding: 2px 6px; border-radius: 2px; outline: none; text-align: center; letter-spacing: 2px;
+        }
+        .zip-input:focus { border-color: var(--blue-light); background: rgba(26,86,219,0.12); }
+        .zip-input::placeholder { color: rgba(100,150,190,0.3); font-size: 10px; }
+        .btn-zip {
+            font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+            padding: 2px 8px; background: var(--blue-dim); border: 1px solid var(--blue-border);
+            color: var(--blue-light); border-radius: 2px; cursor: pointer; transition: all 0.15s;
+        }
+        .btn-zip:hover { background: var(--blue); color: #fff; }
+        .zip-display {
+            font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; color: #fcd34d; letter-spacing: 2px;
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); padding: 2px 7px; border-radius: 2px; margin-left: auto;
+        }
+
+        /* MAP */
+        .map-panel { width: 340px; flex-shrink: 0; border-left: 1px solid var(--blue-border); display: flex; flex-direction: column; overflow: hidden; }
+        .map-hdr { padding: 9px 13px; border-bottom: 1px solid var(--blue-border); display: flex; align-items: center; justify-content: space-between; }
+        .map-hdr h3 { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+        .map-legend { display: flex; gap: 8px; flex-wrap: wrap; padding: 5px 10px; border-bottom: 1px solid var(--blue-border); }
+        .legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+        .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .map-container { flex: 1; position: relative; overflow: hidden; background: #071120; }
+        .map-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; display: block; filter: saturate(0.5) brightness(0.55) hue-rotate(195deg); }
+        .map-container::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1; background: linear-gradient(to bottom,rgba(3,10,20,0.45) 0%,transparent 20%,transparent 80%,rgba(3,10,20,0.45) 100%),linear-gradient(to right,rgba(3,10,20,0.3) 0%,transparent 15%,transparent 85%,rgba(3,10,20,0.3) 100%); }
+        .map-markers { position: absolute; inset: 0; z-index: 2; }
+        .map-marker { position: absolute; transform: translate(-50%,-50%); cursor: pointer; }
+        .marker-pulse { position: absolute; width: 32px; height: 32px; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: mPulse 2s ease-out infinite; border: 2px solid; }
+        @keyframes mPulse { 0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.8} 100%{transform:translate(-50%,-50%) scale(2.1);opacity:0} }
+        .marker-body { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; font-family: 'Rajdhani', sans-serif; box-shadow: 0 0 10px currentColor; position: relative; z-index: 2; }
+        .marker-label { display: none; position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); background: rgba(3,10,20,0.97); border: 1px solid var(--blue-border); color: var(--text); padding: 6px 10px; border-radius: 3px; font-size: 10px; white-space: nowrap; z-index: 10; pointer-events: none; }
+        .map-marker:hover .marker-label { display: block; }
+        .marker-intervention .marker-pulse { border-color: var(--red); }   .marker-intervention .marker-body { background: var(--red); }
+        .marker-patrouille  .marker-pulse { border-color: var(--green); }  .marker-patrouille  .marker-body { background: var(--green); }
+        .marker-en_route    .marker-pulse { border-color: var(--yellow); } .marker-en_route    .marker-body { background: var(--yellow); }
+        .marker-danger      .marker-pulse { border-color: var(--purple); animation: mPulse 0.7s ease-out infinite; } .marker-danger .marker-body { background: var(--purple); }
+        .marker-disponible  .marker-pulse { border-color: var(--blue-light); } .marker-disponible .marker-body { background: var(--blue); }
+        .marker-hors_service .marker-pulse { border-color: var(--gray); }  .marker-hors_service .marker-body { background: var(--gray); }
+
+        /* STATS BAR */
+        .stats-bar {
+            height: 32px; background: rgba(3,10,20,0.99); border-top: 1px solid var(--blue-border);
+            display: flex; align-items: center; padding: 0 18px; gap: 16px; flex-shrink: 0; position: relative; z-index: 100;
+        }
+        .stat-item { display: flex; align-items: center; gap: 5px; font-size: 10px; letter-spacing: 1px; color: var(--muted); }
+        .stat-item span { color: var(--text); font-weight: 600; }
+        .stat-sep { width: 1px; height: 13px; background: var(--blue-border); }
+
+        /* MODALS */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: rgba(4,12,26,0.99); border: 1px solid var(--blue-border); border-radius: 5px; padding: 24px; width: 330px; position: relative; }
+        .modal-box::before, .modal-box::after { content: ''; position: absolute; width: 12px; height: 12px; border-color: var(--gold); border-style: solid; }
+        .modal-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .modal-box::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
+        .modal-field { margin-bottom: 13px; }
+        .modal-field label { display: block; font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        .modal-field select, .modal-field input { width: 100%; padding: 8px 10px; background: rgba(26,86,219,0.06); border: 1px solid var(--blue-border); border-radius: 2px; color: var(--text); font-family: 'Exo 2', sans-serif; font-size: 13px; outline: none; transition: all 0.2s; }
+        .modal-field select:focus, .modal-field input:focus { border-color: var(--blue-light); }
+        .modal-field select option { background: #050d1a; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 16px; }
+        .info-block { background: rgba(26,86,219,0.06); border: 1px solid var(--blue-border); padding: 8px 10px; border-radius: 3px; }
+        .info-block .lbl { font-size: 8px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
+        .info-block .val { font-size: 12px; font-weight: 600; color: var(--text); }
+
+        .sortable-ghost { opacity: 0.2; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--blue-border); border-radius: 2px; }
+
+        /* Dispatch note badge on card */
+        .staff-card.is-dispatch { background: rgba(201,162,39,0.1); border-color: var(--gold-border); }
+        .staff-card.is-dispatch::after { content: '📡 DISPATCH'; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: 8px; letter-spacing: 1px; color: var(--gold); font-weight: 700; }
+
+        .note-sql { background: rgba(26,86,219,0.06); border: 1px solid var(--blue-border); border-radius: 3px; padding: 8px 11px; font-size: 11px; color: var(--muted); font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hdr-left">
+        <a href="index.html" class="hdr-logo">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="hdr-title">
+                <span class="main">Police Fédérale</span>
+                <span class="sub">Liège City RP</span>
+            </div>
+        </a>
+        <div class="hdr-divider"></div>
+        <div class="hdr-badge">📡 Centre de Dispatch</div>
+        <div class="hdr-clock" id="clock">00:00:00</div>
+    </div>
+    <div class="hdr-user">Opérateur : <span id="userLabel">—</span></div>
+    <div class="hdr-right">
+        <a href="police-complaints.html" class="btn btn-ghost">📋 Plaintes</a>
+        <button class="btn btn-danger" id="resetBtn" style="display:none" onclick="confirmReset()">⟳ Reset</button>
+        <button class="btn btn-ghost" onclick="location.href='police-complaints.html'">✕ Quitter</button>
+    </div>
+</header>
+<div class="alert-bar">⚠ &nbsp; Système de dispatch temps réel — Rafraîchissement automatique toutes les 6 secondes. Rôle minimum requis : Supervision.</div>
+
+<div class="app-body">
+
+    <!-- SIDEBAR : personnel disponible -->
+    <div class="sidebar">
+        <div class="sidebar-hdr">
+            <h3>En Service</h3>
+            <div class="badge-count" id="availCount">0</div>
+        </div>
+        <div class="sidebar-scroll" id="available-list"></div>
+        <div class="dispatcher-zone">
+            <div class="dispatcher-label">📡 Dispatcher en poste</div>
+            <div class="dispatcher-slot" id="dispatcher-slot"></div>
+        </div>
+    </div>
+
+    <!-- CENTER : unités -->
+    <div class="center-panel">
+        <div class="units-grid" id="units-grid"></div>
+    </div>
+
+    <!-- MAP -->
+    <div class="map-panel">
+        <div class="map-hdr">
+            <h3>🗺 Vue Tactique</h3>
+            <span style="font-size:9px;color:var(--muted);letter-spacing:1px">SECTEUR BASSENGE</span>
+        </div>
+        <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Intervention</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Patrouille</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>En Route</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Danger</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--blue-light)"></div>Disponible</div>
+        </div>
+        <div class="map-container">
+            <img class="map-img" src="https://www.bragitoff.com/wp-content/uploads/2015/11/GTAV_SATELLITE_2048x2048.png" alt="Carte">
+            <div class="map-markers" id="map-markers"></div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-item">Unités actives : <span id="statActive">0</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">Intervention : <span id="statIntervention" style="color:#fca5a5">0</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">Patrouille : <span id="statPatrouille" style="color:#86efac">0</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">En Route : <span id="statEnRoute" style="color:#fcd34d">0</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item" style="color:var(--purple)">⚠ Danger : <span id="statDanger" style="color:#d8b4fe">0</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">Personnel en service : <span id="statPersonnel">0</span></div>
+</div>
+
+<!-- MODAL STATUT -->
+<div class="modal-overlay" id="modal-statut">
+    <div class="modal-box">
+        <div class="modal-title">Statut de l'unité</div>
+        <div class="modal-field">
+            <label>Sélectionner le statut</label>
+            <select id="statut-select">
+                <option value="disponible">🟢 Disponible</option>
+                <option value="en_route">🟡 En Route...</option>
+                <option value="patrouille">🔵 En Patrouille</option>
+                <option value="intervention">🔴 En Intervention</option>
+                <option value="danger">🟣 UNITÉ EN DANGER</option>
+                <option value="hors_service">⚫ Hors Service</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" style="flex:1" onclick="saveStatut()">Confirmer</button>
+            <button class="btn btn-ghost" onclick="closeModal('modal-statut')">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VÉHICULE -->
+<div class="modal-overlay" id="modal-vehicle">
+    <div class="modal-box">
+        <div class="modal-title">Véhicule Assigné</div>
+        <div class="modal-field">
+            <label>Type de véhicule</label>
+            <select id="vehicle-select">
+                <option value="">— Aucun —</option>
+                <option value="Patrouille">🚔 Voiture de Patrouille — PAT</option>
+                <option value="Banalisée">🚗 Véhicule Banalisé — BAN</option>
+                <option value="Moto">🏍️ Moto — MOTO</option>
+                <option value="Fourgon">🚐 Fourgon — FOURGON</option>
+                <option value="Hélicoptère">🚁 Hélicoptère — AIR</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" style="flex:1" onclick="saveVehicle()">Confirmer</button>
+            <button class="btn btn-ghost" onclick="closeModal('modal-vehicle')">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FICHE AGENT -->
+<div class="modal-overlay" id="modal-staff">
+    <div class="modal-box">
+        <div class="modal-title">Fiche Agent</div>
+        <div class="staff-grid" id="staff-info-grid"></div>
+        <button class="btn btn-ghost" style="width:100%" onclick="closeModal('modal-staff')">Fermer</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ============================================================
+// DISPATCH — Police Fédérale Liège
+// Tables Supabase requises :
+//
+// CREATE TABLE table_policefed_dispatch_units (
+//   num INT PRIMARY KEY,
+//   statut TEXT DEFAULT 'hors_service',
+//   vehicle TEXT DEFAULT '',
+//   localisation TEXT DEFAULT '',
+//   zip TEXT DEFAULT '',
+//   updated_at TIMESTAMPTZ DEFAULT NOW()
+// );
+// INSERT INTO table_policefed_dispatch_units (num) VALUES (1),(2),(3),(4),(5),(6),(7),(8);
+//
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS en_service BOOLEAN DEFAULT false;
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS service_start TIMESTAMPTZ;
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS dispatch_unit INT;
+// ============================================================
+
+const currentUser = requireRole('supervision');
+renderAuthNav('police-dispatch.html');
+
+let currentUnitNum = null;
+const UNIT_COUNT = 8;
+
+const ROLE_LABELS = {
+    officier: 'Officier',
+    supervision: 'Supervision',
+    agent: 'Agent'
+};
+
+const STATUS_LABELS = {
+    disponible: 'Disponible',
+    en_route: 'En Route...',
+    patrouille: 'En Patrouille',
+    intervention: 'En Intervention',
+    danger: '🚨 DANGER',
+    hors_service: 'Hors Service'
+};
+
+const VEHICLE_INFO = {
+    'Patrouille':   { icon: '🚔', prefix: 'PAT' },
+    'Banalisée':    { icon: '🚗', prefix: 'BAN' },
+    'Moto':         { icon: '🏍️', prefix: 'MOTO' },
+    'Fourgon':      { icon: '🚐', prefix: 'FRG' },
+    'Hélicoptère':  { icon: '🚁', prefix: 'AIR' },
+    '':             { icon: '🚔', prefix: '' }
+};
+
+const LOCATIONS = [
+    '', 'Bassenge Centre', 'Zone Nord', 'Zone Sud', 'Zone Est', 'Zone Ouest',
+    'Autoroute E40', 'Route Nationale', 'Zone Industrielle', 'Quartier Résidentiel',
+    'Centre Commercial', 'Aéroport', 'Port', 'Université', 'Hôpital',
+    'Commissariat Central', 'Palais de Justice', 'Gare Centrale'
+];
+
+const LOCATION_COORDS = {
+    'Bassenge Centre': [50,50], 'Zone Nord': [22,48], 'Zone Sud': [78,52],
+    'Zone Est': [52,75], 'Zone Ouest': [50,25], 'Autoroute E40': [62,38],
+    'Route Nationale': [40,60], 'Zone Industrielle': [68,68], 'Quartier Résidentiel': [38,42],
+    'Centre Commercial': [55,58], 'Aéroport': [82,35], 'Port': [84,48],
+    'Université': [62,44], 'Hôpital': [44,52], 'Commissariat Central': [48,48],
+    'Palais de Justice': [46,52], 'Gare Centrale': [60,50]
+};
+
+function getCallsign(vehicle, num) {
+    const v = VEHICLE_INFO[vehicle || ''];
+    return v && v.prefix ? `${v.prefix}-${String(num).padStart(2, '0')}` : `UNIT-${String(num).padStart(2, '0')}`;
+}
+
+// Clock
+function updateClock() {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+        String(n.getHours()).padStart(2,'0') + ':' +
+        String(n.getMinutes()).padStart(2,'0') + ':' +
+        String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Show user info
+document.getElementById('userLabel').textContent = `${currentUser.prenom} ${currentUser.nom} — ${ROLE_LABELS[currentUser.role] || currentUser.role}`;
+if ((ROLES_LEVEL[currentUser.role] || 0) >= 3) document.getElementById('resetBtn').style.display = 'block';
+
+// Build unit cards
+async function buildUnitCards() {
+    let { data: units } = await supabase.from('table_policefed_dispatch_units').select('*').order('num');
+    if (!units || units.length === 0) {
+        units = Array.from({ length: UNIT_COUNT }, (_, i) => ({ num: i + 1, statut: 'hors_service', vehicle: '', localisation: '', zip: '' }));
+    }
+    const grid = document.getElementById('units-grid');
+    grid.innerHTML = '';
+    units.forEach(u => {
+        const div = document.createElement('div');
+        div.className = `unit-card statut-${u.statut || 'hors_service'}`;
+        div.id = `unit-card-${u.num}`;
+        div.innerHTML = buildUnitHTML(u);
+        grid.appendChild(div);
+    });
+}
+
+function buildUnitHTML(u) {
+    const { num, vehicle = '', localisation = '', zip = '' } = u;
+    const statut = u.statut || 'hors_service';
+    const vInfo = VEHICLE_INFO[vehicle] || VEHICLE_INFO[''];
+    const callsign = getCallsign(vehicle, num);
+    const vehicleLabel = vehicle || 'Aucun véhicule assigné';
+    const statusBadge = `<span class="unit-status-badge badge-${statut}">${STATUS_LABELS[statut] || statut}</span>`;
+    const locOptions = LOCATIONS.map(l => `<option value="${l}" ${l === localisation ? 'selected' : ''}>${l || '— Localisation —'}</option>`).join('');
+    const zipDisplay = zip ? `<span class="zip-display">${zip}</span>` : '';
+    return `
+        <div class="unit-header">
+            <div class="unit-icon">${vInfo.icon}</div>
+            <div class="unit-info">
+                <div class="unit-name">${callsign}</div>
+                <div class="unit-vehicle">${vehicleLabel}</div>
+            </div>
+            ${statusBadge}
+        </div>
+        <div class="unit-members" id="members-${num}" data-unit="${num}"></div>
+        <div class="unit-footer">
+            <select class="loc-select" id="loc-${num}" onchange="updateLocation(${num})">${locOptions}</select>
+            <button class="btn-xs" onclick="openStatutModal(${num})">Statut</button>
+            <button class="btn-xs" onclick="openVehicleModal(${num})">Véhicule</button>
+        </div>
+        <div class="zip-row">
+            <span class="zip-label">ZIP</span>
+            <input class="zip-input" id="zip-${num}" type="text" maxlength="6" placeholder="Code..." value="${zip || ''}" onkeydown="if(event.key==='Enter')saveZip(${num})">
+            <button class="btn-zip" onclick="saveZip(${num})">OK</button>
+            ${zipDisplay}
+        </div>
+    `;
+}
+
+// Refresh data
+async function refresh() {
+    const [{ data: users }, { data: units }] = await Promise.all([
+        supabase.from('table_policefed_users').select('*').eq('en_service', true).neq('role', 'civil'),
+        supabase.from('table_policefed_dispatch_units').select('*').order('num')
+    ]);
+    renderBoard(users || [], units || []);
+    renderMapMarkers(units || [], users || []);
+    updateStats(users || [], units || []);
+}
+
+function renderBoard(users, units) {
+    document.getElementById('available-list').innerHTML = '';
+    document.getElementById('dispatcher-slot').innerHTML = '';
+    const unitMap = {};
+    units.forEach(u => unitMap[u.num] = u);
+
+    // Rebuild unit cards
+    for (let i = 1; i <= UNIT_COUNT; i++) {
+        const u = unitMap[i];
+        const card = document.getElementById(`unit-card-${i}`);
+        if (!card) continue;
+        if (u) {
+            card.className = `unit-card statut-${u.statut || 'hors_service'}`;
+            card.innerHTML = buildUnitHTML(u);
+        }
+    }
+
+    let availCount = 0;
+    const unitFirst = {};
+    users.forEach(u => {
+        const tag = createStaffCard(u);
+        if (u.is_dispatcher && !u.dispatch_unit) {
+            tag.classList.add('is-dispatch');
+            document.getElementById('dispatcher-slot').appendChild(tag);
+        } else if (u.dispatch_unit >= 1 && u.dispatch_unit <= UNIT_COUNT) {
+            const zone = document.getElementById(`members-${u.dispatch_unit}`);
+            if (zone) {
+                if (!unitFirst[u.dispatch_unit]) {
+                    unitFirst[u.dispatch_unit] = true;
+                    const nameEl = tag.querySelector('.staff-name');
+                    if (nameEl) {
+                        const b = document.createElement('span');
+                        b.className = 'staff-badge';
+                        b.textContent = 'CHEF';
+                        nameEl.appendChild(b);
+                    }
+                }
+                zone.appendChild(tag);
+            }
+        } else {
+            document.getElementById('available-list').appendChild(tag);
+            availCount++;
+        }
+    });
+
+    document.getElementById('availCount').textContent = availCount;
+
+    for (let i = 1; i <= UNIT_COUNT; i++) {
+        const m = document.getElementById(`members-${i}`);
+        if (m && m.children.length === 0) m.innerHTML = '<div class="unit-members-empty">Aucun agent assigné</div>';
+    }
+    initDragAndDrop();
+}
+
+function createStaffCard(u) {
+    const div = document.createElement('div');
+    div.className = `staff-card role-${u.role || 'agent'}`;
+    div.dataset.userId = u.id;
+    div.innerHTML = `
+        <div class="staff-name">${escapeHtml(u.prenom)} ${escapeHtml(u.nom)}</div>
+        <div class="staff-role"><span class="role-dot"></span>${ROLE_LABELS[u.role] || u.role || 'Agent'}</div>
+        ${u.matricule ? `<div class="staff-matricule">${escapeHtml(u.matricule)}</div>` : ''}
+    `;
+    div.addEventListener('dblclick', () => openStaffModal(u.id));
+    return div;
+}
+
+function initDragAndDrop() {
+    const canManage = (ROLES_LEVEL[currentUser.role] || 0) >= 2;
+    const opts = {
+        group: 'staff', animation: 150, ghostClass: 'sortable-ghost',
+        onEnd: async (evt) => {
+            if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
+            const userId = evt.item.dataset.userId;
+            if (!canManage) { await refresh(); return; }
+            let dispatch_unit = null;
+            if (evt.to.dataset.unit) dispatch_unit = parseInt(evt.to.dataset.unit);
+            await supabase.from('table_policefed_users').update({ dispatch_unit }).eq('id', userId);
+            await refresh();
+        }
+    };
+    new Sortable(document.getElementById('available-list'), opts);
+    new Sortable(document.getElementById('dispatcher-slot'), opts);
+    for (let i = 1; i <= UNIT_COUNT; i++) {
+        const m = document.getElementById(`members-${i}`);
+        if (m) new Sortable(m, opts);
+    }
+}
+
+function renderMapMarkers(units, users) {
+    const container = document.getElementById('map-markers');
+    container.innerHTML = '';
+    const locGroups = {};
+    units.forEach(u => {
+        if (!u.localisation) return;
+        if (!locGroups[u.localisation]) locGroups[u.localisation] = [];
+        locGroups[u.localisation].push(u);
+    });
+    Object.entries(locGroups).forEach(([loc, list]) => {
+        const coords = LOCATION_COORDS[loc];
+        if (!coords) return;
+        list.forEach((u, idx) => {
+            const offset = (idx - (list.length - 1) / 2) * 26;
+            const marker = document.createElement('div');
+            marker.className = `map-marker marker-${u.statut || 'hors_service'}`;
+            marker.style.top = coords[0] + '%';
+            marker.style.left = `calc(${coords[1]}% + ${offset}px)`;
+            const callsign = getCallsign(u.vehicle, u.num);
+            const members = users.filter(x => x.dispatch_unit === u.num && x.en_service).map(x => `${x.prenom} ${x.nom}`).join(', ') || 'Aucun';
+            const zipInfo = u.zip ? `<br><span style="color:#fcd34d;font-weight:700">ZIP: ${u.zip}</span>` : '';
+            marker.innerHTML = `<div class="marker-pulse"></div><div class="marker-body">${u.num}</div>
+                <div class="marker-label"><strong>${callsign}</strong><br>${STATUS_LABELS[u.statut || 'hors_service']}<br>
+                <span style="color:var(--muted);font-size:9px">${loc}</span>${zipInfo}<br>
+                <span style="font-size:9px">${members}</span></div>`;
+            container.appendChild(marker);
+        });
+    });
+}
+
+function updateStats(users, units) {
+    document.getElementById('statActive').textContent = units.filter(u => u.statut && u.statut !== 'hors_service').length;
+    document.getElementById('statIntervention').textContent = units.filter(u => u.statut === 'intervention').length;
+    document.getElementById('statPatrouille').textContent = units.filter(u => u.statut === 'patrouille').length;
+    document.getElementById('statEnRoute').textContent = units.filter(u => u.statut === 'en_route').length;
+    document.getElementById('statDanger').textContent = units.filter(u => u.statut === 'danger').length;
+    document.getElementById('statPersonnel').textContent = users.length;
+}
+
+// Modals
+window.openStatutModal = function(num) { currentUnitNum = num; document.getElementById('modal-statut').classList.add('active'); };
+window.saveStatut = async function() {
+    const statut = document.getElementById('statut-select').value;
+    await supabase.from('table_policefed_dispatch_units').update({ statut, updated_at: new Date().toISOString() }).eq('num', currentUnitNum);
+    closeModal('modal-statut');
+    await refresh();
+};
+window.openVehicleModal = function(num) { currentUnitNum = num; document.getElementById('modal-vehicle').classList.add('active'); };
+window.saveVehicle = async function() {
+    const vehicle = document.getElementById('vehicle-select').value;
+    await supabase.from('table_policefed_dispatch_units').update({ vehicle, updated_at: new Date().toISOString() }).eq('num', currentUnitNum);
+    closeModal('modal-vehicle');
+    await refresh();
+};
+window.updateLocation = async function(num) {
+    const loc = document.getElementById(`loc-${num}`)?.value;
+    await supabase.from('table_policefed_dispatch_units').update({ localisation: loc || null, updated_at: new Date().toISOString() }).eq('num', num);
+    await refresh();
+};
+window.saveZip = async function(num) {
+    const el = document.getElementById(`zip-${num}`);
+    if (!el) return;
+    const zip = el.value.trim();
+    await supabase.from('table_policefed_dispatch_units').update({ zip: zip || null, updated_at: new Date().toISOString() }).eq('num', num);
+    await refresh();
+};
+
+async function openStaffModal(id) {
+    const { data: u } = await supabase.from('table_policefed_users').select('*').eq('id', id).single();
+    if (!u) return;
+    document.getElementById('staff-info-grid').innerHTML = `
+        <div class="info-block"><div class="lbl">Prénom</div><div class="val">${escapeHtml(u.prenom)}</div></div>
+        <div class="info-block"><div class="lbl">Nom</div><div class="val">${escapeHtml(u.nom)}</div></div>
+        <div class="info-block"><div class="lbl">Grade</div><div class="val">${escapeHtml(u.grade || '—')}</div></div>
+        <div class="info-block"><div class="lbl">Matricule</div><div class="val">${escapeHtml(u.matricule || '—')}</div></div>
+        <div class="info-block"><div class="lbl">Rôle</div><div class="val">${ROLE_LABELS[u.role] || u.role}</div></div>
+        <div class="info-block"><div class="lbl">Statut Service</div><div class="val" style="color:var(--green)">${u.en_service ? '✓ En Service' : 'Hors Service'}</div></div>
+    `;
+    document.getElementById('modal-staff').classList.add('active');
+}
+window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); };
+document.querySelectorAll('.modal-overlay').forEach(el => { el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); }); });
+
+window.confirmReset = async function() {
+    if (!confirm('⚠️ Réinitialiser toutes les unités et assignations ?')) return;
+    await supabase.from('table_policefed_dispatch_units').update({ statut: 'hors_service', vehicle: null, localisation: null, zip: null }).gte('num', 1);
+    await supabase.from('table_policefed_users').update({ dispatch_unit: null }).neq('role', 'civil');
+    showToast('🔄 Réinitialisation', 'Toutes les unités ont été réinitialisées.', 'success');
+    await buildUnitCards();
+    await refresh();
+};
+
+// Init
+buildUnitCards().then(() => refresh());
+setInterval(refresh, 6000);
+</script>
+</body>
+</html>
