@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion RDV — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#030a14;--panel:rgba(4,12,26,0.97);--blue:#1a56db;--blue-light:#3b82f6;--blue-dim:rgba(26,86,219,0.15);--blue-border:rgba(26,86,219,0.22);--gold:#c9a227;--gold-light:#e4b93a;--gold-dim:rgba(201,162,39,0.15);--gold-border:rgba(201,162,39,0.25);--text:#c5d8f0;--text-bright:#e8f4ff;--muted:#4a7a9b;--green:#22c55e;--green-dim:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);--red:#ef4444;--red-dim:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.25);--yellow:#f59e0b}
+        html,body{min-height:100%;background:var(--bg);font-family:'Exo 2',sans-serif;color:var(--text)}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,86,219,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.03) 1px,transparent 1px);background-size:40px 40px;animation:gridDrift 50s linear infinite}
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:40px 40px}}
+        .t-header{height:56px;background:rgba(3,10,20,0.99);border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+        .t-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent);opacity:0.4}
+        .hdr-left{display:flex;align-items:center;gap:14px}
+        .logo-link{display:flex;align-items:center;gap:9px;text-decoration:none}
+        .logo-link img{width:28px;height:33px;filter:drop-shadow(0 0 6px rgba(201,162,39,0.4))}
+        .logo-txt .m{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;color:#fff;display:block;line-height:1}
+        .logo-txt .s{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block}
+        .divider{width:1px;height:28px;background:var(--blue-border)}
+        .sec-badge{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:2px}
+        .hdr-nav{display:flex;align-items:center;gap:2px}
+        .hdr-nav a{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:5px 9px;border-radius:2px;transition:all .15s}
+        .hdr-nav a:hover,.hdr-nav a.active{color:var(--text-bright);background:var(--blue-dim)}
+        .btn{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:none;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+        .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--blue-border)}.btn-ghost:hover{color:var(--text);border-color:var(--blue-light)}
+        .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+        .btn-success{background:var(--green-dim);color:#86efac;border:1px solid var(--green-border)}.btn-success:hover{background:rgba(34,197,94,.25)}
+        .btn-danger{background:var(--red-dim);color:#fca5a5;border:1px solid var(--red-border)}.btn-danger:hover{background:rgba(239,68,68,.25)}
+        .btn-warning{background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}.btn-warning:hover{background:rgba(245,158,11,.22)}
+        .btn-sm{padding:3px 8px;font-size:10px}
+        .page{position:relative;z-index:1;padding:24px;max-width:1400px;margin:0 auto}
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+        @media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+        .stat{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:10px}
+        .stat-ico{width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+        .sib{background:var(--blue-dim);border:1px solid var(--blue-border)}
+        .sig{background:var(--green-dim);border:1px solid var(--green-border)}
+        .sir{background:var(--red-dim);border:1px solid var(--red-border)}
+        .siw{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25)}
+        .stat-v{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--text-bright);line-height:1}
+        .stat-l{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+        .t-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;overflow:hidden}
+        .t-card-hdr{padding:12px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+        .t-card-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light)}
+        .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .t-select{padding:5px 9px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:11px;outline:none}
+        .t-select option{background:#050d1a}
+        .t-input{padding:5px 9px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:11px;outline:none}
+        .t-input::placeholder{color:var(--muted)}
+        .t-table{width:100%;border-collapse:collapse;font-size:11px}
+        .t-table th{padding:9px 12px;background:rgba(26,86,219,.08);border-bottom:1px solid var(--blue-border);font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap}
+        .t-table td{padding:10px 12px;border-bottom:1px solid rgba(26,86,219,.1);vertical-align:middle}
+        .t-table tr:hover td{background:rgba(26,86,219,.04)}.t-table tr:last-child td{border-bottom:none}
+        .sb{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap}
+        .sb-attente{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d}
+        .sb-confirme{background:var(--blue-dim);border:1px solid var(--blue-border);color:#93c5fd}
+        .sb-complete{background:var(--green-dim);border:1px solid var(--green-border);color:#86efac}
+        .sb-annule{background:rgba(107,114,128,.12);border:1px solid rgba(107,114,128,.3);color:#9ca3af}
+        .empty-state{text-align:center;padding:30px;color:var(--muted);font-size:11px;letter-spacing:1px}
+        /* MODAL */
+        .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);z-index:300;align-items:center;justify-content:center}
+        .modal-ov.active{display:flex}
+        .modal{background:rgba(4,12,26,.99);border:1px solid var(--blue-border);border-radius:8px;padding:24px;width:min(90vw,480px);position:relative}
+        .modal::before,.modal::after{content:'';position:absolute;width:12px;height:12px;border-color:var(--gold);border-style:solid}
+        .modal::before{top:-1px;left:-1px;border-width:2px 0 0 2px}.modal::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+        .modal-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:18px}
+        .form-group{margin-bottom:14px}
+        .t-label{display:block;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;font-family:'Rajdhani',sans-serif;font-weight:700}
+        .fi{width:100%;padding:8px 10px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:12px;outline:none}
+        .fi:focus{border-color:var(--blue-light)}.fi option{background:#050d1a}
+        .ta{width:100%;padding:8px 10px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:12px;outline:none;resize:vertical;min-height:70px}
+        .ta:focus{border-color:var(--blue-light)}
+        .modal-actions{display:flex;gap:8px;margin-top:16px}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:2px}
+    </style>
+</head>
+<body>
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="divider"></div>
+        <div class="sec-badge">👔 Admin RDV</div>
+        <nav class="hdr-nav" id="mainNav"></nav>
+    </div>
+    <div class="hdr-right">
+        <a href="police-portal.html" class="btn btn-ghost">← Portail</a>
+    </div>
+</header>
+
+<div class="page">
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="t-card">
+        <div class="t-card-hdr">
+            <span class="t-card-title">📋 Tous les Rendez-vous</span>
+            <div class="filters">
+                <input type="text" class="t-input" id="searchFilter" placeholder="Rechercher un agent..." oninput="loadRdv()">
+                <select class="t-select" id="statusFilter" onchange="loadRdv()">
+                    <option value="">Tous statuts</option>
+                    <option value="en_attente">En Attente</option>
+                    <option value="confirme">Confirmés</option>
+                    <option value="complete">Complétés</option>
+                    <option value="annule">Annulés</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" onclick="loadRdv()">🔄 Refresh</button>
+            </div>
+        </div>
+        <div style="overflow-x:auto">
+            <table class="t-table">
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Formation</th>
+                        <th>Superviseur</th>
+                        <th>Date demandée</th>
+                        <th>Note agent</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="rdvTable">
+                    <tr><td colspan="7"><div class="empty-state">Chargement...</div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal-ov" id="editModal">
+    <div class="modal">
+        <div class="modal-title">✏️ Gérer le Rendez-vous</div>
+        <input type="hidden" id="editRdvId">
+        <div class="form-group">
+            <label class="t-label">Statut</label>
+            <select class="fi" id="editStatus">
+                <option value="en_attente">⏳ En Attente</option>
+                <option value="confirme">✅ Confirmé</option>
+                <option value="complete">🏁 Complété</option>
+                <option value="annule">✕ Annulé</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="t-label">Nouvelle date / heure (optionnel)</label>
+            <input type="datetime-local" class="fi" id="editDate">
+        </div>
+        <div class="form-group">
+            <label class="t-label">Note au candidat</label>
+            <textarea class="ta" id="editNote" placeholder="Message visible par l'agent..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" style="flex:1" onclick="saveRdv()">💾 Sauvegarder</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('supervision');
+const isOfficier = (ROLES_LEVEL[currentUser.role]||0) >= 3;
+const isSuperv   = (ROLES_LEVEL[currentUser.role]||0) >= 2;
+
+const navLinks = [
+    { href:'police-complaints.html', label:'📋 Plaintes' },
+    { href:'police-courses.html', label:'📚 Formations' },
+    { href:'police-rdv.html', label:'📅 Mon RDV' },
+    { href:'police-kahoot-host.html', label:'🎮 Kahoot' },
+    { href:'police-rdv-admin.html', label:'👔 RDV Admin', active:true },
+    ...(isOfficier ? [{ href:'police-personnel.html', label:'👥 Personnel' }] : []),
+    { href:'police-profile.html', label:'👤 Profil' },
+];
+document.getElementById('mainNav').innerHTML = navLinks.map(l =>
+    `<a href="${l.href}" ${l.active ? 'class="active"' : ''}>${l.label}</a>`
+).join('');
+
+const SM = {
+    en_attente:{ label:'En Attente', cls:'sb-attente' },
+    confirme:  { label:'Confirmé',   cls:'sb-confirme' },
+    complete:  { label:'Complété',   cls:'sb-complete' },
+    annule:    { label:'Annulé',     cls:'sb-annule' }
+};
+
+async function loadStats() {
+    const { data } = await supabase.from('table_policefed_rdv').select('status');
+    const all = data||[];
+    const today = new Date().toDateString();
+    document.getElementById('statsRow').innerHTML = `
+        <div class="stat"><div class="stat-ico siw">⏳</div><div><div class="stat-v">${all.filter(r=>r.status==='en_attente').length}</div><div class="stat-l">En Attente</div></div></div>
+        <div class="stat"><div class="stat-ico sib">✅</div><div><div class="stat-v">${all.filter(r=>r.status==='confirme').length}</div><div class="stat-l">Confirmés</div></div></div>
+        <div class="stat"><div class="stat-ico sig">🏁</div><div><div class="stat-v">${all.filter(r=>r.status==='complete').length}</div><div class="stat-l">Complétés</div></div></div>
+        <div class="stat"><div class="stat-ico sir">✕</div><div><div class="stat-v">${all.filter(r=>r.status==='annule').length}</div><div class="stat-l">Annulés</div></div></div>
+    `;
+}
+
+async function loadRdv() {
+    const statusF = document.getElementById('statusFilter').value;
+    const searchF = document.getElementById('searchFilter').value.toLowerCase();
+
+    let q = supabase.from('table_policefed_rdv')
+        .select('*, agent:agent_id(id,prenom,nom,grade,matricule), supervisor:supervisor_id(prenom,nom,role), formation:formation_id(titre,icon)')
+        .order('date_rdv', { ascending: true });
+    if (statusF) q = q.eq('status', statusF);
+
+    const { data } = await q;
+    let list = data||[];
+    if (searchF) list = list.filter(r => `${r.agent?.prenom||''} ${r.agent?.nom||''}`.toLowerCase().includes(searchF));
+
+    const tbody = document.getElementById('rdvTable');
+    if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Aucun rendez-vous.</div></td></tr>`; return; }
+
+    tbody.innerHTML = list.map(r => {
+        const sm = SM[r.status]||SM.en_attente;
+        return `
+        <tr>
+            <td>
+                <strong>${escapeHtml(r.agent?.prenom||'')} ${escapeHtml(r.agent?.nom||'—')}</strong>
+                <br><span style="font-size:10px;color:var(--muted)">${r.agent?.matricule||''}</span>
+                <a href="police-profile.html?id=${r.agent?.id}" style="font-size:9px;color:var(--blue-light);margin-left:4px">→ Profil</a>
+            </td>
+            <td>${r.formation?.icon||'📚'} ${escapeHtml(r.formation?.titre||'—')}</td>
+            <td>${escapeHtml(r.supervisor?.prenom||'')} ${escapeHtml(r.supervisor?.nom||'—')}</td>
+            <td style="font-size:10px">${r.date_rdv ? formatDateFull(r.date_rdv) : '—'}</td>
+            <td style="max-width:140px;font-size:10px;color:var(--muted);font-style:italic">${r.notes_agent ? `"${escapeHtml(r.notes_agent)}"` : '—'}</td>
+            <td><span class="sb ${sm.cls}">${sm.label}</span></td>
+            <td>
+                <button class="btn btn-ghost btn-sm" onclick="openEdit('${r.id}','${r.status}','${r.date_rdv||''}','${escapeHtml(r.notes_supervisor||'')}')">✏️</button>
+                ${r.status === 'en_attente' ? `
+                <button class="btn btn-success btn-sm" onclick="quickAction('${r.id}','confirme')">✓</button>
+                <button class="btn btn-danger btn-sm" onclick="quickAction('${r.id}','annule')">✕</button>` : ''}
+                ${r.status === 'confirme' ? `<button class="btn btn-primary btn-sm" onclick="quickAction('${r.id}','complete')">🏁 Complet</button>` : ''}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function openEdit(id, status, date, note) {
+    document.getElementById('editRdvId').value = id;
+    document.getElementById('editStatus').value = status;
+    document.getElementById('editDate').value = date ? new Date(date).toISOString().slice(0,16) : '';
+    document.getElementById('editNote').value = note;
+    document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('active'); }
+
+async function saveRdv() {
+    const id = document.getElementById('editRdvId').value;
+    const status = document.getElementById('editStatus').value;
+    const dateVal = document.getElementById('editDate').value;
+    const note = document.getElementById('editNote').value.trim();
+    const update = { status, updated_at: new Date().toISOString(), notes_supervisor: note||null };
+    if (dateVal) update.date_rdv = new Date(dateVal).toISOString();
+
+    const { data: rdv } = await supabase.from('table_policefed_rdv').select('agent_id').eq('id',id).single();
+    const { error } = await supabase.from('table_policefed_rdv').update(update).eq('id', id);
+    if (!error) {
+        closeModal();
+        showToast('✅ RDV mis à jour', `Statut : ${status}`, 'success');
+        if (rdv?.agent_id) await createNotification(rdv.agent_id, 'rdv', '📅 RDV Mis à Jour', `Votre rendez-vous est maintenant : ${status}${note ? ' — "'+note+'"' : ''}`, id, 'rdv');
+        await createLog('RDV_UPDATE', `${currentUser.prenom} ${currentUser.nom} a mis à jour le RDV ${id} → ${status}`);
+        await loadRdv();
+        await loadStats();
+    }
+}
+
+async function quickAction(id, status) {
+    const { data: rdv } = await supabase.from('table_policefed_rdv').select('agent_id').eq('id',id).single();
+    await supabase.from('table_policefed_rdv').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    if (rdv?.agent_id) await createNotification(rdv.agent_id, 'rdv', '📅 RDV Mis à Jour', `Votre rendez-vous est maintenant : ${status}`, id, 'rdv');
+    showToast('✅', `RDV → ${status}`, 'success');
+    await loadRdv();
+    await loadStats();
+}
+
+document.getElementById('editModal').addEventListener('click', e => { if (e.target === document.getElementById('editModal')) closeModal(); });
+
+loadStats();
+loadRdv();
+setInterval(loadRdv, 30000);
+</script>
+</body>
+</html>
