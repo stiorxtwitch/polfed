@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejoindre Examen — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#020810;--panel:rgba(3,10,22,0.98);--blue:#1a56db;--blue-light:#3b82f6;--blue-dim:rgba(26,86,219,0.15);--blue-border:rgba(26,86,219,0.22);--gold:#c9a227;--gold-light:#e4b93a;--gold-dim:rgba(201,162,39,0.15);--gold-border:rgba(201,162,39,0.25);--text:#c5d8f0;--text-bright:#e8f4ff;--muted:#4a7a9b;--green:#22c55e;--green-dim:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);--red:#ef4444;--red-dim:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.25);--yellow:#f59e0b;--a-red:#e74c3c;--a-blue:#2980b9;--a-yellow:#f39c12;--a-green:#27ae60}
+        html,body{min-height:100%;background:var(--bg);font-family:'Exo 2',sans-serif;color:var(--text)}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,86,219,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.04) 1px,transparent 1px);background-size:44px 44px;animation:gridDrift 45s linear infinite}
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:44px 44px}}
+
+        /* HEADER */
+        .t-header{height:56px;background:rgba(2,8,16,.99);border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+        .t-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent);opacity:0.45}
+        .hdr-left{display:flex;align-items:center;gap:14px}
+        .logo-link{display:flex;align-items:center;gap:9px;text-decoration:none}
+        .logo-link img{width:28px;height:33px;filter:drop-shadow(0 0 6px rgba(201,162,39,0.4))}
+        .logo-txt .m{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;color:#fff;display:block;line-height:1}
+        .logo-txt .s{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block}
+        .sec-badge{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:2px}
+        .btn{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border:none;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+        .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--blue-border)}.btn-ghost:hover{color:var(--text);border-color:var(--blue-light)}
+        .btn-gold{background:var(--gold);color:#000;font-weight:700}.btn-gold:hover{background:var(--gold-light)}
+        .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+        .btn-lg{padding:13px 32px;font-size:15px}
+        .btn:disabled{opacity:.4;cursor:not-allowed}
+
+        /* PHASES */
+        .phase{display:none;position:relative;z-index:1}
+        .phase.active{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:calc(100vh - 56px);padding:40px 20px}
+        .center{max-width:560px;width:100%;text-align:center}
+
+        /* PHASE 1: CODE ENTRY */
+        .code-entry-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:12px;padding:40px 36px;text-align:center;position:relative}
+        .code-entry-card::before,.code-entry-card::after{content:'';position:absolute;width:18px;height:18px;border-color:var(--gold);border-style:solid}
+        .code-entry-card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+        .code-entry-card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+        .big-icon{font-size:4rem;margin-bottom:16px;display:block}
+        .card-title{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:4px;color:var(--text-bright);margin-bottom:6px;text-transform:uppercase}
+        .card-sub{font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:32px}
+        .code-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+        .code-digit{width:52px;height:62px;background:rgba(26,86,219,.08);border:2px solid var(--blue-border);border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;text-align:center;color:var(--gold-light);outline:none;transition:all .2s;caret-color:var(--gold)}
+        .code-digit:focus{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 12px rgba(201,162,39,0.2)}
+        .code-error{padding:9px 14px;background:var(--red-dim);border:1px solid var(--red-border);border-radius:4px;font-size:12px;color:#fca5a5;margin-bottom:14px;display:none}
+
+        /* PHASE 2: WAITING */
+        .waiting-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:12px;padding:40px 36px;text-align:center;max-width:500px;width:100%}
+        .pulse-dot{width:14px;height:14px;background:var(--green);border-radius:50%;display:inline-block;animation:pulseDot 1.4s ease-in-out infinite;margin-right:6px}
+        @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+        .session-title{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;color:var(--text-bright);margin:16px 0 8px}
+        .participants-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:20px}
+        .p-chip{background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text);animation:slideIn .3s ease}
+        @keyframes slideIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+        /* PHASE 3: QUESTION */
+        .question-wrap{width:100%;max-width:780px}
+        .q-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:0 4px}
+        .q-num-badge{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:4px 12px;border-radius:2px;white-space:nowrap}
+        .q-prog-track{flex:1;height:6px;background:rgba(26,86,219,.12);border-radius:3px;overflow:hidden}
+        .q-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:3px;transition:width .4s}
+        .timer-display{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--text-bright);min-width:44px;text-align:right}
+        .timer-display.warning{color:var(--red);animation:timerWarn .5s ease-in-out infinite}
+        @keyframes timerWarn{0%,100%{opacity:1}50%{opacity:.5}}
+        .question-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:10px;padding:26px;margin-bottom:18px;text-align:center}
+        .q-text{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;color:var(--text-bright);line-height:1.4}
+        .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:560px){.answer-grid{grid-template-columns:1fr}}
+        .answer-btn{padding:16px 20px;border-radius:8px;border:2px solid;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s;text-align:left;font-family:'Exo 2',sans-serif;font-size:14px;font-weight:500}
+        .ab-a{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.4);color:#fff}.ab-a:hover:not(:disabled){background:rgba(231,76,60,.25);border-color:#e74c3c;transform:scale(1.02)}
+        .ab-b{background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.4);color:#fff}.ab-b:hover:not(:disabled){background:rgba(41,128,185,.25);border-color:#2980b9;transform:scale(1.02)}
+        .ab-c{background:rgba(243,156,18,.12);border-color:rgba(243,156,18,.4);color:#fff}.ab-c:hover:not(:disabled){background:rgba(243,156,18,.25);border-color:#f39c12;transform:scale(1.02)}
+        .ab-d{background:rgba(39,174,96,.12);border-color:rgba(39,174,96,.4);color:#fff}.ab-d:hover:not(:disabled){background:rgba(39,174,96,.25);border-color:#27ae60;transform:scale(1.02)}
+        .answer-btn:disabled{cursor:default}
+        .answer-btn.selected-correct{animation:pulseGreen .5s ease forwards}
+        .answer-btn.selected-wrong{opacity:.7}
+        .answer-btn.reveal-correct{background:rgba(39,174,96,.3)!important;border-color:#27ae60!important}
+        @keyframes pulseGreen{0%{transform:scale(1)}50%{transform:scale(1.04);box-shadow:0 0 20px rgba(39,174,96,.4)}100%{transform:scale(1)}}
+        .ab-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;flex-shrink:0}
+        .ab-a .ab-icon{background:var(--a-red);color:#fff}.ab-b .ab-icon{background:var(--a-blue);color:#fff}.ab-c .ab-icon{background:var(--a-yellow);color:#000}.ab-d .ab-icon{background:var(--a-green);color:#fff}
+        .answer-result{margin-top:16px;padding:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-align:center;display:none}
+        .ar-correct{background:var(--green-dim);border:1px solid var(--green-border);color:#86efac}
+        .ar-wrong{background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5}
+        .ar-timeout{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d}
+
+        /* PHASE 4: RESULTS */
+        .result-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:12px;padding:40px 36px;text-align:center;max-width:480px;width:100%;position:relative}
+        .result-card::before,.result-card::after{content:'';position:absolute;width:18px;height:18px;border-style:solid}
+        .result-card.pass::before,.result-card.pass::after{border-color:var(--green)}
+        .result-card.fail::before,.result-card.fail::after{border-color:var(--red)}
+        .result-card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+        .result-card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+        .score-circle{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;flex-direction:column;border:3px solid}
+        .sc-pass{background:var(--green-dim);border-color:var(--green)}
+        .sc-fail{background:var(--red-dim);border-color:var(--red)}
+        .score-num{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;line-height:1}
+        .score-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+        .result-title{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;letter-spacing:3px;margin-bottom:8px;text-transform:uppercase}
+        .rt-pass{color:var(--green)}.rt-fail{color:var(--red)}
+        .q-breakdown{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+        .q-dot{width:14px;height:14px;border-radius:50%}
+        .qd-correct{background:var(--green)}.qd-wrong{background:var(--red)}.qd-skip{background:var(--muted)}
+
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:2px}
+    </style>
+</head>
+<body>
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="sec-badge" id="phaseBadge">🎮 Rejoindre un Examen</div>
+    </div>
+    <div>
+        <a href="police-portal.html" class="btn btn-ghost">← Portail</a>
+    </div>
+</header>
+
+<!-- PHASE 1: CODE -->
+<div class="phase active" id="p1">
+    <div class="center">
+        <div class="code-entry-card">
+            <span class="big-icon">🎮</span>
+            <div class="card-title">Rejoindre un Examen</div>
+            <div class="card-sub">Entrez le code fourni par votre superviseur</div>
+            <div class="code-inputs" id="codeInputs">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d0" onkeyup="handleDigit(event,0)">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d1" onkeyup="handleDigit(event,1)">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d2" onkeyup="handleDigit(event,2)">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d3" onkeyup="handleDigit(event,3)">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d4" onkeyup="handleDigit(event,4)">
+                <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]*" id="d5" onkeyup="handleDigit(event,5)">
+            </div>
+            <div class="code-error" id="codeError"></div>
+            <button class="btn btn-gold btn-lg" id="joinBtn" onclick="joinSession()" disabled style="width:100%;justify-content:center">
+                → Rejoindre
+            </button>
+            <div style="margin-top:16px;font-size:10px;color:var(--muted);letter-spacing:1px">
+                Connecté en tant que : <strong id="userLabel" style="color:var(--text)">—</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PHASE 2: WAITING -->
+<div class="phase" id="p2">
+    <div class="center">
+        <div class="waiting-card">
+            <div style="font-size:3rem;margin-bottom:12px">📡</div>
+            <div style="font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:8px">CONNECTÉ</div>
+            <div class="session-title" id="waitSessionTitle">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px;margin-bottom:24px" id="waitSessionInfo">—</div>
+            <div style="padding:16px;background:rgba(34,197,94,.06);border:1px solid var(--green-border);border-radius:6px;display:flex;align-items:center;justify-content:center;gap:8px">
+                <div class="pulse-dot"></div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;color:#86efac">EN ATTENTE DU DÉBUT...</div>
+            </div>
+            <div style="margin-top:20px;font-size:11px;color:var(--muted)">
+                Participants connectés : <strong id="waitParticipants" style="color:var(--text)">—</strong>
+            </div>
+            <div class="participants-row" id="waitParticipantsList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- PHASE 3: QUESTION -->
+<div class="phase" id="p3" style="justify-content:flex-start;padding-top:24px">
+    <div class="question-wrap" style="padding:0 16px">
+        <div class="q-bar">
+            <div class="q-num-badge" id="qBadge">Q 1/1</div>
+            <div class="q-prog-track"><div class="q-prog-fill" id="qProgFill" style="width:0%"></div></div>
+            <div class="timer-display" id="timerDisplay">20</div>
+        </div>
+        <div class="question-card">
+            <div class="q-text" id="qText">—</div>
+        </div>
+        <div class="answer-grid" id="answerGrid"></div>
+        <div class="answer-result" id="answerResult"></div>
+    </div>
+</div>
+
+<!-- PHASE 4: RESULTS -->
+<div class="phase" id="p4">
+    <div class="result-card" id="resultCard">
+        <div class="score-circle" id="scoreCircle">
+            <div class="score-num" id="scoreNum">0%</div>
+            <div class="score-lbl">SCORE</div>
+        </div>
+        <div class="result-title" id="resultTitle">—</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="resultSub">—</div>
+        <div class="q-breakdown" id="qBreakdown"></div>
+        <div style="margin:16px 0;padding:12px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:6px;font-size:11px;line-height:1.8" id="resultStats"></div>
+        <div id="badgeWon" style="display:none;padding:16px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:8px;margin-bottom:16px;text-align:center">
+            <div style="font-size:2.5rem">🏅</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--gold-light);margin-top:6px">BADGE OBTENU !</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Votre badge a été attribué sur votre profil</div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <a href="police-profile.html" class="btn btn-gold">👤 Voir mon Profil</a>
+            <a href="police-courses.html" class="btn btn-ghost">📚 Formations</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('agent');
+if (!currentUser) throw new Error();
+
+document.getElementById('userLabel').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+
+let session = null;
+let myParticipant = null;
+let myAnswers = [];
+let currentQIdx = -1;
+let timerInterval = null;
+let pollInterval = null;
+let realtimeChannel = null;
+let answered = false;
+
+// ── CODE INPUT ──
+function handleDigit(e, idx) {
+    const val = document.getElementById(`d${idx}`).value.replace(/[^0-9]/g,'');
+    document.getElementById(`d${idx}`).value = val;
+
+    if (val && idx < 5) document.getElementById(`d${idx+1}`).focus();
+    if (e.key === 'Backspace' && !val && idx > 0) document.getElementById(`d${idx-1}`).focus();
+
+    const code = Array.from({length:6}, (_,i) => document.getElementById(`d${i}`).value).join('');
+    document.getElementById('joinBtn').disabled = code.length < 6;
+    if (code.length === 6) document.getElementById('joinBtn').click();
+}
+
+async function joinSession() {
+    const code = Array.from({length:6}, (_,i) => document.getElementById(`d${i}`).value).join('');
+    const errEl = document.getElementById('codeError');
+    errEl.style.display = 'none';
+
+    const { data: s, error } = await supabase.from('table_policefed_kahoot').select('*').eq('code', code).single();
+    if (!s || error) {
+        errEl.textContent = '⚠️ Code invalide. Vérifiez le code fourni par votre superviseur.';
+        errEl.style.display = 'block';
+        return;
+    }
+    if (s.status === 'finished') {
+        errEl.textContent = '⚠️ Cette session est terminée.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    session = s;
+    session.questions = typeof s.questions === 'string' ? JSON.parse(s.questions) : s.questions;
+
+    // Register as participant
+    const { data: existing } = await supabase.from('table_policefed_kahoot_participants').select('*').eq('session_id', s.id).eq('user_id', currentUser.id).maybeSingle();
+    if (existing) {
+        myParticipant = existing;
+        myAnswers = existing.answers || [];
+    } else {
+        const { data: newP } = await supabase.from('table_policefed_kahoot_participants').insert({
+            session_id: s.id,
+            user_id: currentUser.id,
+            user_name: `${currentUser.prenom} ${currentUser.nom}`,
+            answers: [],
+            score: 0, passed: false, badge_awarded: false, finished: false
+        }).select().single();
+        myParticipant = newP;
+        myAnswers = [];
+    }
+
+    goPhase(2);
+    startWaiting();
+}
+
+// ── WAITING ──
+function goPhase(n) {
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    document.getElementById('p' + n).classList.add('active');
+    const badges = ['','🎮 Rejoindre','📡 Salle d\'Attente','🔴 Question en Cours','📊 Résultats'];
+    document.getElementById('phaseBadge').textContent = badges[n]||'🎮';
+}
+
+async function startWaiting() {
+    document.getElementById('waitSessionTitle').textContent = session.titre;
+    document.getElementById('waitSessionInfo').textContent = `${session.questions.length} question(s) · Seuil de réussite : ${session.pass_score}%`;
+
+    await refreshWaitParticipants();
+
+    if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+
+    // Listen for session status changes
+    realtimeChannel = supabase.channel(`kahoot-player-${session.id}`)
+        .on('postgres_changes', {
+            event:'UPDATE', schema:'public', table:'table_policefed_kahoot',
+            filter:`id=eq.${session.id}`
+        }, payload => {
+            const updated = payload.new;
+            if (updated.status === 'active' || updated.status === 'waiting') {
+                session.current_question = updated.current_question;
+                session.status = updated.status;
+                if (updated.status === 'active' && currentQIdx !== updated.current_question) {
+                    currentQIdx = updated.current_question;
+                    answered = false;
+                    goPhase(3);
+                    showQuestion();
+                }
+            }
+            if (updated.status === 'finished') {
+                if (timerInterval) clearInterval(timerInterval);
+                if (pollInterval) clearInterval(pollInterval);
+                goPhase(4);
+                showResults();
+            }
+        })
+        .on('postgres_changes', {
+            event:'INSERT', schema:'public', table:'table_policefed_kahoot_participants',
+            filter:`session_id=eq.${session.id}`
+        }, () => refreshWaitParticipants())
+        .subscribe();
+
+    // Also poll for session status (fallback)
+    pollInterval = setInterval(async () => {
+        const { data: s } = await supabase.from('table_policefed_kahoot').select('status,current_question').eq('id', session.id).single();
+        if (!s) return;
+        if (s.status === 'active' && document.getElementById('p2').classList.contains('active')) {
+            session.status = 'active';
+            session.current_question = s.current_question;
+            currentQIdx = s.current_question;
+            answered = false;
+            clearInterval(pollInterval);
+            goPhase(3);
+            showQuestion();
+        } else if (s.status === 'active' && s.current_question !== currentQIdx && !document.getElementById('p2').classList.contains('active')) {
+            // New question
+            currentQIdx = s.current_question;
+            answered = false;
+            showQuestion();
+        }
+        if (s.status === 'finished' && !document.getElementById('p4').classList.contains('active')) {
+            clearInterval(pollInterval);
+            goPhase(4);
+            showResults();
+        }
+    }, 3000);
+}
+
+async function refreshWaitParticipants() {
+    const { data } = await supabase.from('table_policefed_kahoot_participants').select('user_name,user:user_id(prenom,nom)').eq('session_id', session.id);
+    const list = data||[];
+    document.getElementById('waitParticipants').textContent = list.length;
+    document.getElementById('waitParticipantsList').innerHTML = list.map(p => {
+        const name = p.user ? `${p.user.prenom} ${p.user.nom}` : (p.user_name||'Agent');
+        return `<div class="p-chip">${escapeHtml(name)}</div>`;
+    }).join('');
+}
+
+// ── QUESTION ──
+function showQuestion() {
+    const q = session.questions[currentQIdx];
+    const total = session.questions.length;
+
+    document.getElementById('qBadge').textContent = `Q ${currentQIdx+1}/${total}`;
+    document.getElementById('qProgFill').style.width = ((currentQIdx+1)/total*100)+'%';
+    document.getElementById('qText').textContent = q.q;
+    document.getElementById('answerResult').style.display = 'none';
+
+    const colors = ['ab-a','ab-b','ab-c','ab-d'];
+    const letters = ['A','B','C','D'];
+    document.getElementById('answerGrid').innerHTML = q.opts.map((opt,i) => `
+        <button class="answer-btn ${colors[i]}" id="abtn-${i}" onclick="submitAnswer(${i})">
+            <div class="ab-icon">${letters[i]}</div>
+            <div>${escapeHtml(opt)}</div>
+        </button>
+    `).join('');
+
+    // Start timer
+    if (timerInterval) clearInterval(timerInterval);
+    let remaining = q.time || 20;
+    const timerEl = document.getElementById('timerDisplay');
+    timerEl.textContent = remaining;
+    timerEl.classList.remove('warning');
+
+    timerInterval = setInterval(() => {
+        remaining--;
+        timerEl.textContent = remaining;
+        if (remaining <= 5) timerEl.classList.add('warning');
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+            if (!answered) timeOut(currentQIdx);
+        }
+    }, 1000);
+
+    // Poll for next question trigger
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(async () => {
+        const { data: s } = await supabase.from('table_policefed_kahoot').select('status,current_question').eq('id', session.id).single();
+        if (!s) return;
+        if (s.status === 'finished') {
+            clearInterval(pollInterval);
+            clearInterval(timerInterval);
+            goPhase(4);
+            showResults();
+            return;
+        }
+        if (s.current_question !== currentQIdx) {
+            clearInterval(timerInterval);
+            clearInterval(pollInterval);
+            const newQ = s.current_question;
+            currentQIdx = newQ;
+            answered = false;
+            showQuestion();
+        }
+    }, 2500);
+}
+
+async function submitAnswer(optionIdx) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInterval);
+
+    const q = session.questions[currentQIdx];
+    const isCorrect = optionIdx === q.correct;
+
+    // Visual feedback
+    document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correct) btn.classList.add('reveal-correct');
+    });
+
+    const resultEl = document.getElementById('answerResult');
+    resultEl.className = 'answer-result ' + (isCorrect ? 'ar-correct' : 'ar-wrong');
+    resultEl.textContent = isCorrect ? `✅ Bonne réponse !` : `✕ Mauvaise réponse. La bonne réponse était : ${['A','B','C','D'][q.correct]}`;
+    resultEl.style.display = 'block';
+
+    // Save answer
+    myAnswers[currentQIdx] = optionIdx;
+    await supabase.from('table_policefed_kahoot_participants').update({ answers: myAnswers }).eq('id', myParticipant.id);
+}
+
+async function timeOut(qIdx) {
+    if (answered) return;
+    answered = true;
+    const q = session.questions[qIdx];
+    document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correct) btn.classList.add('reveal-correct');
+    });
+    const resultEl = document.getElementById('answerResult');
+    resultEl.className = 'answer-result ar-timeout';
+    resultEl.textContent = `⏱ Temps écoulé ! La bonne réponse était : ${['A','B','C','D'][q.correct]}`;
+    resultEl.style.display = 'block';
+    myAnswers[qIdx] = -1; // no answer
+    await supabase.from('table_policefed_kahoot_participants').update({ answers: myAnswers }).eq('id', myParticipant.id);
+}
+
+// ── RESULTS ──
+async function showResults() {
+    // Reload my participant data (score might have been updated by host)
+    let tries = 0;
+    let part = null;
+    while (tries < 10) {
+        const { data } = await supabase.from('table_policefed_kahoot_participants').select('*').eq('id', myParticipant.id).single();
+        if (data && data.finished) { part = data; break; }
+        await new Promise(r => setTimeout(r, 1500));
+        tries++;
+    }
+    if (!part) part = myParticipant;
+
+    const score = part.score || 0;
+    const passed = part.passed;
+    const total = session.questions.length;
+
+    const card = document.getElementById('resultCard');
+    card.classList.add(passed ? 'pass' : 'fail');
+
+    const circle = document.getElementById('scoreCircle');
+    circle.className = 'score-circle ' + (passed ? 'sc-pass' : 'sc-fail');
+    document.getElementById('scoreNum').textContent = score + '%';
+    document.getElementById('scoreNum').style.color = passed ? 'var(--green)' : 'var(--red)';
+
+    document.getElementById('resultTitle').textContent = passed ? '🎉 REÇU !' : '✕ ÉCHOUÉ';
+    document.getElementById('resultTitle').className = 'result-title ' + (passed ? 'rt-pass' : 'rt-fail');
+    document.getElementById('resultSub').textContent = `${session.titre}`;
+
+    // Breakdown dots
+    let correctCount = 0;
+    const dots = session.questions.map((q, i) => {
+        const ans = (part.answers||[])[i];
+        let cls;
+        if (ans === undefined || ans === null || ans < 0) cls = 'qd-skip';
+        else if (ans === q.correct) { cls = 'qd-correct'; correctCount++; }
+        else cls = 'qd-wrong';
+        return `<div class="q-dot ${cls}" title="Q${i+1}"></div>`;
+    }).join('');
+    document.getElementById('qBreakdown').innerHTML = dots;
+
+    document.getElementById('resultStats').innerHTML = `
+        <div style="display:flex;justify-content:space-around;text-align:center">
+            <div><div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--green)">${correctCount}</div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">Correctes</div></div>
+            <div><div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--red)">${total - correctCount}</div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">Incorrectes</div></div>
+            <div><div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${session.pass_score}%</div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">Seuil</div></div>
+        </div>
+    `;
+
+    if (part.badge_awarded) document.getElementById('badgeWon').style.display = 'block';
+}
+</script>
+</body>
+</html>
