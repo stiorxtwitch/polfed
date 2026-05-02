@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examens — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#030a14;--panel:rgba(4,12,26,0.97);--blue:#1a56db;--blue-light:#3b82f6;--blue-dim:rgba(26,86,219,0.15);--blue-border:rgba(26,86,219,0.22);--gold:#c9a227;--gold-light:#e4b93a;--gold-dim:rgba(201,162,39,0.15);--gold-border:rgba(201,162,39,0.25);--text:#c5d8f0;--text-bright:#e8f4ff;--muted:#4a7a9b;--green:#22c55e;--green-dim:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);--red:#ef4444;--red-dim:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.25);--yellow:#f59e0b}
+        html,body{min-height:100%;background:var(--bg);font-family:'Exo 2',sans-serif;color:var(--text)}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,86,219,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.03) 1px,transparent 1px);background-size:40px 40px;animation:gridDrift 50s linear infinite}
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:40px 40px}}
+        .t-header{height:56px;background:rgba(3,10,20,.99);border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+        .t-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent);opacity:0.4}
+        .hdr-left{display:flex;align-items:center;gap:14px}
+        .logo-link{display:flex;align-items:center;gap:9px;text-decoration:none}
+        .logo-link img{width:28px;height:33px;filter:drop-shadow(0 0 6px rgba(201,162,39,0.4))}
+        .logo-txt .m{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;color:#fff;display:block;line-height:1}
+        .logo-txt .s{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block}
+        .divider{width:1px;height:28px;background:var(--blue-border)}
+        .sec-badge{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:2px}
+        .hdr-nav{display:flex;align-items:center;gap:2px}
+        .hdr-nav a{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:5px 9px;border-radius:2px;transition:all .15s}
+        .hdr-nav a:hover,.hdr-nav a.active{color:var(--text-bright);background:var(--blue-dim)}
+        .hdr-right{display:flex;align-items:center;gap:8px}
+        .btn{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:none;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+        .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--blue-border)}.btn-ghost:hover{color:var(--text);border-color:var(--blue-light)}
+        .btn-gold{background:var(--gold);color:#000;font-weight:700}.btn-gold:hover{background:var(--gold-light)}
+        .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+        .btn-sm{padding:4px 9px;font-size:10px}
+        .page{position:relative;z-index:1;padding:24px;max-width:1200px;margin:0 auto}
+
+        /* PROGRESS OVERVIEW */
+        .overview{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;padding:20px;margin-bottom:22px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+        .ov-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--blue-light);text-transform:uppercase;margin-bottom:14px;width:100%}
+        .ov-stat{text-align:center;min-width:80px}
+        .ov-num{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;line-height:1}
+        .ov-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:3px}
+        .ov-divider{width:1px;height:50px;background:var(--blue-border)}
+        .big-progress{flex:1;min-width:200px}
+        .prog-track{height:12px;background:rgba(26,86,219,.1);border-radius:6px;overflow:hidden;margin-bottom:6px}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:6px;transition:width .8s ease}
+        .prog-lbl{font-size:10px;color:var(--muted);letter-spacing:1px}
+
+        /* EXAM CARDS */
+        .exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+        .exam-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;overflow:hidden;transition:all .2s;display:flex;flex-direction:column}
+        .exam-card:hover{border-color:var(--blue-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+        .ec-top{height:4px}
+        .ec-top-done{background:linear-gradient(90deg,var(--green),#16a34a)}
+        .ec-top-rdv{background:linear-gradient(90deg,var(--blue),var(--blue-light))}
+        .ec-top-pending{background:linear-gradient(90deg,var(--yellow),#d97706)}
+        .ec-top-none{background:linear-gradient(90deg,var(--muted),#374151)}
+        .ec-body{padding:18px;flex:1}
+        .ec-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+        .ec-icon{width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid}
+        .ei-done{background:var(--green-dim);border-color:var(--green-border)}
+        .ei-rdv{background:var(--blue-dim);border-color:var(--blue-border)}
+        .ei-pending{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25)}
+        .ei-none{background:rgba(107,114,128,.08);border-color:rgba(107,114,128,.25)}
+        .ec-meta{flex:1}
+        .ec-status{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+        .es-done{color:var(--green)}.es-rdv{color:var(--blue-light)}.es-pending{color:var(--yellow)}.es-none{color:var(--muted)}
+        .ec-name{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;color:var(--text-bright);margin-bottom:4px}
+        .ec-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+        .ec-requirements{margin-bottom:12px}
+        .req-title{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700}
+        .req-row{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0}
+        .req-ok{color:var(--green)}.req-no{color:var(--muted)}
+        .ec-badge{margin-top:8px;padding:8px 10px;border-radius:4px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gold-light)}
+        .ec-footer{padding:12px 18px;border-top:1px solid var(--blue-border);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+        .ec-rdv-info{flex:1;font-size:10px;color:var(--muted);letter-spacing:.5px}
+
+        /* EXAM HISTORY (sup/officier) */
+        .history-section{margin-top:24px}
+        .section-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light);margin-bottom:14px}
+        .t-table{width:100%;border-collapse:collapse;font-size:11px}
+        .t-table th{padding:8px 12px;background:rgba(26,86,219,.08);border-bottom:1px solid var(--blue-border);font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap}
+        .t-table td{padding:10px 12px;border-bottom:1px solid rgba(26,86,219,.1);vertical-align:middle}
+        .t-table tr:hover td{background:rgba(26,86,219,.04)}.t-table tr:last-child td{border-bottom:none}
+        .t-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;overflow:hidden}
+        .t-card-hdr{padding:12px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between}
+        .t-card-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light)}
+        .empty-state{text-align:center;padding:30px;color:var(--muted);font-size:11px;letter-spacing:1px}
+        .sb{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+        .sb-pass{background:var(--green-dim);border:1px solid var(--green-border);color:#86efac}
+        .sb-fail{background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:2px}
+    </style>
+</head>
+<body>
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="divider"></div>
+        <div class="sec-badge">📝 Examens & Certifications</div>
+        <nav class="hdr-nav" id="mainNav"></nav>
+    </div>
+    <div class="hdr-right">
+        <a href="police-rdv.html" class="btn btn-gold btn-sm">📅 Prendre RDV</a>
+        <a href="police-kahoot-join.html" class="btn btn-primary btn-sm">🎮 Rejoindre Examen</a>
+        <a href="police-portal.html" class="btn btn-ghost btn-sm">← Portail</a>
+    </div>
+</header>
+
+<div class="page">
+    <!-- Progress overview -->
+    <div class="overview" id="overviewEl">
+        <div class="ov-title">📊 Mon Parcours de Certification</div>
+    </div>
+
+    <!-- Exam cards -->
+    <div class="exam-grid" id="examGrid">
+        <div class="empty-state" style="grid-column:1/-1">Chargement des formations...</div>
+    </div>
+
+    <!-- Kahoot history -->
+    <div class="history-section">
+        <div class="section-title">📝 Historique des Examens Passés</div>
+        <div class="t-card">
+            <div class="t-card-hdr">
+                <span class="t-card-title">Sessions Kahoot</span>
+                <span style="font-size:10px;color:var(--muted)" id="historyCount">—</span>
+            </div>
+            <div style="overflow-x:auto">
+                <table class="t-table">
+                    <thead>
+                        <tr>
+                            <th>Examen</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Résultat</th>
+                            <th>Badge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable">
+                        <tr><td colspan="5"><div class="empty-state">Chargement...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('agent');
+const isOfficier = (ROLES_LEVEL[currentUser.role]||0) >= 3;
+const isSuperv   = (ROLES_LEVEL[currentUser.role]||0) >= 2;
+
+const navLinks = [
+    { href:'police-complaints.html', label:'📋 Plaintes' },
+    { href:'police-courses.html', label:'📚 Formations' },
+    { href:'police-examen.html', label:'📝 Examens', active:true },
+    { href:'police-rdv.html', label:'📅 Rendez-vous' },
+    ...(isSuperv ? [{ href:'police-kahoot-host.html', label:'🎮 Kahoot' }] : [{ href:'police-kahoot-join.html', label:'🎮 Examen' }]),
+    ...(isSuperv ? [{ href:'police-rdv-admin.html', label:'👔 RDV Admin' }] : []),
+    ...(isOfficier ? [{ href:'police-personnel.html', label:'👥 Personnel' }] : []),
+    { href:'police-profile.html', label:'👤 Profil' },
+];
+document.getElementById('mainNav').innerHTML = navLinks.map(l =>
+    `<a href="${l.href}" ${l.active ? 'class="active"' : ''}>${l.label}</a>`
+).join('');
+
+async function init() {
+    const [
+        { data: formations },
+        { data: progress },
+        { data: rdvs },
+        { data: kahootParts }
+    ] = await Promise.all([
+        supabase.from('table_policefed_formations').select('*').order('ordre'),
+        supabase.from('table_policefed_progress').select('*').eq('user_id', currentUser.id),
+        supabase.from('table_policefed_rdv').select('*, formation:formation_id(titre)').eq('agent_id', currentUser.id).in('status',['en_attente','confirme']),
+        supabase.from('table_policefed_kahoot_participants').select('*, session:session_id(titre,pass_score,created_at)').eq('user_id', currentUser.id).eq('finished', true).order('joined_at', { ascending: false })
+    ]);
+
+    const forms = formations||[];
+    const progressMap = {};
+    (progress||[]).forEach(p => progressMap[p.formation_id] = p);
+    const rdvMap = {};
+    (rdvs||[]).forEach(r => rdvMap[r.formation_id] = r);
+    const parts = kahootParts||[];
+
+    // Overview
+    const coursesDone = forms.filter(f => progressMap[f.id]?.completed).length;
+    const examsPassed = parts.filter(p => p.passed).length;
+    const pct = forms.length > 0 ? Math.round(coursesDone / forms.length * 100) : 0;
+
+    document.getElementById('overviewEl').innerHTML = `
+        <div class="ov-title">📊 Mon Parcours de Certification</div>
+        <div class="ov-stat"><div class="ov-num" style="color:var(--blue-light)">${forms.length}</div><div class="ov-lbl">Modules</div></div>
+        <div class="ov-divider"></div>
+        <div class="ov-stat"><div class="ov-num" style="color:var(--green)">${coursesDone}</div><div class="ov-lbl">Cours lus</div></div>
+        <div class="ov-divider"></div>
+        <div class="ov-stat"><div class="ov-num" style="color:var(--gold)">${examsPassed}</div><div class="ov-lbl">Réussis</div></div>
+        <div class="ov-divider"></div>
+        <div class="big-progress">
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">Progression formations</div>
+            <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+            <div class="prog-lbl">${pct}% complété (${coursesDone}/${forms.length} cours)</div>
+        </div>
+    `;
+
+    // Exam cards (one per formation)
+    document.getElementById('examGrid').innerHTML = forms.map(f => {
+        const courseDone = progressMap[f.id]?.completed;
+        const rdv = rdvMap[f.id];
+        const examDone = parts.find(p => p.session?.titre?.includes(f.titre) || false);
+
+        let status, topClass, iconClass, statusLabel, statusCls;
+
+        if (examDone?.passed) {
+            status = 'done'; topClass = 'ec-top-done'; iconClass = 'ei-done';
+            statusLabel = '✅ Certifié'; statusCls = 'es-done';
+        } else if (rdv) {
+            status = 'rdv'; topClass = 'ec-top-rdv'; iconClass = 'ei-rdv';
+            statusLabel = `📅 RDV ${rdv.status === 'confirme' ? 'Confirmé' : 'En Attente'}`; statusCls = 'es-rdv';
+        } else if (courseDone) {
+            status = 'pending'; topClass = 'ec-top-pending'; iconClass = 'ei-pending';
+            statusLabel = '⏳ Cours lu — Examen disponible'; statusCls = 'es-pending';
+        } else {
+            status = 'none'; topClass = 'ec-top-none'; iconClass = 'ei-none';
+            statusLabel = '📖 Formation requise'; statusCls = 'es-none';
+        }
+
+        const canBook = courseDone && !rdv && status !== 'done';
+        const rdvInfo = rdv ? `RDV ${rdv.status === 'confirme' ? 'confirmé' : 'en attente'} — ${rdv.date_rdv ? formatDate(rdv.date_rdv) : 'date à confirmer'}` : '';
+
+        return `
+        <div class="exam-card">
+            <div class="ec-top ${topClass}"></div>
+            <div class="ec-body">
+                <div class="ec-icon-row">
+                    <div class="ec-icon ${iconClass}">${f.icon||'📚'}</div>
+                    <div class="ec-meta">
+                        <div class="ec-status ${statusCls}">${statusLabel}</div>
+                        <div class="ec-name">${escapeHtml(f.titre)}</div>
+                    </div>
+                </div>
+                <div class="ec-desc">${escapeHtml(f.description||'')}</div>
+                <div class="ec-requirements">
+                    <div class="req-title">Prérequis</div>
+                    <div class="req-row ${courseDone ? 'req-ok' : 'req-no'}">
+                        ${courseDone ? '✓' : '○'} Cours "${escapeHtml(f.titre)}" complété
+                    </div>
+                    <div class="req-row ${status !== 'none' ? 'req-ok' : 'req-no'}">
+                        ${status !== 'none' ? '✓' : '○'} Demander un examen (RDV / Kahoot)
+                    </div>
+                </div>
+                ${status === 'done' && f.badge_titre ? `<div class="ec-badge">🏅 Badge: <strong>${escapeHtml(f.badge_titre)}</strong></div>` : ''}
+            </div>
+            <div class="ec-footer">
+                <div class="ec-rdv-info">${rdvInfo}</div>
+                ${status === 'done'
+                    ? `<a href="police-profile.html" class="btn btn-ghost btn-sm">👤 Mon Profil</a>`
+                    : canBook
+                        ? `<a href="police-rdv.html" class="btn btn-gold btn-sm">📅 Prendre RDV</a>
+                           <a href="police-kahoot-join.html" class="btn btn-primary btn-sm">🎮 Rejoindre Examen</a>`
+                        : !courseDone
+                            ? `<a href="police-courses.html" class="btn btn-primary btn-sm">📖 Voir le Cours</a>`
+                            : `<span style="font-size:10px;color:var(--muted)">En cours de traitement</span>`
+                }
+            </div>
+        </div>
+        `;
+    }).join('');
+
+    // History table
+    document.getElementById('historyCount').textContent = `${parts.length} examen(s) passé(s)`;
+    document.getElementById('historyTable').innerHTML = parts.length === 0
+        ? `<tr><td colspan="5"><div class="empty-state">Aucun examen passé pour le moment.</div></td></tr>`
+        : parts.map(p => `
+            <tr>
+                <td><strong>${escapeHtml(p.session?.titre||'—')}</strong></td>
+                <td style="font-size:10px;color:var(--muted)">${p.session?.created_at ? formatDate(p.session.created_at) : '—'}</td>
+                <td>
+                    <span style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:${p.passed?'var(--green)':'var(--red)'}">
+                        ${p.score}%
+                    </span>
+                    <span style="font-size:10px;color:var(--muted);margin-left:4px">/ ${p.session?.pass_score||70}% requis</span>
+                </td>
+                <td><span class="sb ${p.passed?'sb-pass':'sb-fail'}">${p.passed?'✓ REÇU':'✕ ÉCHOUÉ'}</span></td>
+                <td>${p.badge_awarded ? '<span style="color:var(--gold);font-size:14px">🏅</span>' : '—'}</td>
+            </tr>
+        `).join('');
+}
+
+init();
+</script>
+</body>
+</html>
