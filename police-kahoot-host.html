@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer Examen — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#020810;--panel:rgba(3,10,22,0.98);--blue:#1a56db;--blue-light:#3b82f6;--blue-dim:rgba(26,86,219,0.15);--blue-border:rgba(26,86,219,0.22);--gold:#c9a227;--gold-light:#e4b93a;--gold-dim:rgba(201,162,39,0.15);--gold-border:rgba(201,162,39,0.25);--text:#c5d8f0;--text-bright:#e8f4ff;--muted:#4a7a9b;--green:#22c55e;--green-dim:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);--red:#ef4444;--red-dim:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.25);--yellow:#f59e0b;--purple:#a855f7;--a-red:#e74c3c;--a-blue:#2980b9;--a-yellow:#f39c12;--a-green:#27ae60}
+        html,body{min-height:100%;background:var(--bg);font-family:'Exo 2',sans-serif;color:var(--text)}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,86,219,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.04) 1px,transparent 1px);background-size:44px 44px;animation:gridDrift 45s linear infinite}
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:44px 44px}}
+        .t-header{height:56px;background:rgba(2,8,16,0.99);border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+        .t-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent);opacity:0.45}
+        .hdr-left{display:flex;align-items:center;gap:14px}
+        .logo-link{display:flex;align-items:center;gap:9px;text-decoration:none}
+        .logo-link img{width:28px;height:33px;filter:drop-shadow(0 0 6px rgba(201,162,39,0.4))}
+        .logo-txt .m{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;color:#fff;display:block;line-height:1}
+        .logo-txt .s{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block}
+        .divider{width:1px;height:28px;background:var(--blue-border)}
+        .sec-badge{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:2px}
+        .hdr-right{display:flex;align-items:center;gap:8px}
+        .btn{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border:none;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+        .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--blue-border)}.btn-ghost:hover{color:var(--text);border-color:var(--blue-light)}
+        .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+        .btn-gold{background:var(--gold);color:#000;font-weight:700}.btn-gold:hover{background:var(--gold-light)}
+        .btn-success{background:var(--green-dim);color:#86efac;border:1px solid var(--green-border)}.btn-success:hover{background:rgba(34,197,94,.25)}
+        .btn-danger{background:var(--red-dim);color:#fca5a5;border:1px solid var(--red-border)}.btn-danger:hover{background:rgba(239,68,68,.25)}
+        .btn-purple{background:rgba(168,85,247,.15);color:#d8b4fe;border:1px solid rgba(168,85,247,.3)}.btn-purple:hover{background:rgba(168,85,247,.25)}
+        .btn-lg{padding:12px 28px;font-size:14px}
+        .btn-sm{padding:4px 9px;font-size:10px}
+        .btn:disabled{opacity:.45;cursor:not-allowed}
+        /* PHASES */
+        .phase{display:none}.phase.active{display:block}
+        .page{position:relative;z-index:1;padding:24px;max-width:1200px;margin:0 auto}
+
+        /* PHASE 1 — CREATE */
+        .create-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+        @media(max-width:900px){.create-grid{grid-template-columns:1fr}}
+        .t-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;overflow:hidden}
+        .t-card-hdr{padding:12px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between}
+        .t-card-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light)}
+        .t-card-body{padding:16px}
+        .form-group{margin-bottom:14px}
+        .t-label{display:block;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;font-family:'Rajdhani',sans-serif;font-weight:700}
+        .t-input,.t-select,.t-textarea{width:100%;padding:9px 11px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+        .t-input:focus,.t-select:focus,.t-textarea:focus{border-color:var(--blue-light)}
+        .t-select option{background:#050d1a}.t-input::placeholder{color:var(--muted)}
+
+        /* QUESTION BUILDER */
+        .q-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+        .q-item{background:rgba(26,86,219,.05);border:1px solid var(--blue-border);border-radius:6px;padding:14px;position:relative}
+        .q-num{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+        .q-text-input{width:100%;padding:8px 10px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text-bright);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;margin-bottom:10px}
+        .q-text-input:focus{border-color:var(--blue-light)}
+        .q-text-input::placeholder{color:var(--muted)}
+        .q-options{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+        .q-opt{display:flex;align-items:center;gap:6px;padding:7px 9px;border-radius:4px;border:1px solid;cursor:pointer;transition:all .15s}
+        .q-opt-a{background:rgba(231,76,60,.08);border-color:rgba(231,76,60,.3)}.q-opt-a.selected{background:rgba(231,76,60,.2);border-color:#e74c3c}
+        .q-opt-b{background:rgba(41,128,185,.08);border-color:rgba(41,128,185,.3)}.q-opt-b.selected{background:rgba(41,128,185,.2);border-color:#2980b9}
+        .q-opt-c{background:rgba(243,156,18,.08);border-color:rgba(243,156,18,.3)}.q-opt-c.selected{background:rgba(243,156,18,.2);border-color:#f39c12}
+        .q-opt-d{background:rgba(39,174,96,.08);border-color:rgba(39,174,96,.3)}.q-opt-d.selected{background:rgba(39,174,96,.2);border-color:#27ae60}
+        .q-opt-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;flex-shrink:0}
+        .q-opt-a .q-opt-icon{background:var(--a-red);color:#fff}.q-opt-b .q-opt-icon{background:var(--a-blue);color:#fff}
+        .q-opt-c .q-opt-icon{background:var(--a-yellow);color:#000}.q-opt-d .q-opt-icon{background:var(--a-green);color:#fff}
+        .q-opt-input{flex:1;background:transparent;border:none;color:var(--text);font-family:'Exo 2',sans-serif;font-size:12px;outline:none}
+        .q-opt-input::placeholder{color:var(--muted);opacity:0.5}
+        .q-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+        .q-correct-hint{font-size:10px;color:var(--muted);letter-spacing:1px}
+        .q-correct-hint strong{color:var(--green)}
+        .q-del{background:var(--red-dim);color:#fca5a5;border:1px solid var(--red-border);border-radius:2px;padding:3px 8px;cursor:pointer;font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:700}
+        .q-timer-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+        .q-timer-label{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;font-family:'Rajdhani',sans-serif;font-weight:700;white-space:nowrap}
+        .q-timer-input{width:60px;padding:4px 8px;background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;text-align:center;outline:none}
+
+        /* PHASE 2 — WAITING ROOM */
+        .waiting-wrap{text-align:center;padding:40px 20px}
+        .code-display{font-family:'Rajdhani',sans-serif;font-size:72px;font-weight:700;letter-spacing:12px;color:var(--gold-light);text-shadow:0 0 30px rgba(201,162,39,0.4);margin:20px 0;line-height:1}
+        .code-label{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+        .participants-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:20px;max-width:800px;margin-left:auto;margin-right:auto}
+        .participant-chip{background:var(--panel);border:1px solid var(--blue-border);border-radius:6px;padding:10px 12px;display:flex;align-items:center;gap:8px;animation:slideIn .3s ease}
+        @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .p-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--blue-border);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--blue-light);flex-shrink:0}
+        .p-name{font-size:12px;font-weight:500;color:var(--text-bright)}
+        .p-role{font-size:9px;color:var(--muted);letter-spacing:1px}
+
+        /* PHASE 3 — LIVE QUESTION */
+        .live-q-wrap{max-width:900px;margin:0 auto;padding:20px}
+        .q-progress{display:flex;gap:8px;margin-bottom:20px;align-items:center}
+        .q-prog-bar{flex:1;height:6px;background:rgba(26,86,219,.15);border-radius:3px;overflow:hidden}
+        .q-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:3px;transition:width .4s}
+        .q-counter{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--muted)}
+        .live-question{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;padding:24px;margin-bottom:18px}
+        .lq-text{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;color:var(--text-bright);margin-bottom:8px;line-height:1.3}
+        .lq-timer{font-size:11px;color:var(--muted);letter-spacing:2px}
+        .live-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+        .live-opt{border-radius:6px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:#fff}
+        .lo-a{background:rgba(231,76,60,.18);border:1px solid rgba(231,76,60,.4)}
+        .lo-b{background:rgba(41,128,185,.18);border:1px solid rgba(41,128,185,.4)}
+        .lo-c{background:rgba(243,156,18,.18);border:1px solid rgba(243,156,18,.4);color:#000}
+        .lo-d{background:rgba(39,174,96,.18);border:1px solid rgba(39,174,96,.4)}
+        .lo-icon{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;flex-shrink:0}
+        .lo-a .lo-icon{background:var(--a-red)}.lo-b .lo-icon{background:var(--a-blue)}.lo-c .lo-icon{background:var(--a-yellow);color:#000}.lo-d .lo-icon{background:var(--a-green)}
+        .answer-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+        .a-stat{background:rgba(26,86,219,.06);border:1px solid var(--blue-border);border-radius:4px;padding:8px;text-align:center}
+        .a-stat-num{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--text-bright)}
+        .a-stat-lbl{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+        .a-bar{height:4px;border-radius:2px;margin-top:6px;transition:width .5s}
+
+        /* PHASE 4 — RESULTS */
+        .results-wrap{max-width:900px;margin:0 auto;padding:20px}
+        .podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:20px 0 30px;height:140px}
+        .podium-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+        .podium-place{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted)}
+        .podium-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;border:2px solid}
+        .p1 .podium-avatar{background:rgba(201,162,39,.2);border-color:var(--gold);color:var(--gold-light);width:52px;height:52px;font-size:18px}
+        .p2 .podium-avatar{background:rgba(148,163,184,.15);border-color:#94a3b8;color:#94a3b8}
+        .p3 .podium-avatar{background:rgba(180,120,80,.12);border-color:#b47850;color:#b47850}
+        .podium-bar{border-radius:4px 4px 0 0;width:70px}
+        .p1 .podium-bar{height:100px;background:rgba(201,162,39,.15);border:1px solid var(--gold-border)}
+        .p2 .podium-bar{height:70px;background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.3)}
+        .p3 .podium-bar{height:50px;background:rgba(180,120,80,.08);border:1px solid rgba(180,120,80,.25)}
+        .result-table{width:100%;border-collapse:collapse;font-size:12px}
+        .result-table th{padding:9px 12px;background:rgba(26,86,219,.08);border-bottom:1px solid var(--blue-border);font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left}
+        .result-table td{padding:10px 12px;border-bottom:1px solid rgba(26,86,219,.1);vertical-align:middle}
+        .result-table tr:last-child td{border-bottom:none}
+        .score-bar-wrap{height:8px;background:rgba(26,86,219,.1);border-radius:4px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle;margin-right:6px}
+        .score-bar-fill{height:100%;border-radius:4px;transition:width 1s}
+
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:2px}
+        .empty-state{text-align:center;padding:30px;color:var(--muted);font-size:11px;letter-spacing:1px}
+    </style>
+</head>
+<body>
+
+<!-- SQL NOTE:
+CREATE TABLE table_policefed_kahoot (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  titre TEXT NOT NULL,
+  formation_id UUID,
+  created_by UUID REFERENCES table_policefed_users(id),
+  questions JSONB NOT NULL DEFAULT '[]',
+  status TEXT DEFAULT 'waiting',
+  current_question INT DEFAULT -1,
+  pass_score INT DEFAULT 70,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE table_policefed_kahoot_participants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id UUID REFERENCES table_policefed_kahoot(id),
+  user_id UUID REFERENCES table_policefed_users(id),
+  user_name TEXT,
+  answers JSONB DEFAULT '[]',
+  score INT DEFAULT 0,
+  passed BOOLEAN DEFAULT false,
+  badge_awarded BOOLEAN DEFAULT false,
+  finished BOOLEAN DEFAULT false,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(session_id, user_id)
+);
+-->
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="divider"></div>
+        <div class="sec-badge" id="phaseBadge">🎮 Créer Examen</div>
+    </div>
+    <div class="hdr-right">
+        <div id="phaseInfo" style="font-size:11px;color:var(--muted)"></div>
+        <a href="police-portal.html" class="btn btn-ghost">← Portail</a>
+    </div>
+</header>
+
+<!-- PHASE 1: CREATE -->
+<div class="phase active page" id="p1">
+    <div class="create-grid">
+        <div>
+            <div class="t-card" style="margin-bottom:16px">
+                <div class="t-card-hdr"><span class="t-card-title">📋 Informations de la Session</span></div>
+                <div class="t-card-body">
+                    <div class="form-group">
+                        <label class="t-label">Titre de l'examen *</label>
+                        <input type="text" class="t-input" id="sessionTitre" placeholder="Ex: Examen Droit Pénal — Promotion 2026">
+                    </div>
+                    <div class="form-group">
+                        <label class="t-label">Formation liée</label>
+                        <select class="t-select" id="sessionFormation"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="t-label">Score de réussite (%)</label>
+                        <input type="number" class="t-input" id="sessionPassScore" value="70" min="1" max="100" style="width:100px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="t-card">
+                <div class="t-card-hdr">
+                    <span class="t-card-title">❓ Questions (<span id="qCount">0</span>)</span>
+                    <button class="btn btn-gold btn-sm" onclick="addQuestion()">+ Ajouter une Question</button>
+                </div>
+                <div class="t-card-body">
+                    <div class="q-list" id="questionList"></div>
+                    <div id="noQuestions" class="empty-state">
+                        Aucune question. Cliquez sur "+ Ajouter une Question" pour commencer.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div>
+            <div class="t-card" style="margin-bottom:14px">
+                <div class="t-card-hdr"><span class="t-card-title">ℹ️ Guide Kahoot</span></div>
+                <div class="t-card-body" style="font-size:12px;line-height:1.7;color:var(--muted)">
+                    <div style="margin-bottom:8px"><span style="color:var(--gold)">1.</span> Remplissez le titre et les infos.</div>
+                    <div style="margin-bottom:8px"><span style="color:var(--gold)">2.</span> Ajoutez vos questions (4 options, 1 bonne réponse).</div>
+                    <div style="margin-bottom:8px"><span style="color:var(--gold)">3.</span> Cliquez "Lancer" pour obtenir le <strong style="color:var(--text-bright)">code 6 chiffres</strong>.</div>
+                    <div style="margin-bottom:8px"><span style="color:var(--gold)">4.</span> Communiquez ce code aux agents.</div>
+                    <div><span style="color:var(--gold)">5.</span> Lancez les questions quand tout le monde est connecté.</div>
+                </div>
+            </div>
+            <div class="t-card">
+                <div class="t-card-body" style="display:flex;flex-direction:column;gap:10px">
+                    <div id="createAlert" style="display:none;padding:9px 12px;background:var(--red-dim);border:1px solid var(--red-border);border-radius:4px;font-size:12px;color:#fca5a5"></div>
+                    <button class="btn btn-gold btn-lg" onclick="launchSession()" style="width:100%;justify-content:center">
+                        🚀 Créer et Lancer la Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PHASE 2: WAITING ROOM -->
+<div class="phase page" id="p2">
+    <div class="waiting-wrap">
+        <div style="font-size:3rem;margin-bottom:16px">📡</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--text-bright);margin-bottom:4px" id="waitingTitle">—</div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:24px">Salle d'attente — En attente des participants</div>
+        <div class="code-label">CODE D'ACCÈS</div>
+        <div class="code-display" id="codeDisplay">------</div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:30px">Les agents doivent entrer ce code sur <strong style="color:var(--text)">police-kahoot-join.html</strong></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:30px">
+            <button class="btn btn-success btn-lg" id="startBtn" onclick="startSession()" disabled>▶ Lancer l'Examen</button>
+            <button class="btn btn-danger" onclick="cancelSession()">✕ Annuler</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:1px">
+            <span id="participantCount">0</span> participant(s) connecté(s)
+        </div>
+        <div class="participants-grid" id="participantsList"></div>
+    </div>
+</div>
+
+<!-- PHASE 3: LIVE -->
+<div class="phase page" id="p3">
+    <div class="live-q-wrap">
+        <div class="q-progress">
+            <div class="q-counter" id="liveCounter">Q 1 / 1</div>
+            <div class="q-prog-bar"><div class="q-prog-fill" id="liveProgFill" style="width:0%"></div></div>
+            <div style="font-size:11px;color:var(--muted)" id="liveAnsweredCount">0 réponses</div>
+        </div>
+
+        <div class="live-question">
+            <div class="lq-text" id="liveQText">—</div>
+            <div class="lq-timer" id="liveQTimer">Durée : — sec</div>
+        </div>
+
+        <div class="live-options" id="liveOptions"></div>
+
+        <div class="answer-stats" id="answerStats"></div>
+
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+            <button class="btn btn-gold btn-lg" onclick="nextQuestion()" id="nextBtn">→ Question Suivante</button>
+            <button class="btn btn-success btn-lg" id="endBtn" style="display:none" onclick="endSession()">🏁 Terminer & Voir Résultats</button>
+        </div>
+    </div>
+</div>
+
+<!-- PHASE 4: RESULTS -->
+<div class="phase page" id="p4">
+    <div class="results-wrap">
+        <div style="text-align:center;margin-bottom:10px">
+            <div style="font-size:3rem;margin-bottom:8px">🏆</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:3px;color:var(--gold-light)">RÉSULTATS FINAUX</div>
+            <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:4px" id="resultSessionTitle">—</div>
+        </div>
+        <div id="podiumEl" class="podium"></div>
+        <div class="t-card">
+            <div class="t-card-hdr">
+                <span class="t-card-title">📊 Classement Complet</span>
+                <div style="font-size:11px;color:var(--muted)" id="passInfo">—</div>
+            </div>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Agent</th>
+                        <th>Score</th>
+                        <th>Performance</th>
+                        <th>Résultat</th>
+                        <th>Badge</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTable"></tbody>
+            </table>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+            <button class="btn btn-gold btn-lg" onclick="awardAllPassed()">🏅 Attribuer Badges aux Reçus</button>
+            <button class="btn btn-ghost" onclick="location.reload()">+ Nouvelle Session</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('supervision');
+const isOfficier = (ROLES_LEVEL[currentUser.role]||0) >= 3;
+
+let session = null;
+let questions = [];
+let participants = [];
+let currentQIdx = -1;
+let realtimeChannel = null;
+
+// Load formations
+(async () => {
+    const { data } = await supabase.from('table_policefed_formations').select('id,titre,icon').order('ordre');
+    const sel = document.getElementById('sessionFormation');
+    sel.innerHTML = '<option value="">— Aucune (examen général) —</option>' +
+        (data||[]).map(f => `<option value="${f.id}">${f.icon||'📚'} ${escapeHtml(f.titre)}</option>`).join('');
+})();
+
+// ── QUESTION BUILDER ──
+function addQuestion() {
+    const idx = questions.length;
+    questions.push({ q:'', opts:['','','',''], correct:0, time:20 });
+    renderQuestions();
+}
+
+function renderQuestions() {
+    const list = document.getElementById('questionList');
+    const none = document.getElementById('noQuestions');
+    document.getElementById('qCount').textContent = questions.length;
+    none.style.display = questions.length === 0 ? 'block' : 'none';
+    list.innerHTML = questions.map((q, i) => `
+        <div class="q-item" id="qitem-${i}">
+            <div class="q-num">Question ${i+1}</div>
+            <input type="text" class="q-text-input" value="${escapeHtml(q.q)}" placeholder="Entrez votre question..." onchange="questions[${i}].q=this.value">
+            <div class="q-options">
+                ${['A','B','C','D'].map((ltr,j) => `
+                    <div class="q-opt q-opt-${ltr.toLowerCase()} ${q.correct===j?'selected':''}" onclick="setCorrect(${i},${j})">
+                        <div class="q-opt-icon">${ltr}</div>
+                        <input class="q-opt-input" value="${escapeHtml(q.opts[j]||'')}" placeholder="Option ${ltr}..." onclick="event.stopPropagation()" onchange="questions[${i}].opts[${j}]=this.value">
+                        ${q.correct===j ? '<span style="color:var(--green);font-size:12px;margin-left:auto">✓</span>' : ''}
+                    </div>
+                `).join('')}
+            </div>
+            <div class="q-footer">
+                <div class="q-correct-hint">Bonne réponse : <strong>${['A','B','C','D'][q.correct]}</strong> — Cliquez sur une option pour changer</div>
+                <div class="q-timer-row">
+                    <span class="q-timer-label">Temps</span>
+                    <input class="q-timer-input" type="number" value="${q.time}" min="5" max="120" onchange="questions[${i}].time=parseInt(this.value)||20">
+                    <span style="font-size:9px;color:var(--muted)">sec</span>
+                </div>
+                <button class="q-del" onclick="deleteQuestion(${i})">✕ Suppr</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function setCorrect(qi, oi) { questions[qi].correct = oi; renderQuestions(); }
+function deleteQuestion(i) { questions.splice(i,1); renderQuestions(); }
+
+// ── LAUNCH ──
+function generateCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function launchSession() {
+    const titre = document.getElementById('sessionTitre').value.trim();
+    const alertEl = document.getElementById('createAlert');
+    alertEl.style.display = 'none';
+
+    if (!titre) { alertEl.textContent = '⚠️ Le titre est obligatoire.'; alertEl.style.display = 'block'; return; }
+    if (questions.length === 0) { alertEl.textContent = '⚠️ Ajoutez au moins une question.'; alertEl.style.display = 'block'; return; }
+    const invalid = questions.find(q => !q.q.trim() || q.opts.some(o => !o.trim()));
+    if (invalid) { alertEl.textContent = '⚠️ Toutes les questions et options doivent être remplies.'; alertEl.style.display = 'block'; return; }
+
+    const code = generateCode();
+    const formation_id = document.getElementById('sessionFormation').value || null;
+    const pass_score = parseInt(document.getElementById('sessionPassScore').value)||70;
+
+    const { data, error } = await supabase.from('table_policefed_kahoot').insert({
+        code, titre, formation_id, created_by: currentUser.id,
+        questions: JSON.stringify(questions), status:'waiting',
+        current_question:-1, pass_score
+    }).select().single();
+
+    if (error) { alertEl.textContent = '⚠️ Erreur: ' + error.message; alertEl.style.display = 'block'; return; }
+
+    session = data;
+    goPhase(2);
+    startWaitingRoom();
+}
+
+// ── WAITING ROOM ──
+function goPhase(n) {
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    document.getElementById('p' + n).classList.add('active');
+    const badges = ['','🎮 Créer Examen','📡 Salle d\'Attente','🔴 LIVE','🏆 Résultats'];
+    document.getElementById('phaseBadge').textContent = badges[n]||'';
+}
+
+function startWaitingRoom() {
+    document.getElementById('codeDisplay').textContent = session.code;
+    document.getElementById('waitingTitle').textContent = session.titre;
+
+    if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+    realtimeChannel = supabase.channel(`kahoot-host-${session.id}`)
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'table_policefed_kahoot_participants', filter:`session_id=eq.${session.id}` },
+            () => refreshParticipants())
+        .subscribe();
+
+    refreshParticipants();
+}
+
+async function refreshParticipants() {
+    const { data } = await supabase.from('table_policefed_kahoot_participants')
+        .select('*, user:user_id(prenom,nom,role)')
+        .eq('session_id', session.id);
+    participants = data||[];
+    document.getElementById('participantCount').textContent = participants.length;
+    const startBtn = document.getElementById('startBtn');
+    startBtn.disabled = participants.length === 0;
+    if (participants.length > 0) startBtn.innerHTML = `▶ Lancer l'Examen (${participants.length})`;
+
+    document.getElementById('participantsList').innerHTML = participants.map(p => {
+        const name = p.user ? `${p.user.prenom} ${p.user.nom}` : (p.user_name||'Agent');
+        const initials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+        return `<div class="participant-chip">
+            <div class="p-avatar">${initials}</div>
+            <div><div class="p-name">${escapeHtml(name)}</div><div class="p-role">${p.user?.role||'—'}</div></div>
+        </div>`;
+    }).join('');
+}
+
+async function startSession() {
+    await supabase.from('table_policefed_kahoot').update({ status:'active', current_question:0, updated_at:new Date().toISOString() }).eq('id', session.id);
+    if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+    currentQIdx = 0;
+    goPhase(3);
+    showQuestion();
+}
+
+async function cancelSession() {
+    if (!confirm('Annuler la session ?')) return;
+    await supabase.from('table_policefed_kahoot').update({ status:'finished' }).eq('id', session.id);
+    location.reload();
+}
+
+// ── LIVE QUESTIONS ──
+function showQuestion() {
+    const q = questions[currentQIdx];
+    const total = questions.length;
+
+    document.getElementById('liveCounter').textContent = `Q ${currentQIdx+1} / ${total}`;
+    document.getElementById('liveProgFill').style.width = ((currentQIdx+1)/total*100)+'%';
+    document.getElementById('liveQText').textContent = q.q;
+    document.getElementById('liveQTimer').textContent = `Durée : ${q.time} secondes`;
+
+    document.getElementById('liveOptions').innerHTML = ['A','B','C','D'].map((ltr,i) => `
+        <div class="live-opt lo-${ltr.toLowerCase()}">
+            <div class="lo-icon">${ltr}</div>
+            <div>${escapeHtml(q.opts[i]||'')}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('nextBtn').style.display = currentQIdx < total-1 ? 'inline-flex' : 'none';
+    document.getElementById('endBtn').style.display = currentQIdx === total-1 ? 'inline-flex' : 'none';
+
+    // Reset answer stats
+    document.getElementById('answerStats').innerHTML = ['A','B','C','D'].map((ltr,i) => `
+        <div class="a-stat"><div class="a-stat-num" id="as-${i}">0</div><div class="a-stat-lbl">${ltr}</div><div class="a-bar" style="background:${'#e74c3c#2980b9#f39c12#27ae60'.slice(i*7,(i+1)*7)};width:0%" id="ab-${i}"></div></div>
+    `).join('');
+    ['#e74c3c','#2980b9','#f39c12','#27ae60'].forEach((c,i) => { const b=document.getElementById(`ab-${i}`); if(b) b.style.background=c; });
+
+    // Poll for answers
+    pollAnswers();
+}
+
+let pollInterval = null;
+async function pollAnswers() {
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(async () => {
+        const { data } = await supabase.from('table_policefed_kahoot_participants')
+            .select('answers').eq('session_id', session.id);
+        const counts = [0,0,0,0];
+        let answered = 0;
+        (data||[]).forEach(p => {
+            const ans = p.answers?.[currentQIdx];
+            if (ans !== undefined && ans !== null && ans >= 0) { counts[ans]++; answered++; }
+        });
+        const max = Math.max(...counts, 1);
+        counts.forEach((c,i) => {
+            const el = document.getElementById(`as-${i}`);
+            const bl = document.getElementById(`ab-${i}`);
+            if (el) el.textContent = c;
+            if (bl) bl.style.width = (c/max*100)+'%';
+        });
+        document.getElementById('liveAnsweredCount').textContent = `${answered} / ${participants.length} réponses`;
+    }, 2000);
+}
+
+async function nextQuestion() {
+    if (pollInterval) clearInterval(pollInterval);
+    currentQIdx++;
+    await supabase.from('table_policefed_kahoot').update({ current_question:currentQIdx, updated_at:new Date().toISOString() }).eq('id', session.id);
+    showQuestion();
+}
+
+async function endSession() {
+    if (pollInterval) clearInterval(pollInterval);
+    // Calculate scores
+    const passScore = session.pass_score||70;
+    const { data: parts } = await supabase.from('table_policefed_kahoot_participants').select('*').eq('session_id', session.id);
+
+    await Promise.all((parts||[]).map(async p => {
+        let correct = 0;
+        (p.answers||[]).forEach((ans, i) => { if (questions[i] && ans === questions[i].correct) correct++; });
+        const score = questions.length > 0 ? Math.round(correct / questions.length * 100) : 0;
+        const passed = score >= passScore;
+        await supabase.from('table_policefed_kahoot_participants').update({ score, passed, finished:true }).eq('id', p.id);
+    }));
+
+    await supabase.from('table_policefed_kahoot').update({ status:'finished', updated_at:new Date().toISOString() }).eq('id', session.id);
+    goPhase(4);
+    loadResults();
+}
+
+// ── RESULTS ──
+async function loadResults() {
+    document.getElementById('resultSessionTitle').textContent = session.titre;
+    const { data: parts } = await supabase.from('table_policefed_kahoot_participants')
+        .select('*, user:user_id(id,prenom,nom,role)')
+        .eq('session_id', session.id)
+        .order('score', { ascending: false });
+
+    const list = parts||[];
+    const passed = list.filter(p=>p.passed).length;
+    document.getElementById('passInfo').textContent = `${passed} / ${list.length} reçus (seuil: ${session.pass_score}%)`;
+
+    // Podium (top 3)
+    const podium = document.getElementById('podiumEl');
+    podium.innerHTML = '';
+    const order = [1,0,2]; // 2nd, 1st, 3rd display order
+    order.forEach(i => {
+        if (!list[i]) return;
+        const p = list[i];
+        const name = p.user ? `${p.user.prenom[0]}${p.user.nom[0]}` : '??';
+        const fullName = p.user ? `${p.user.prenom} ${p.user.nom}` : 'Agent';
+        const cls = i===0?'p1':i===1?'p2':'p3';
+        podium.innerHTML += `<div class="podium-col ${cls}">
+            <div class="podium-place">${['🥇','🥈','🥉'][i]}</div>
+            <div class="podium-avatar">${name.toUpperCase()}</div>
+            <div style="font-size:11px;color:var(--muted);text-align:center;max-width:80px">${escapeHtml(fullName)}</div>
+            <div class="podium-bar"></div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:${p.passed?'var(--green)':'var(--red)'}">
+                ${p.score}%
+            </div>
+        </div>`;
+    });
+
+    const tbody = document.getElementById('resultsTable');
+    tbody.innerHTML = list.map((p, i) => {
+        const fullName = p.user ? `${p.user.prenom} ${p.user.nom}` : (p.user_name||'Agent');
+        const barColor = p.passed ? '#22c55e' : '#ef4444';
+        return `<tr>
+            <td><strong style="font-family:'Rajdhani',sans-serif;font-size:16px">${i+1}</strong></td>
+            <td>
+                <strong>${escapeHtml(fullName)}</strong>
+                ${p.user ? `<br><a href="police-profile.html?id=${p.user.id}" style="font-size:9px;color:var(--blue-light)">→ Profil</a>` : ''}
+            </td>
+            <td>
+                <span style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:${barColor}">${p.score}%</span>
+            </td>
+            <td>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${p.score}%;background:${barColor}"></div></div>
+                    <span style="font-size:10px;color:var(--muted)">${p.score}%</span>
+                </div>
+            </td>
+            <td>
+                <span style="font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;padding:2px 7px;border-radius:2px;
+                    ${p.passed ? 'background:var(--green-dim);border:1px solid var(--green-border);color:#86efac' : 'background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5'}">
+                    ${p.passed ? '✓ REÇU' : '✕ ÉCHOUÉ'}
+                </span>
+            </td>
+            <td>
+                ${p.badge_awarded
+                    ? '<span style="color:var(--gold);font-size:13px">🏅 Attribué</span>'
+                    : p.passed
+                        ? `<button class="btn btn-gold btn-sm" onclick="awardBadge('${p.id}','${p.user?.id||''}','${escapeHtml(fullName)}')">🏅 Badge</button>`
+                        : '—'
+                }
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function awardBadge(partId, userId, name) {
+    if (!userId) return;
+    const formation = await supabase.from('table_policefed_formations').select('titre,badge_icon,badge_titre').eq('id', session.formation_id||'').maybeSingle();
+    const fData = formation?.data;
+    await supabase.from('table_policefed_badges_earned').insert({
+        user_id: userId,
+        titre: fData?.badge_titre || session.titre,
+        description: `Examen réussi : ${session.titre}`,
+        icon: fData?.badge_icon || '🏅',
+        type: 'kahoot',
+        reference_id: session.id,
+        awarded_by: currentUser.id
+    });
+    await supabase.from('table_policefed_kahoot_participants').update({ badge_awarded:true }).eq('id', partId);
+    await createNotification(userId, 'badge', '🏅 Badge Obtenu !', `Vous avez reçu un badge pour : ${session.titre}`, session.id, 'kahoot');
+    showToast('🏅 Badge attribué', `Badge attribué à ${name}`, 'success');
+    loadResults();
+}
+
+async function awardAllPassed() {
+    const { data: parts } = await supabase.from('table_policefed_kahoot_participants')
+        .select('*, user:user_id(id,prenom,nom)')
+        .eq('session_id', session.id)
+        .eq('passed', true)
+        .eq('badge_awarded', false);
+    await Promise.all((parts||[]).map(p => {
+        if (p.user?.id) return awardBadge(p.id, p.user.id, `${p.user.prenom} ${p.user.nom}`);
+    }));
+    showToast('🏅', 'Badges attribués à tous les reçus.', 'success');
+}
+</script>
+</body>
+</html>
