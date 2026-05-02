@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Plaintes — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<!-- Split layout -->
+<div class="split-layout">
+    <!-- Liste des plaintes -->
+    <div class="split-list">
+        <div class="split-list-header">
+            <h3>📋 Mes Plaintes</h3>
+            <div class="split-search">
+                <span class="split-search-icon">🔍</span>
+                <input type="text" placeholder="Rechercher..." id="searchInput" oninput="filterComplaints(this.value)">
+            </div>
+        </div>
+        <div class="split-tabs">
+            <div class="split-tab active" onclick="showTab('active', this)">En cours</div>
+            <div class="split-tab" onclick="showTab('closed', this)">Archivées</div>
+        </div>
+        <div class="split-list-content" id="listContent">
+            <div class="empty-state"><div class="empty-state-icon">📋</div><h3>Chargement...</h3></div>
+        </div>
+        <div style="padding:16px;border-top:1px solid var(--border)">
+            <a href="complaint-deposit.html" class="btn btn-primary" style="width:100%;justify-content:center;font-size:0.88rem">+ Nouvelle Plainte</a>
+        </div>
+    </div>
+
+    <!-- Détail plainte -->
+    <div class="split-detail" id="detailArea">
+        <div class="empty-state" style="padding:80px 24px">
+            <div class="empty-state-icon">👈</div>
+            <h3>Sélectionnez une plainte</h3>
+            <p>Cliquez sur une plainte dans la liste pour voir les détails et échanger avec la police.</p>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    const user = requireLogin();
+    renderAuthNav('civil-complaints.html');
+
+    let complaints = [];
+    let currentTab = 'active';
+    let selectedId = null;
+    let msgChannel = null;
+
+    async function loadComplaints() {
+        const { data } = await supabase
+            .from('table_policefed_complaints')
+            .select('*, officer:assigned_officer_id(nom, prenom)')
+            .eq('civil_id', user.id)
+            .order('updated_at', { ascending: false });
+        complaints = data || [];
+        renderList();
+    }
+
+    function showTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function filterComplaints(q) {
+        renderList(q.toLowerCase());
+    }
+
+    function renderList(filter = '') {
+        const listEl = document.getElementById('listContent');
+        const filtered = complaints.filter(c => {
+            const inTab = currentTab === 'active' ? c.status !== 'ferme' : c.status === 'ferme';
+            const matchSearch = !filter || c.titre.toLowerCase().includes(filter) || c.description.toLowerCase().includes(filter);
+            return inTab && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>Aucune plainte</h3><p>${currentTab === 'active' ? 'Vous n\'avez pas de plainte en cours.' : 'Aucune plainte archivée.'}</p></div>`;
+            return;
+        }
+        listEl.innerHTML = filtered.map(c => `
+            <div class="list-item ${c.id === selectedId ? 'selected' : ''}" onclick="selectComplaint('${c.id}')">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                    <div class="list-item-title">${escapeHtml(c.titre)}</div>
+                    ${statusBadge(c.status)}
+                </div>
+                <div class="list-item-meta">
+                    <span class="list-item-dot dot-${c.status}"></span>
+                    <span>${formatDate(c.created_at)}</span>
+                    ${c.officer ? `<span>· Agent: ${c.officer.prenom} ${c.officer.nom}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function selectComplaint(id) {
+        selectedId = id;
+        renderList();
+        const complaint = complaints.find(c => c.id === id);
+        if (!complaint) return;
+
+        // Render detail
+        const isClosed = complaint.status === 'ferme';
+        document.getElementById('detailArea').innerHTML = `
+            <div class="detail-panel">
+                <div class="breadcrumb">
+                    <span onclick="clearDetail()" style="cursor:pointer;color:var(--primary-light)">Mes Plaintes</span>
+                    <span class="breadcrumb-sep">›</span>
+                    <span>${escapeHtml(complaint.titre)}</span>
+                </div>
+                <div class="detail-header">
+                    <div class="detail-title">${escapeHtml(complaint.titre)}</div>
+                    <div class="detail-meta">
+                        ${statusBadge(complaint.status)}
+                        <span style="font-size:0.82rem;color:var(--text-muted)">Déposé le ${formatDateFull(complaint.created_at)}</span>
+                        ${complaint.officer ? `<span style="font-size:0.82rem;color:var(--text-muted)">· Traité par: ${complaint.officer.prenom} ${complaint.officer.nom}</span>` : ''}
+                    </div>
+                    <div class="detail-description">${escapeHtml(complaint.description)}</div>
+                </div>
+
+                <div class="chat-box">
+                    <div class="chat-header">💬 Échanges avec la Police</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Chargement des messages...</div>
+                    </div>
+                    ${!isClosed ? `
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <textarea id="msgInput" placeholder="Répondre à la police..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+                            <button class="btn btn-primary btn-sm" onclick="sendMessage()">Envoyer</button>
+                        </div>
+                        <div class="chat-file-attach">
+                            <label for="fileInput">📎 Joindre un fichier</label>
+                            <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx">
+                            <span class="chat-file-name" id="fileName"></span>
+                        </div>
+                    </div>` : `<div style="padding:14px;background:var(--off-white);text-align:center;font-size:0.85rem;color:var(--text-muted)">🔒 Cette plainte est clôturée — consultation en lecture seule</div>`}
+                </div>
+            </div>
+        `;
+
+        document.getElementById('fileInput')?.addEventListener('change', function() {
+            document.getElementById('fileName').textContent = this.files[0]?.name || '';
+        });
+
+        // Load and subscribe to messages
+        await loadMessages(id, isClosed);
+        subscribeMessages(id);
+    }
+
+    async function loadMessages(complaintId, isClosed) {
+        const { data } = await supabase
+            .from('table_policefed_complaint_messages')
+            .select('*, sender:sender_id(nom, prenom, role)')
+            .eq('complaint_id', complaintId)
+            .order('created_at', { ascending: true });
+
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Aucun message pour l'instant. ${!isClosed ? 'Vous pouvez envoyer un message.' : ''}</div>`;
+            return;
+        }
+        container.innerHTML = data.map(msg => {
+            const isSent = msg.sender_id === user.id;
+            const senderName = msg.sender ? `${msg.sender.prenom} ${msg.sender.nom}` : 'Inconnu';
+            const isPoliceMsg = msg.sender && msg.sender.role !== 'civil';
+            return `
+                <div class="msg-row ${isSent ? 'sent' : 'received'}">
+                    <div class="msg-avatar ${isPoliceMsg && !isSent ? 'police-av' : ''}">${senderName[0] || '?'}</div>
+                    <div>
+                        <div class="msg-bubble">
+                            ${msg.message ? escapeHtml(msg.message) : ''}
+                            ${msg.file_url ? `<div><a href="${msg.file_url}" target="_blank" class="msg-file-link">📎 ${escapeHtml(msg.file_name || 'Fichier joint')}</a></div>` : ''}
+                        </div>
+                        <div class="msg-meta">${senderName} · ${formatDate(msg.created_at)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeMessages(complaintId) {
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        msgChannel = supabase.channel(`complaint-${complaintId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_policefed_complaint_messages', filter: `complaint_id=eq.${complaintId}` }, () => {
+                loadMessages(complaintId, false);
+            }).subscribe();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const fileInput = document.getElementById('fileInput');
+        const text = input?.value?.trim();
+        const file = fileInput?.files?.[0];
+        if (!text && !file) return;
+
+        let fileUrl = null, fileName = null;
+
+        if (file) {
+            showLoading();
+            const path = `complaints/${selectedId}/${Date.now()}_${file.name}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage.from('pfl-uploads').upload(path, file);
+            hideLoading();
+            if (!uploadError) {
+                const { data: urlData } = supabase.storage.from('pfl-uploads').getPublicUrl(path);
+                fileUrl = urlData.publicUrl;
+                fileName = file.name;
+            }
+        }
+
+        const { error } = await supabase.from('table_policefed_complaint_messages').insert({
+            complaint_id: selectedId,
+            sender_id: user.id,
+            message: text || null,
+            file_url: fileUrl,
+            file_name: fileName
+        });
+
+        if (!error) {
+            if (input) input.value = '';
+            if (fileInput) { fileInput.value = ''; document.getElementById('fileName').textContent = ''; }
+
+            // Notify officer if any, otherwise all police
+            const complaint = complaints.find(c => c.id === selectedId);
+            if (complaint?.assigned_officer_id) {
+                await createNotification(complaint.assigned_officer_id, 'message', '💬 Nouveau Message', `${user.prenom} ${user.nom} a répondu sur la plainte "${complaint.titre}"`, selectedId, 'complaint_police');
+            } else {
+                await notifyAllPolice('message', '💬 Nouveau Message', `${user.prenom} ${user.nom} a répondu sur une plainte.`, selectedId, 'complaint_police');
+            }
+            await supabase.from('table_policefed_complaints').update({ updated_at: new Date().toISOString() }).eq('id', selectedId);
+        }
+    }
+
+    function clearDetail() {
+        selectedId = null;
+        renderList();
+        document.getElementById('detailArea').innerHTML = `<div class="empty-state" style="padding:80px 24px"><div class="empty-state-icon">👈</div><h3>Sélectionnez une plainte</h3></div>`;
+    }
+
+    // Auto-select from URL param
+    const urlId = new URLSearchParams(window.location.search).get('id');
+
+    loadComplaints().then(() => {
+        if (urlId) selectComplaint(urlId);
+    });
+</script>
+</body>
+</html>

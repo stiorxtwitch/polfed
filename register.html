@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <a href="login.html" class="btn-connexion">Connexion</a>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="auth-page">
+    <div style="width:100%;max-width:480px">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div style="font-size:3rem;margin-bottom:10px">👤</div>
+                <h2>Créer un Compte</h2>
+                <p>Inscription réservée aux citoyens civils</p>
+            </div>
+
+            <div id="registerAlert" style="display:none" class="alert alert-danger"></div>
+
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Prénom <span class="required">*</span></label>
+                        <input type="text" id="regPrenom" class="form-control" placeholder="Jean" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Nom <span class="required">*</span></label>
+                        <input type="text" id="regNom" class="form-control" placeholder="Dupont" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:20px">
+                    <label class="form-label">Nom d'utilisateur <span class="required">*</span></label>
+                    <input type="text" id="regUsername" class="form-control" placeholder="jean.dupont" required autocomplete="username">
+                    <div class="form-hint">Unique, sans espaces</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mot de passe <span class="required">*</span></label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Votre mot de passe" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmer le mot de passe <span class="required">*</span></label>
+                    <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Répétez le mot de passe" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;border-radius:var(--radius)">
+                    👤 Créer mon Compte
+                </button>
+            </form>
+
+            <div style="text-align:center;margin-top:20px;font-size:0.88rem;color:var(--text-muted)">
+                Déjà un compte ?
+                <a href="login.html" style="color:var(--primary-light);font-weight:600"> Se connecter</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+    if (getCurrentUser()) window.location.href = 'index.html';
+    hideLoading();
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const alert = document.getElementById('registerAlert');
+        alert.style.display = 'none';
+
+        const prenom = document.getElementById('regPrenom').value.trim();
+        const nom = document.getElementById('regNom').value.trim();
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regPasswordConfirm').value;
+
+        if (password !== confirm) {
+            alert.style.display = 'flex';
+            alert.innerHTML = '⚠️ Les mots de passe ne correspondent pas.';
+            return;
+        }
+        if (username.includes(' ')) {
+            alert.style.display = 'flex';
+            alert.innerHTML = "⚠️ Le nom d'utilisateur ne doit pas contenir d'espaces.";
+            return;
+        }
+
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.textContent = 'Création en cours...';
+
+        const { user, error } = await register(nom, prenom, username, password);
+        if (error) {
+            alert.style.display = 'flex';
+            alert.innerHTML = `⚠️ ${error}`;
+            btn.disabled = false;
+            btn.innerHTML = '👤 Créer mon Compte';
+        } else {
+            showToast('✅ Compte créé !', `Bienvenue ${prenom} !`, 'success');
+            setTimeout(() => { window.location.href = 'index.html'; }, 800);
+        }
+    }
+</script>
+</body>
+</html>

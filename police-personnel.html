@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Personnel — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="police-complaints.html">📋 Plaintes</a>
+            <a href="police-recruitment.html">📝 Recrutement</a>
+            <a href="police-personnel.html" class="active">👥 Personnel</a>
+            <a href="police-logs.html">🗂️ Logs</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div style="padding:28px 24px;max-width:1300px;margin:0 auto">
+    <!-- Stats -->
+    <div id="statsRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start" id="mainGrid">
+        <!-- Personnel list -->
+        <div>
+            <div class="card-header" style="background:var(--primary);color:var(--white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border:none">
+                <span style="font-weight:700">👥 Effectifs de la Police</span>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" id="searchInput" placeholder="Rechercher..." style="padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.85rem;outline:none" oninput="filterPersonnel(this.value)" placeholder="Rechercher...">
+                    <select id="roleFilter" style="padding:6px 10px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.85rem;outline:none" onchange="filterPersonnel()">
+                        <option value="all">Tous</option>
+                        <option value="officier">Officier</option>
+                        <option value="supervision">Supervision</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-wrapper" style="border-radius:0 0 var(--radius-lg) var(--radius-lg)">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Grade</th>
+                            <th>Matricule</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personnelTable">
+                        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Create form -->
+        <div class="card" style="position:sticky;top:90px">
+            <div class="card-header">
+                <span class="card-title">➕ Nouveau Profil Policier</span>
+            </div>
+            <div class="card-body">
+                <div id="personnelAlert" style="display:none" class="alert alert-danger"></div>
+                <form id="personnelForm" onsubmit="createOfficer(event)">
+                    <div class="form-group">
+                        <label class="form-label">Prénom <span class="required">*</span></label>
+                        <input type="text" id="pPrenom" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom <span class="required">*</span></label>
+                        <input type="text" id="pNom" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Grade</label>
+                        <input type="text" id="pGrade" class="form-control" placeholder="Ex: Inspecteur Principal">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Matricule</label>
+                        <input type="text" id="pMatricule" class="form-control" placeholder="Ex: MAT-0042">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Niveau de Permission <span class="required">*</span></label>
+                        <select id="pRole" class="form-control" required>
+                            <option value="agent">Cadre Agent (Policier de base)</option>
+                            <option value="supervision">Cadre Supervision (+ Recrutement)</option>
+                            <option value="officier">Cadre Officier (Tout)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom d'utilisateur <span class="required">*</span></label>
+                        <input type="text" id="pUsername" class="form-control" placeholder="agent.dupont" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mot de passe <span class="required">*</span></label>
+                        <input type="text" id="pPassword" class="form-control" placeholder="Mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="createBtn" style="width:100%;justify-content:center">
+                        ➕ Créer le Profil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal edit -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">✏️ Modifier le Profil</span>
+            <span class="modal-close" onclick="closeEditModal()">×</span>
+        </div>
+        <div class="modal-body">
+            <div id="editAlert" style="display:none" class="alert alert-danger"></div>
+            <form id="editForm" onsubmit="saveEdit(event)">
+                <input type="hidden" id="editId">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="form-group" style="margin-bottom:0"><label class="form-label">Prénom</label><input type="text" id="editPrenom" class="form-control"></div>
+                    <div class="form-group" style="margin-bottom:0"><label class="form-label">Nom</label><input type="text" id="editNom" class="form-control"></div>
+                </div>
+                <div class="form-group" style="margin-top:16px"><label class="form-label">Grade</label><input type="text" id="editGrade" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Matricule</label><input type="text" id="editMatricule" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Rôle</label>
+                    <select id="editRole" class="form-control">
+                        <option value="civil">Civil</option>
+                        <option value="agent">Agent</option>
+                        <option value="supervision">Supervision</option>
+                        <option value="officier">Officier</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Statut</label>
+                    <select id="editActive" class="form-control">
+                        <option value="true">Actif</option>
+                        <option value="false">Désactivé</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-dark btn-sm" onclick="closeEditModal()">Annuler</button>
+            <button class="btn btn-primary btn-sm" onclick="saveEdit()">💾 Sauvegarder</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    const user = requireRole('officier');
+    renderAuthNav('police-personnel.html');
+
+    let personnel = [];
+
+    async function loadPersonnel() {
+        const { data } = await supabase
+            .from('table_policefed_users')
+            .select('*')
+            .order('role', { ascending: false })
+            .order('nom', { ascending: true });
+        personnel = data || [];
+        renderPersonnel();
+        renderStats();
+    }
+
+    function renderStats() {
+        const officiers = personnel.filter(p => p.role === 'officier').length;
+        const superviseurs = personnel.filter(p => p.role === 'supervision').length;
+        const agents = personnel.filter(p => p.role === 'agent').length;
+        const civils = personnel.filter(p => p.role === 'civil').length;
+        document.getElementById('statsRow').innerHTML = `
+            <div class="stat-card"><div class="stat-icon stat-icon-red">⭐</div><div><div class="stat-value">${officiers}</div><div class="stat-label">Officiers</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-gold">🎖️</div><div><div class="stat-value">${superviseurs}</div><div class="stat-label">Superviseurs</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-blue">👮</div><div><div class="stat-value">${agents}</div><div class="stat-label">Agents</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#f1f5f9">👤</div><div><div class="stat-value">${civils}</div><div class="stat-label">Civils</div></div></div>
+        `;
+    }
+
+    function renderPersonnel(filter = '', roleF = 'all') {
+        const tbody = document.getElementById('personnelTable');
+        const roleFilter = roleF || document.getElementById('roleFilter')?.value || 'all';
+        const q = filter || document.getElementById('searchInput')?.value?.toLowerCase() || '';
+        const filtered = personnel.filter(p => {
+            const name = `${p.prenom} ${p.nom} ${p.username}`.toLowerCase();
+            return (roleFilter === 'all' || p.role === roleFilter) && (!q || name.includes(q));
+        });
+        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Aucun résultat</td></tr>`; return; }
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td><strong>${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</strong><br><span style="font-size:0.78rem;color:var(--text-muted)">@${escapeHtml(p.username)}</span></td>
+                <td>${escapeHtml(p.grade || '—')}</td>
+                <td>${escapeHtml(p.matricule || '—')}</td>
+                <td>${roleBadge(p.role)}</td>
+                <td><span class="badge ${p.is_active ? 'badge-success' : 'badge-danger'}">${p.is_active ? '● Actif' : '○ Désactivé'}</span></td>
+                <td>
+                    <button class="btn btn-outline-dark btn-sm" onclick="openEdit('${p.id}')">✏️ Modifier</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function filterPersonnel(q) { renderPersonnel(q?.toLowerCase() || ''); }
+
+    async function createOfficer(e) {
+        e.preventDefault();
+        const alertEl = document.getElementById('personnelAlert');
+        alertEl.style.display = 'none';
+        const username = document.getElementById('pUsername').value.trim();
+        const existing = personnel.find(p => p.username === username);
+        if (existing) { alertEl.style.display = 'flex'; alertEl.innerHTML = "⚠️ Ce nom d'utilisateur existe déjà."; return; }
+
+        const btn = document.getElementById('createBtn');
+        btn.disabled = true;
+        btn.textContent = 'Création...';
+        showLoading();
+
+        const { data, error } = await supabase.from('table_policefed_users').insert({
+            nom: document.getElementById('pNom').value.trim(),
+            prenom: document.getElementById('pPrenom').value.trim(),
+            grade: document.getElementById('pGrade').value.trim() || null,
+            matricule: document.getElementById('pMatricule').value.trim() || null,
+            role: document.getElementById('pRole').value,
+            username,
+            password: document.getElementById('pPassword').value
+        }).select().single();
+
+        hideLoading();
+        if (error) {
+            alertEl.style.display = 'flex';
+            alertEl.innerHTML = `⚠️ Erreur : ${error.message}`;
+            btn.disabled = false;
+            btn.innerHTML = '➕ Créer le Profil';
+        } else {
+            showToast('✅ Profil créé', `${data.prenom} ${data.nom} ajouté avec succès.`, 'success');
+            await createLog('CREATION_PROFIL', `${user.prenom} ${user.nom} a créé le profil ${data.prenom} ${data.nom} (${data.role})`);
+            document.getElementById('personnelForm').reset();
+            btn.disabled = false;
+            btn.innerHTML = '➕ Créer le Profil';
+            await loadPersonnel();
+        }
+    }
+
+    function openEdit(id) {
+        const p = personnel.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('editId').value = p.id;
+        document.getElementById('editPrenom').value = p.prenom;
+        document.getElementById('editNom').value = p.nom;
+        document.getElementById('editGrade').value = p.grade || '';
+        document.getElementById('editMatricule').value = p.matricule || '';
+        document.getElementById('editRole').value = p.role;
+        document.getElementById('editActive').value = p.is_active ? 'true' : 'false';
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
+
+    async function saveEdit() {
+        const id = document.getElementById('editId').value;
+        showLoading();
+        const { error } = await supabase.from('table_policefed_users').update({
+            prenom: document.getElementById('editPrenom').value.trim(),
+            nom: document.getElementById('editNom').value.trim(),
+            grade: document.getElementById('editGrade').value.trim() || null,
+            matricule: document.getElementById('editMatricule').value.trim() || null,
+            role: document.getElementById('editRole').value,
+            is_active: document.getElementById('editActive').value === 'true',
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+        hideLoading();
+        if (!error) {
+            showToast('✅ Profil modifié', 'Les modifications ont été sauvegardées.', 'success');
+            await createLog('MODIFICATION_PROFIL', `${user.prenom} ${user.nom} a modifié le profil ID ${id}`);
+            closeEditModal();
+            await loadPersonnel();
+        } else {
+            document.getElementById('editAlert').style.display = 'flex';
+            document.getElementById('editAlert').innerHTML = `⚠️ ${error.message}`;
+        }
+    }
+
+    loadPersonnel();
+</script>
+</body>
+</html>

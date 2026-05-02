@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Recrutement — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="police-complaints.html">📋 Plaintes</a>
+            <a href="police-recruitment.html" class="active">📝 Recrutement</a>
+            <a href="police-personnel.html" id="navPersonnel" style="display:none">👥 Personnel</a>
+            <a href="police-logs.html" id="navLogs" style="display:none">🗂️ Logs</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="split-layout">
+    <div class="split-list">
+        <div class="split-list-header">
+            <h3>📝 Gestion du Recrutement</h3>
+            <div class="split-search">
+                <span class="split-search-icon">🔍</span>
+                <input type="text" placeholder="Rechercher..." id="searchInput" oninput="filterList(this.value)">
+            </div>
+            <div class="split-filters">
+                <button class="split-filter-btn active" onclick="setFilter('all', this)">Tout</button>
+                <button class="split-filter-btn" onclick="setFilter('en_attente', this)">En Attente</button>
+                <button class="split-filter-btn" onclick="setFilter('en_cours', this)">En Cours</button>
+                <button class="split-filter-btn" onclick="setFilter('valide', this)">Validé</button>
+            </div>
+        </div>
+        <div class="split-tabs">
+            <div class="split-tab active" onclick="showTab('active', this)">Actives</div>
+            <div class="split-tab" onclick="showTab('closed', this)">📁 Archivées</div>
+        </div>
+        <div class="split-list-content" id="listContent">
+            <div class="empty-state"><div class="empty-state-icon">📝</div><h3>Chargement...</h3></div>
+        </div>
+    </div>
+
+    <div class="split-detail" id="detailArea">
+        <div class="empty-state" style="padding:80px 24px">
+            <div class="empty-state-icon">👈</div>
+            <h3>Sélectionnez une candidature</h3>
+            <p>Cliquez sur une candidature pour la traiter.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    const user = requireRole('supervision');
+    renderAuthNav('police-recruitment.html');
+    if ((ROLES_LEVEL[user?.role]||0) >= 3) { document.getElementById('navPersonnel').style.display = ''; document.getElementById('navLogs').style.display = ''; }
+
+    let items = [];
+    let currentTab = 'active';
+    let currentFilter = 'all';
+    let selectedId = null;
+    let msgChannel = null;
+
+    async function loadItems() {
+        const { data } = await supabase
+            .from('table_policefed_recruitments')
+            .select('*, civil:civil_id(nom, prenom, username)')
+            .order('updated_at', { ascending: false });
+        items = data || [];
+        renderList();
+    }
+
+    function showTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function setFilter(filter, el) {
+        currentFilter = filter;
+        document.querySelectorAll('.split-filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function filterList(q) { renderList(q.toLowerCase()); }
+
+    function renderList(filter = '') {
+        const listEl = document.getElementById('listContent');
+        const filtered = items.filter(r => {
+            const inTab = currentTab === 'active' ? !['ferme','refuse'].includes(r.status) : ['ferme','refuse'].includes(r.status);
+            const inFilter = currentFilter === 'all' || r.status === currentFilter;
+            const name = `${r.prenom} ${r.nom}`.toLowerCase();
+            const matchSearch = !filter || name.includes(filter) || r.motivation.toLowerCase().includes(filter);
+            return inTab && inFilter && matchSearch;
+        });
+        if (filtered.length === 0) { listEl.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>Aucune candidature</h3></div>`; return; }
+        listEl.innerHTML = filtered.map(r => `
+            <div class="list-item ${r.id === selectedId ? 'selected' : ''}" onclick="selectItem('${r.id}')">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                    <div class="list-item-title">${escapeHtml(r.prenom)} ${escapeHtml(r.nom)}</div>
+                    ${statusBadge(r.status)}
+                </div>
+                <div class="list-item-meta">
+                    <span class="list-item-dot dot-${r.status}"></span>
+                    <span>${r.age ? r.age + ' ans' : ''}</span>
+                    <span>· ${formatDate(r.updated_at)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function selectItem(id) {
+        selectedId = id;
+        renderList();
+        const r = items.find(x => x.id === id);
+        if (!r) return;
+        const isClosed = ['ferme','refuse'].includes(r.status);
+
+        document.getElementById('detailArea').innerHTML = `
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">Candidature : ${escapeHtml(r.prenom)} ${escapeHtml(r.nom)}</div>
+                    <div class="detail-meta">
+                        ${statusBadge(r.status)}
+                        <span style="font-size:0.82rem;color:var(--text-muted)">${r.age ? r.age + ' ans ·' : ''} Soumis le ${formatDateFull(r.created_at)}</span>
+                        ${r.civil ? `<span style="font-size:0.82rem;color:var(--text-muted)">· @${r.civil.username}</span>` : ''}
+                    </div>
+                    <div class="detail-description">
+                        <strong>Motivation :</strong><br>${escapeHtml(r.motivation)}<br><br>
+                        ${r.experience ? `<strong>Expérience :</strong><br>${escapeHtml(r.experience)}<br><br>` : ''}
+                        ${r.disponibilite ? `<strong>Disponibilités :</strong> ${escapeHtml(r.disponibilite)}` : ''}
+                    </div>
+                    ${!isClosed ? `
+                    <div class="detail-actions">
+                        <button class="btn btn-warning btn-sm" onclick="updateStatus('en_attente')">⏳ En Attente</button>
+                        <button class="btn btn-info btn-sm" onclick="updateStatus('en_cours')">🔄 Entretien</button>
+                        <button class="btn btn-success btn-sm" onclick="updateStatus('valide')">✅ Valider</button>
+                        <button class="btn btn-danger btn-sm" onclick="updateStatus('refuse')">❌ Refuser</button>
+                        <button class="btn btn-secondary btn-sm" onclick="updateStatus('ferme')">🔒 Clôturer</button>
+                    </div>` : `<div style="margin-top:14px"><div class="alert alert-info">🔒 Dossier archivé</div></div>`}
+                </div>
+                <div class="chat-box">
+                    <div class="chat-header">💬 Échanges avec le Candidat</div>
+                    <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Chargement...</div></div>
+                    ${!isClosed ? `
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <textarea id="msgInput" placeholder="Envoyer un message au candidat..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+                            <button class="btn btn-primary btn-sm" onclick="sendMessage()">Envoyer</button>
+                        </div>
+                        <div class="chat-file-attach">
+                            <label for="fileInput">📎 Joindre</label>
+                            <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx">
+                            <span class="chat-file-name" id="fileName"></span>
+                        </div>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+        document.getElementById('fileInput')?.addEventListener('change', function() { document.getElementById('fileName').textContent = this.files[0]?.name || ''; });
+        await loadMessages(id);
+        subscribeMessages(id);
+    }
+
+    async function updateStatus(status) {
+        showLoading();
+        const { error } = await supabase.from('table_policefed_recruitments').update({ status, updated_at: new Date().toISOString() }).eq('id', selectedId);
+        hideLoading();
+        if (!error) {
+            const r = items.find(x => x.id === selectedId);
+            if (r) {
+                r.status = status;
+                await createNotification(r.civil_id, 'status', '📝 Candidature Mise à Jour', `Votre candidature est maintenant : ${STATUS_LABELS[status]}`, selectedId, 'recruitment');
+                await createLog('STATUT_CANDIDATURE', `Candidature ${r.prenom} ${r.nom} → ${status} par ${user.prenom} ${user.nom}`);
+            }
+            renderList();
+            selectItem(selectedId);
+            showToast('✅ Statut mis à jour', `Candidature : ${STATUS_LABELS[status]}`, 'success');
+        }
+    }
+
+    async function loadMessages(recId) {
+        const { data } = await supabase
+            .from('table_policefed_recruitment_messages')
+            .select('*, sender:sender_id(nom, prenom, role)')
+            .eq('recruitment_id', recId)
+            .order('created_at', { ascending: true });
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        if (!data || data.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Aucun message.</div>`; return; }
+        container.innerHTML = data.map(msg => {
+            const isSent = msg.sender_id === user.id;
+            const senderName = msg.sender ? `${msg.sender.prenom} ${msg.sender.nom}` : '?';
+            const isPolice = msg.sender && msg.sender.role !== 'civil';
+            return `<div class="msg-row ${isSent ? 'sent' : 'received'}">
+                <div class="msg-avatar ${isPolice && isSent ? 'police-av' : ''}">${senderName[0]}</div>
+                <div><div class="msg-bubble">${msg.message ? escapeHtml(msg.message) : ''}${msg.file_url ? `<div><a href="${msg.file_url}" target="_blank" class="msg-file-link">📎 ${escapeHtml(msg.file_name || 'Fichier')}</a></div>` : ''}</div>
+                <div class="msg-meta">${senderName} · ${formatDate(msg.created_at)}</div></div>
+            </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeMessages(recId) {
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        msgChannel = supabase.channel(`p-recruitment-${recId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_policefed_recruitment_messages', filter: `recruitment_id=eq.${recId}` }, () => loadMessages(recId))
+            .subscribe();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const fileInput = document.getElementById('fileInput');
+        const text = input?.value?.trim();
+        const file = fileInput?.files?.[0];
+        if (!text && !file) return;
+        let fileUrl = null, fileName = null;
+        if (file) {
+            showLoading();
+            const path = `recruitments/${selectedId}/${Date.now()}_${file.name}`;
+            const { error: upe } = await supabase.storage.from('pfl-uploads').upload(path, file);
+            hideLoading();
+            if (!upe) { const { data: u } = supabase.storage.from('pfl-uploads').getPublicUrl(path); fileUrl = u.publicUrl; fileName = file.name; }
+        }
+        const { error } = await supabase.from('table_policefed_recruitment_messages').insert({ recruitment_id: selectedId, sender_id: user.id, message: text || null, file_url: fileUrl, file_name: fileName });
+        if (!error) {
+            if (input) input.value = '';
+            if (fileInput) { fileInput.value = ''; document.getElementById('fileName').textContent = ''; }
+            const r = items.find(x => x.id === selectedId);
+            if (r) {
+                await createNotification(r.civil_id, 'message', '💬 Message Recrutement', `Un superviseur a répondu à votre candidature`, selectedId, 'recruitment');
+                await supabase.from('table_policefed_recruitments').update({ updated_at: new Date().toISOString() }).eq('id', selectedId);
+            }
+        }
+    }
+
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    loadItems().then(() => { if (urlId) selectItem(urlId); });
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dépôt de Plainte — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <div class="nav-dropdown">
+                <button>Section Code ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="https://drive.google.com/REPLACE_CODE_ROUTE" target="_blank" class="dropdown-item">🚗 Code de la Route</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_JUDICIAIRE" target="_blank" class="dropdown-item">⚖️ Code Judiciaire</a>
+                    <a href="https://drive.google.com/REPLACE_LOI_POLICE" target="_blank" class="dropdown-item">🚔 Loi sur la Fonction de Police</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_PENAL" target="_blank" class="dropdown-item">📜 Code Pénal</a>
+                </div>
+            </div>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html" class="active">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <h1>📋 Dépôt de Plainte</h1>
+    <p>Signalez un incident aux autorités de la Police Fédérale de Liège</p>
+</div>
+
+<section class="section">
+    <div class="container" style="max-width:760px">
+
+        <!-- Pas connecté -->
+        <div id="notLoggedIn" style="display:none;text-align:center;padding:50px 0">
+            <div style="font-size:4rem;margin-bottom:20px">🔐</div>
+            <h2 style="color:var(--primary);margin-bottom:12px">Connexion Requise</h2>
+            <p style="color:var(--text-muted);margin-bottom:28px">Vous devez être connecté pour déposer une plainte. Créez un compte ou connectez-vous.</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                <a href="login.html" class="btn btn-primary btn-lg">🔐 Se Connecter</a>
+                <a href="register.html" class="btn btn-outline-dark btn-lg">👤 Créer un Compte</a>
+            </div>
+        </div>
+
+        <!-- Formulaire (connecté) -->
+        <div id="complaintFormContainer" style="display:none">
+            <div class="alert alert-info" style="margin-bottom:24px">
+                ℹ️ Remplissez ce formulaire pour soumettre une plainte. Nos agents prendront en charge votre dossier dans les meilleurs délais. Numéro d'urgence : <strong>101</strong>
+            </div>
+
+            <div id="complaintAlert" style="display:none" class="alert alert-danger"></div>
+            <div id="complaintSuccess" style="display:none" class="alert alert-success">
+                ✅ Votre plainte a été enregistrée ! Vous pouvez suivre son avancement depuis <a href="civil-complaints.html" style="color:var(--success);font-weight:600">Mes Plaintes</a>.
+            </div>
+
+            <div class="form-card" style="border-top-color:var(--danger)">
+                <form id="complaintForm" onsubmit="handleComplaint(event)">
+                    <div class="form-group">
+                        <label class="form-label">Objet de la Plainte <span class="required">*</span></label>
+                        <input type="text" id="cTitre" class="form-control" placeholder="Ex: Vol de véhicule, Agression, Dommages..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description Détaillée <span class="required">*</span></label>
+                        <textarea id="cDescription" class="form-control" rows="7" placeholder="Décrivez les faits avec le maximum de détails : date, lieu, personnes impliquées, circonstances..." required style="min-height:180px"></textarea>
+                        <div class="form-hint">Minimum 50 caractères. Plus votre description est détaillée, plus nous pouvons agir efficacement.</div>
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                        <button type="submit" class="btn btn-danger btn-lg" id="complaintSubmitBtn" style="flex:1;justify-content:center;border-radius:var(--radius)">
+                            📋 Soumettre la Plainte
+                        </button>
+                        <a href="civil-complaints.html" class="btn btn-outline-dark btn-lg" style="flex:0">
+                            Mes Plaintes →
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-inner">
+        <div class="footer-brand"><div class="header-logo" style="margin-bottom:12px"><div class="logo-shield" style="width:36px;height:42px;font-size:1rem">🛡️</div><div class="logo-text"><span class="logo-title">Police Fédérale Liège</span></div></div><p>Servant et protégeant la communauté de Bassenge.</p></div>
+        <div class="footer-col"><h4>Navigation</h4><a href="index.html">Accueil</a><a href="about.html">À Propos</a><a href="recruitment.html">Recrutement</a></div>
+        <div class="footer-col"><h4>Services</h4><a href="complaint-deposit.html">Dépôt de Plainte</a><a href="civil-complaints.html">Mes Plaintes</a></div>
+        <div class="footer-col"><h4>Contact</h4><a href="#">📞 101 (Urgences)</a><a href="#">📍 Bassenge, Liège</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 Police Fédérale Liège City RP — Tous droits réservés</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    renderAuthNav('complaint-deposit.html');
+    const user = getCurrentUser();
+    if (!user) {
+        document.getElementById('notLoggedIn').style.display = 'block';
+    } else {
+        document.getElementById('complaintFormContainer').style.display = 'block';
+    }
+
+    async function handleComplaint(e) {
+        e.preventDefault();
+        const alertEl = document.getElementById('complaintAlert');
+        alertEl.style.display = 'none';
+        const desc = document.getElementById('cDescription').value.trim();
+        if (desc.length < 50) {
+            alertEl.style.display = 'flex';
+            alertEl.innerHTML = '⚠️ La description doit contenir au moins 50 caractères.';
+            return;
+        }
+
+        const btn = document.getElementById('complaintSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Envoi en cours...';
+        showLoading();
+
+        const { data, error } = await supabase.from('table_policefed_complaints').insert({
+            civil_id: user.id,
+            titre: document.getElementById('cTitre').value.trim(),
+            description: desc
+        }).select().single();
+
+        hideLoading();
+
+        if (error) {
+            alertEl.style.display = 'flex';
+            alertEl.innerHTML = '⚠️ Erreur lors de l\'envoi. Veuillez réessayer.';
+            btn.disabled = false;
+            btn.innerHTML = '📋 Soumettre la Plainte';
+        } else {
+            await notifyAllPolice('complaint', '🚨 Nouvelle Plainte', `${user.prenom} ${user.nom} a déposé une plainte : "${data.titre}"`, data.id, 'complaint_police');
+            await createLog('PLAINTE', `${user.prenom} ${user.nom} a déposé une plainte (ID: ${data.id})`);
+            document.getElementById('complaintForm').style.display = 'none';
+            document.getElementById('complaintSuccess').style.display = 'flex';
+        }
+    }
+</script>
+</body>
+</html>

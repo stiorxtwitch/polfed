@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recrutement — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <div class="nav-dropdown">
+                <button>Section Code ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="https://drive.google.com/REPLACE_CODE_ROUTE" target="_blank" class="dropdown-item">🚗 Code de la Route</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_JUDICIAIRE" target="_blank" class="dropdown-item">⚖️ Code Judiciaire</a>
+                    <a href="https://drive.google.com/REPLACE_LOI_POLICE" target="_blank" class="dropdown-item">🚔 Loi sur la Fonction de Police</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_PENAL" target="_blank" class="dropdown-item">📜 Code Pénal</a>
+                </div>
+            </div>
+            <a href="recruitment.html" class="active">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <h1>🚔 Recrutement</h1>
+    <p>Rejoignez la Police Fédérale de Liège et contribuez à la sécurité de notre communauté</p>
+</div>
+
+<section class="section">
+    <div class="container">
+
+        <!-- Statut recrutement -->
+        <div id="recruitmentStatusBanner" class="recruitment-status-card" style="max-width:800px;margin:0 auto 50px">
+            <div class="rsc-icon">🟢</div>
+            <div class="rsc-title">Recrutement Ouvert</div>
+            <div class="rsc-sub">Nous accueillons actuellement des candidatures. Consultez nos postes disponibles ci-dessous et postulez via le formulaire en ligne.</div>
+            <span class="rsc-badge">● OUVERT</span>
+        </div>
+
+        <!-- Offres -->
+        <div class="section-header">
+            <div class="section-badge">Postes Disponibles</div>
+            <h2 class="section-title">Nos Offres <span>d'Emploi</span></h2>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px;max-width:900px;margin:0 auto 50px">
+            <div class="job-card">
+                <div class="job-icon">👮</div>
+                <div>
+                    <div class="job-title">Agent de Police — Cadre de Base</div>
+                    <div class="job-desc">Rejoignez nos équipes de terrain. Vous serez en charge des patrouilles, interventions et traitement des plaintes civiles au quotidien. Profil junior accepté, formation interne assurée.</div>
+                    <div class="job-tags">
+                        <span class="job-tag">Terrain</span>
+                        <span class="job-tag">Patrouille</span>
+                        <span class="job-tag">Plaintes</span>
+                        <span class="job-tag">Formation interne</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="job-card">
+                <div class="job-icon">🎖️</div>
+                <div>
+                    <div class="job-title">Superviseur — Cadre de Supervision</div>
+                    <div class="job-desc">Encadrez les agents de terrain et participez au processus de recrutement. Poste accessible après une période de service en tant qu'agent et sur décision hiérarchique.</div>
+                    <div class="job-tags">
+                        <span class="job-tag">Encadrement</span>
+                        <span class="job-tag">Recrutement</span>
+                        <span class="job-tag">Expérience requise</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processus -->
+        <div class="section-header">
+            <div class="section-badge">Processus</div>
+            <h2 class="section-title">Comment <span>Postuler</span></h2>
+        </div>
+
+        <div class="grid-4" style="max-width:900px;margin:0 auto 50px">
+            <div class="info-card" style="border-top-color:var(--info)">
+                <div class="info-card-icon">1️⃣</div>
+                <div class="info-card-title">Créer un Compte</div>
+                <div class="info-card-text">Créez votre compte civil sur le site si ce n'est pas encore fait.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--warning)">
+                <div class="info-card-icon">2️⃣</div>
+                <div class="info-card-title">Soumettre votre Dossier</div>
+                <div class="info-card-text">Remplissez le formulaire de candidature avec votre motivation.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--success)">
+                <div class="info-card-icon">3️⃣</div>
+                <div class="info-card-title">Entretien</div>
+                <div class="info-card-text">Un superviseur prendra contact avec vous pour un entretien.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--gold)">
+                <div class="info-card-icon">4️⃣</div>
+                <div class="info-card-title">Intégration</div>
+                <div class="info-card-text">Validation et intégration dans les rangs de la police.</div>
+            </div>
+        </div>
+
+        <!-- CTA Postuler -->
+        <div style="text-align:center">
+            <div class="card" style="display:inline-block;max-width:560px;width:100%;text-align:center;padding:40px;border-top:4px solid var(--gold)">
+                <div style="font-size:3rem;margin-bottom:16px">📝</div>
+                <h3 style="font-size:1.4rem;font-weight:800;color:var(--primary);margin-bottom:10px">Prêt à postuler ?</h3>
+                <p style="color:var(--text-muted);margin-bottom:24px;font-size:0.95rem">Vous devez être connecté pour accéder au formulaire de candidature.</p>
+                <a href="recruitment-form.html" class="btn btn-gold btn-lg" id="postulerBtn">
+                    🚀 Déposer ma Candidature
+                </a>
+                <div id="alreadyApplied" style="display:none;margin-top:16px">
+                    <div class="alert alert-info">📋 Vous avez déjà une candidature en cours. <a href="civil-cv.html" style="color:var(--primary-light);font-weight:600">Voir mon dossier →</a></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Image terrain -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="grid-3">
+            <img src="https://i.imgur.com/RECRUIT01.jpg" alt="Police terrain" style="width:100%;height:220px;object-fit:cover;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--primary),var(--primary-light))" onerror="this.style.background='linear-gradient(135deg,var(--primary),var(--primary-light))'">
+            <img src="https://i.imgur.com/RECRUIT02.jpg" alt="Police équipe" style="width:100%;height:220px;object-fit:cover;border-radius:var(--radius-lg);background:linear-gradient(135deg,#1a2d5a,var(--primary-mid))" onerror="this.style.background='linear-gradient(135deg,#1a2d5a,var(--primary-mid))'">
+            <img src="https://i.imgur.com/RECRUIT03.jpg" alt="Police formation" style="width:100%;height:220px;object-fit:cover;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--primary-mid),var(--primary))" onerror="this.style.background='linear-gradient(135deg,var(--primary-mid),var(--primary))'">
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-inner">
+        <div class="footer-brand"><div class="header-logo" style="margin-bottom:12px"><div class="logo-shield" style="width:36px;height:42px;font-size:1rem">🛡️</div><div class="logo-text"><span class="logo-title">Police Fédérale Liège</span></div></div><p>Servant et protégeant la communauté de Bassenge.</p></div>
+        <div class="footer-col"><h4>Navigation</h4><a href="index.html">Accueil</a><a href="about.html">À Propos</a><a href="recruitment.html">Recrutement</a><a href="gallery.html">Galerie</a></div>
+        <div class="footer-col"><h4>Services</h4><a href="complaint-deposit.html">Dépôt de Plainte</a><a href="civil-complaints.html">Mes Plaintes</a></div>
+        <div class="footer-col"><h4>Contact</h4><a href="#">📞 101 (Urgences)</a><a href="#">📍 Bassenge, Liège</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 Police Fédérale Liège City RP — Tous droits réservés</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    renderAuthNav('recruitment.html');
+
+    // Check if user already has an application
+    (async () => {
+        const user = getCurrentUser();
+        if (!user || user.role !== 'civil') return;
+        const { data } = await supabase
+            .from('table_policefed_recruitments')
+            .select('id, status')
+            .eq('civil_id', user.id)
+            .not('status', 'eq', 'ferme')
+            .single();
+        if (data) {
+            document.getElementById('alreadyApplied').style.display = 'block';
+            document.getElementById('postulerBtn').style.display = 'none';
+        }
+    })();
+</script>
+</body>
+</html>

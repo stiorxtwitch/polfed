@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galerie — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <div class="nav-dropdown">
+                <button>Section Code ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="https://drive.google.com/REPLACE_CODE_ROUTE" target="_blank" class="dropdown-item">🚗 Code de la Route</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_JUDICIAIRE" target="_blank" class="dropdown-item">⚖️ Code Judiciaire</a>
+                    <a href="https://drive.google.com/REPLACE_LOI_POLICE" target="_blank" class="dropdown-item">🚔 Loi sur la Fonction de Police</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_PENAL" target="_blank" class="dropdown-item">📜 Code Pénal</a>
+                </div>
+            </div>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html" class="active">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <h1>📸 Galerie Photo</h1>
+    <p>Découvrez la Police Fédérale de Liège en images</p>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">×</span>
+    <img id="lightboxImg" src="" alt="">
+</div>
+
+<section class="section">
+    <div class="container">
+        <!-- Filtres -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px">
+            <button class="btn btn-primary btn-sm" onclick="filterGallery('all')" data-filter="all">Tout</button>
+            <button class="btn btn-outline-dark btn-sm" onclick="filterGallery('patrouille')" data-filter="patrouille">🚔 Patrouilles</button>
+            <button class="btn btn-outline-dark btn-sm" onclick="filterGallery('evenement')" data-filter="evenement">🎖️ Évènements</button>
+            <button class="btn btn-outline-dark btn-sm" onclick="filterGallery('formation')" data-filter="formation">📚 Formation</button>
+            <button class="btn btn-outline-dark btn-sm" onclick="filterGallery('commissariat')" data-filter="commissariat">🏛️ Commissariat</button>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- Les images sont définies ici — remplacez les ID imgur -->
+            <div class="gallery-item" data-cat="patrouille" onclick="openLightbox('https://i.imgur.com/GALERIE01.jpg','Patrouille de nuit')">
+                <img src="https://i.imgur.com/GALERIE01.jpg" alt="Patrouille de nuit" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,var(--primary),var(--primary-light))'">
+                <div class="gallery-item-overlay">🚔 Patrouille de nuit</div>
+            </div>
+            <div class="gallery-item" data-cat="commissariat" onclick="openLightbox('https://i.imgur.com/GALERIE02.jpg','Commissariat Bassenge')">
+                <img src="https://i.imgur.com/GALERIE02.jpg" alt="Commissariat" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,#1a2d5a,var(--primary-light))'">
+                <div class="gallery-item-overlay">🏛️ Commissariat de Bassenge</div>
+            </div>
+            <div class="gallery-item" data-cat="evenement" onclick="openLightbox('https://i.imgur.com/GALERIE03.jpg','Cérémonie')">
+                <img src="https://i.imgur.com/GALERIE03.jpg" alt="Cérémonie" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,#0a2d6b,var(--primary))'">
+                <div class="gallery-item-overlay">🎖️ Cérémonie officielle</div>
+            </div>
+            <div class="gallery-item" data-cat="formation" onclick="openLightbox('https://i.imgur.com/GALERIE04.jpg','Formation')">
+                <img src="https://i.imgur.com/GALERIE04.jpg" alt="Formation" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,var(--primary-mid),var(--primary))'">
+                <div class="gallery-item-overlay">📚 Session de formation</div>
+            </div>
+            <div class="gallery-item" data-cat="patrouille" onclick="openLightbox('https://i.imgur.com/GALERIE05.jpg','Intervention')">
+                <img src="https://i.imgur.com/GALERIE05.jpg" alt="Intervention" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,var(--primary),#0a2d6b)'">
+                <div class="gallery-item-overlay">🚨 Intervention terrain</div>
+            </div>
+            <div class="gallery-item" data-cat="evenement" onclick="openLightbox('https://i.imgur.com/GALERIE06.jpg','Remise de grade')">
+                <img src="https://i.imgur.com/GALERIE06.jpg" alt="Remise de grade" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,#1e3a8a,var(--primary))'">
+                <div class="gallery-item-overlay">⭐ Remise de grade</div>
+            </div>
+            <div class="gallery-item" data-cat="commissariat" onclick="openLightbox('https://i.imgur.com/GALERIE07.jpg','Salle briefing')">
+                <img src="https://i.imgur.com/GALERIE07.jpg" alt="Salle briefing" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,var(--primary-mid),#0a2d6b)'">
+                <div class="gallery-item-overlay">💼 Salle de briefing</div>
+            </div>
+            <div class="gallery-item" data-cat="patrouille" onclick="openLightbox('https://i.imgur.com/GALERIE08.jpg','Véhicules')">
+                <img src="https://i.imgur.com/GALERIE08.jpg" alt="Véhicules" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,var(--primary),var(--primary-mid))'">
+                <div class="gallery-item-overlay">🚔 Parc automobile</div>
+            </div>
+            <div class="gallery-item" data-cat="formation" onclick="openLightbox('https://i.imgur.com/GALERIE09.jpg','Entrainement')">
+                <img src="https://i.imgur.com/GALERIE09.jpg" alt="Entraînement" onerror="this.closest('.gallery-item').style.background='linear-gradient(135deg,#0a2d6b,var(--primary-mid))'">
+                <div class="gallery-item-overlay">🎯 Entraînement</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-inner">
+        <div class="footer-brand"><div class="header-logo" style="margin-bottom:12px"><div class="logo-shield" style="width:36px;height:42px;font-size:1rem">🛡️</div><div class="logo-text"><span class="logo-title">Police Fédérale Liège</span></div></div><p>Servant et protégeant la communauté de Bassenge.</p></div>
+        <div class="footer-col"><h4>Navigation</h4><a href="index.html">Accueil</a><a href="about.html">À Propos</a><a href="recruitment.html">Recrutement</a><a href="gallery.html">Galerie</a></div>
+        <div class="footer-col"><h4>Services</h4><a href="complaint-deposit.html">Dépôt de Plainte</a><a href="civil-complaints.html">Mes Plaintes</a></div>
+        <div class="footer-col"><h4>Contact</h4><a href="#">📞 101 (Urgences)</a><a href="#">📍 Bassenge, Liège</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 Police Fédérale Liège City RP — Tous droits réservés</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    renderAuthNav('gallery.html');
+
+    function openLightbox(src, caption) {
+        const lb = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = src;
+        lb.classList.add('active');
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    function filterGallery(cat) {
+        const items = document.querySelectorAll('.gallery-item');
+        items.forEach(item => {
+            if (cat === 'all' || item.dataset.cat === cat) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.className = btn.dataset.filter === cat ? 'btn btn-primary btn-sm' : 'btn btn-outline-dark btn-sm';
+        });
+    }
+</script>
+</body>
+</html>

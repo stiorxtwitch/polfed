@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Système — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="police-complaints.html">📋 Plaintes</a>
+            <a href="police-recruitment.html">📝 Recrutement</a>
+            <a href="police-personnel.html">👥 Personnel</a>
+            <a href="police-logs.html" class="active">🗂️ Logs</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div style="padding:28px 24px;max-width:1300px;margin:0 auto">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+            <h1 style="font-size:1.6rem;font-weight:800;color:var(--primary)">🗂️ Logs Système</h1>
+            <p style="color:var(--text-muted);font-size:0.9rem">Historique complet des actions — Accès Officier uniquement</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-outline-dark btn-sm" onclick="loadLogs()">🔄 Rafraîchir</button>
+            <button class="btn btn-primary btn-sm" onclick="exportLogs()">⬇️ Exporter CSV</button>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card" style="margin-bottom:24px">
+        <div class="card-body" style="padding:18px 20px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;align-items:end">
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Rechercher</label>
+                    <input type="text" id="logSearch" class="form-control" placeholder="Action, utilisateur..." oninput="applyFilters()">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Type d'action</label>
+                    <select id="logAction" class="form-control" onchange="applyFilters()">
+                        <option value="">Toutes</option>
+                        <option value="LOGIN">Connexion</option>
+                        <option value="LOGOUT">Déconnexion</option>
+                        <option value="REGISTER">Inscription</option>
+                        <option value="PLAINTE">Plainte</option>
+                        <option value="STATUT_PLAINTE">Statut Plainte</option>
+                        <option value="CANDIDATURE">Candidature</option>
+                        <option value="STATUT_CANDIDATURE">Statut Candidature</option>
+                        <option value="CREATION_PROFIL">Création Profil</option>
+                        <option value="MODIFICATION_PROFIL">Modification Profil</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Date début</label>
+                    <input type="date" id="dateFrom" class="form-control" onchange="applyFilters()">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Date fin</label>
+                    <input type="date" id="dateTo" class="form-control" onchange="applyFilters()">
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                    <button class="btn btn-outline-dark btn-sm" style="width:100%" onclick="resetFilters()">✕ Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div id="statsRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px"></div>
+
+    <!-- Table des logs -->
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date & Heure</th>
+                    <th>Utilisateur</th>
+                    <th>Action</th>
+                    <th>Détails</th>
+                </tr>
+            </thead>
+            <tbody id="logsTable">
+                <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:0.85rem;color:var(--text-muted)">
+        <span id="logCount">—</span>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-outline-dark btn-sm" id="prevBtn" onclick="changePage(-1)" disabled>← Précédent</button>
+            <span id="pageInfo" style="display:flex;align-items:center;padding:0 12px">Page 1</span>
+            <button class="btn btn-outline-dark btn-sm" id="nextBtn" onclick="changePage(1)">Suivant →</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    requireRole('officier');
+    renderAuthNav('police-logs.html');
+
+    let allLogs = [];
+    let filteredLogs = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 50;
+
+    const ACTION_ICONS = {
+        LOGIN: '🔐', LOGOUT: '🚪', REGISTER: '👤',
+        PLAINTE: '📋', STATUT_PLAINTE: '🔄',
+        CANDIDATURE: '📝', STATUT_CANDIDATURE: '🔄',
+        CREATION_PROFIL: '➕', MODIFICATION_PROFIL: '✏️',
+        ASSIGNATION: '👮'
+    };
+
+    async function loadLogs() {
+        showLoading();
+        const { data, error } = await supabase
+            .from('table_policefed_logs')
+            .select('*, user:user_id(nom, prenom, role)')
+            .order('created_at', { ascending: false })
+            .limit(2000);
+        hideLoading();
+        allLogs = data || [];
+        renderStats();
+        applyFilters();
+    }
+
+    function renderStats() {
+        const today = new Date().toDateString();
+        const todayLogs = allLogs.filter(l => new Date(l.created_at).toDateString() === today);
+        const logins = allLogs.filter(l => l.action === 'LOGIN').length;
+        const plaintes = allLogs.filter(l => l.action === 'PLAINTE').length;
+        document.getElementById('statsRow').innerHTML = `
+            <div class="stat-card"><div class="stat-icon stat-icon-blue">📊</div><div><div class="stat-value">${allLogs.length}</div><div class="stat-label">Total Logs</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-green">📅</div><div><div class="stat-value">${todayLogs.length}</div><div class="stat-label">Aujourd'hui</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-gold">🔐</div><div><div class="stat-value">${logins}</div><div class="stat-label">Connexions</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-red">📋</div><div><div class="stat-value">${plaintes}</div><div class="stat-label">Plaintes</div></div></div>
+        `;
+    }
+
+    function applyFilters() {
+        const q = document.getElementById('logSearch').value.toLowerCase();
+        const action = document.getElementById('logAction').value;
+        const from = document.getElementById('dateFrom').value;
+        const to = document.getElementById('dateTo').value;
+
+        filteredLogs = allLogs.filter(l => {
+            const nameMatch = !q || l.details?.toLowerCase().includes(q) || l.user_name?.toLowerCase().includes(q) || l.action.toLowerCase().includes(q);
+            const actionMatch = !action || l.action === action;
+            const d = new Date(l.created_at);
+            const fromMatch = !from || d >= new Date(from);
+            const toMatch = !to || d <= new Date(to + 'T23:59:59');
+            return nameMatch && actionMatch && fromMatch && toMatch;
+        });
+        currentPage = 1;
+        renderTable();
+    }
+
+    function renderTable() {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const page = filteredLogs.slice(start, start + PAGE_SIZE);
+        const totalPages = Math.ceil(filteredLogs.length / PAGE_SIZE);
+
+        document.getElementById('logCount').textContent = `${filteredLogs.length} entrée(s)`;
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages || 1}`;
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+        document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+
+        if (page.length === 0) {
+            document.getElementById('logsTable').innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">Aucun log trouvé</td></tr>`;
+            return;
+        }
+
+        document.getElementById('logsTable').innerHTML = page.map(l => {
+            const icon = ACTION_ICONS[l.action] || '📌';
+            const userName = l.user_name || (l.user ? `${l.user.prenom} ${l.user.nom}` : 'Système');
+            return `<tr>
+                <td class="text-muted" style="white-space:nowrap">${formatDateFull(l.created_at)}</td>
+                <td><strong>${escapeHtml(userName)}</strong>${l.user ? `<br><span style="font-size:0.75rem;color:var(--text-muted)">${roleBadge(l.user.role)}</span>` : ''}</td>
+                <td><span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:0.85rem">${icon} ${escapeHtml(l.action)}</span></td>
+                <td style="font-size:0.85rem;max-width:400px">${escapeHtml(l.details || '—')}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function changePage(dir) {
+        const totalPages = Math.ceil(filteredLogs.length / PAGE_SIZE);
+        currentPage = Math.max(1, Math.min(totalPages, currentPage + dir));
+        renderTable();
+    }
+
+    function resetFilters() {
+        document.getElementById('logSearch').value = '';
+        document.getElementById('logAction').value = '';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        applyFilters();
+    }
+
+    function exportLogs() {
+        const headers = ['Date', 'Utilisateur', 'Action', 'Détails'];
+        const rows = filteredLogs.map(l => [
+            new Date(l.created_at).toLocaleString('fr-BE'),
+            l.user_name || '?',
+            l.action,
+            (l.details || '').replace(/"/g, '""')
+        ]);
+        const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `logs_police_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        showToast('⬇️ Export', 'Fichier CSV téléchargé.', 'success');
+    }
+
+    loadLogs();
+</script>
+</body>
+</html>

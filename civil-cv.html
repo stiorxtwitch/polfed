@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Dossier — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="split-layout">
+    <!-- Liste candidatures -->
+    <div class="split-list">
+        <div class="split-list-header">
+            <h3>📄 Mon Dossier de Candidature</h3>
+            <div class="split-search">
+                <span class="split-search-icon">🔍</span>
+                <input type="text" placeholder="Rechercher..." id="searchInput" oninput="filterItems(this.value)">
+            </div>
+        </div>
+        <div class="split-tabs">
+            <div class="split-tab active" onclick="showTab('active', this)">En cours</div>
+            <div class="split-tab" onclick="showTab('closed', this)">Archivées</div>
+        </div>
+        <div class="split-list-content" id="listContent">
+            <div class="empty-state"><div class="empty-state-icon">📄</div><h3>Chargement...</h3></div>
+        </div>
+        <div style="padding:16px;border-top:1px solid var(--border)">
+            <a href="recruitment-form.html" class="btn btn-gold" style="width:100%;justify-content:center;font-size:0.88rem">+ Nouvelle Candidature</a>
+        </div>
+    </div>
+
+    <!-- Détail -->
+    <div class="split-detail" id="detailArea">
+        <div class="empty-state" style="padding:80px 24px">
+            <div class="empty-state-icon">📄</div>
+            <h3>Sélectionnez une candidature</h3>
+            <p>Cliquez sur une candidature pour voir son suivi et échanger avec les superviseurs.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    const user = requireLogin();
+    renderAuthNav('civil-cv.html');
+
+    let recruitments = [];
+    let currentTab = 'active';
+    let selectedId = null;
+    let msgChannel = null;
+
+    async function loadRecruitments() {
+        const { data } = await supabase
+            .from('table_policefed_recruitments')
+            .select('*')
+            .eq('civil_id', user.id)
+            .order('updated_at', { ascending: false });
+        recruitments = data || [];
+        renderList();
+    }
+
+    function showTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function filterItems(q) { renderList(q.toLowerCase()); }
+
+    function renderList(filter = '') {
+        const listEl = document.getElementById('listContent');
+        const filtered = recruitments.filter(r => {
+            const inTab = currentTab === 'active' ? !['ferme','refuse'].includes(r.status) : ['ferme','refuse'].includes(r.status);
+            const matchSearch = !filter || r.motivation.toLowerCase().includes(filter);
+            return inTab && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>Aucune candidature</h3><p>${currentTab === 'active' ? 'Pas de candidature en cours.' : 'Aucune candidature archivée.'}</p></div>`;
+            return;
+        }
+        listEl.innerHTML = filtered.map(r => `
+            <div class="list-item ${r.id === selectedId ? 'selected' : ''}" onclick="selectItem('${r.id}')">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                    <div class="list-item-title">Candidature — ${r.prenom} ${r.nom}</div>
+                    ${statusBadge(r.status)}
+                </div>
+                <div class="list-item-meta">
+                    <span class="list-item-dot dot-${r.status}"></span>
+                    <span>${formatDate(r.created_at)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function selectItem(id) {
+        selectedId = id;
+        renderList();
+        const rec = recruitments.find(r => r.id === id);
+        if (!rec) return;
+
+        const isClosed = ['ferme', 'refuse'].includes(rec.status);
+
+        document.getElementById('detailArea').innerHTML = `
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">📝 Dossier de Candidature</div>
+                    <div class="detail-meta">
+                        ${statusBadge(rec.status)}
+                        <span style="font-size:0.82rem;color:var(--text-muted)">Soumis le ${formatDateFull(rec.created_at)}</span>
+                    </div>
+                    <div class="detail-description">
+                        <strong>Motivation :</strong><br>${escapeHtml(rec.motivation)}<br><br>
+                        ${rec.experience ? `<strong>Expérience :</strong><br>${escapeHtml(rec.experience)}<br><br>` : ''}
+                        ${rec.disponibilite ? `<strong>Disponibilité :</strong> ${escapeHtml(rec.disponibilite)}` : ''}
+                    </div>
+                </div>
+                <div class="chat-box">
+                    <div class="chat-header">💬 Échanges avec les Superviseurs</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Chargement...</div>
+                    </div>
+                    ${!isClosed ? `
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <textarea id="msgInput" placeholder="Envoyer un message..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+                            <button class="btn btn-primary btn-sm" onclick="sendMessage()">Envoyer</button>
+                        </div>
+                    </div>` : `<div style="padding:14px;background:var(--off-white);text-align:center;font-size:0.85rem;color:var(--text-muted)">🔒 Dossier clôturé — lecture seule</div>`}
+                </div>
+            </div>
+        `;
+        await loadMessages(id);
+        subscribeMessages(id);
+    }
+
+    async function loadMessages(recId) {
+        const { data } = await supabase
+            .from('table_policefed_recruitment_messages')
+            .select('*, sender:sender_id(nom, prenom, role)')
+            .eq('recruitment_id', recId)
+            .order('created_at', { ascending: true });
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Aucun message.</div>`;
+            return;
+        }
+        container.innerHTML = data.map(msg => {
+            const isSent = msg.sender_id === user.id;
+            const senderName = msg.sender ? `${msg.sender.prenom} ${msg.sender.nom}` : '?';
+            const isPolice = msg.sender && msg.sender.role !== 'civil';
+            return `<div class="msg-row ${isSent ? 'sent' : 'received'}">
+                <div class="msg-avatar ${isPolice && !isSent ? 'police-av' : ''}">${senderName[0]}</div>
+                <div>
+                    <div class="msg-bubble">${msg.message ? escapeHtml(msg.message) : ''}${msg.file_url ? `<div><a href="${msg.file_url}" target="_blank" class="msg-file-link">📎 ${escapeHtml(msg.file_name || 'Fichier')}</a></div>` : ''}</div>
+                    <div class="msg-meta">${senderName} · ${formatDate(msg.created_at)}</div>
+                </div>
+            </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeMessages(recId) {
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        msgChannel = supabase.channel(`recruitment-${recId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_policefed_recruitment_messages', filter: `recruitment_id=eq.${recId}` }, () => loadMessages(recId))
+            .subscribe();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const text = input?.value?.trim();
+        if (!text) return;
+        await supabase.from('table_policefed_recruitment_messages').insert({ recruitment_id: selectedId, sender_id: user.id, message: text });
+        await notifyAllSupervision('message', '💬 Nouveau Message', `${user.prenom} ${user.nom} a envoyé un message sur sa candidature.`, selectedId, 'recruitment_police');
+        await supabase.from('table_policefed_recruitments').update({ updated_at: new Date().toISOString() }).eq('id', selectedId);
+        if (input) input.value = '';
+    }
+
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    loadRecruitments().then(() => { if (urlId) selectItem(urlId); });
+</script>
+</body>
+</html>

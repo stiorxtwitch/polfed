@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Candidature — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="recruitment.html">← Retour Recrutement</a>
+        </nav>
+        <div class="header-actions">
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="auth-page" style="background:var(--bg);padding:40px 24px">
+    <div style="width:100%;max-width:680px">
+        <div class="breadcrumb" style="margin-bottom:20px">
+            <a href="index.html">Accueil</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="recruitment.html">Recrutement</a>
+            <span class="breadcrumb-sep">›</span>
+            <span>Formulaire de Candidature</span>
+        </div>
+        <div class="form-card">
+            <div class="form-card-header">
+                <div style="font-size:3rem;margin-bottom:10px">📝</div>
+                <h2>Formulaire de Candidature</h2>
+                <p>Police Fédérale de Liège — Dossier de recrutement</p>
+            </div>
+
+            <div id="formAlert" style="display:none" class="alert alert-danger"></div>
+            <div id="successMsg" style="display:none" class="alert alert-success">
+                ✅ Votre candidature a été soumise avec succès ! Vous pouvez suivre son avancement depuis <a href="civil-cv.html" style="color:var(--success);font-weight:600">Mon Dossier</a>.
+            </div>
+
+            <form id="recruitmentForm" onsubmit="handleSubmit(event)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Prénom <span class="required">*</span></label>
+                        <input type="text" id="rPrenom" class="form-control" placeholder="Jean" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Nom <span class="required">*</span></label>
+                        <input type="text" id="rNom" class="form-control" placeholder="Dupont" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:20px">
+                    <label class="form-label">Âge <span class="required">*</span></label>
+                    <input type="number" id="rAge" class="form-control" placeholder="25" min="16" max="80" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lettre de Motivation <span class="required">*</span></label>
+                    <textarea id="rMotivation" class="form-control" rows="6" placeholder="Expliquez pourquoi vous souhaitez rejoindre la Police Fédérale de Liège..." required style="min-height:160px"></textarea>
+                    <div class="form-hint">Minimum 100 caractères. Soyez précis et authentique.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expériences Précédentes</label>
+                    <textarea id="rExperience" class="form-control" rows="4" placeholder="Décrivez vos expériences précédentes en lien avec le domaine (police, sécurité, RP...)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Disponibilités</label>
+                    <input type="text" id="rDispo" class="form-control" placeholder="Ex: Soirs en semaine, week-ends...">
+                </div>
+                <button type="submit" class="btn btn-gold btn-lg" id="submitBtn" style="width:100%;justify-content:center;border-radius:var(--radius)">
+                    🚀 Soumettre ma Candidature
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    // Must be logged in and civil
+    const user = requireLogin();
+    if (user && user.role !== 'civil') {
+        showToast('Info', 'Seuls les civils peuvent postuler.', 'warning');
+        setTimeout(() => window.location.href = 'recruitment.html', 1500);
+    }
+    if (user) {
+        document.getElementById('rPrenom').value = user.prenom;
+        document.getElementById('rNom').value = user.nom;
+    }
+    renderAuthNav('recruitment-form.html');
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const alert = document.getElementById('formAlert');
+        alert.style.display = 'none';
+
+        const motivation = document.getElementById('rMotivation').value.trim();
+        if (motivation.length < 100) {
+            alert.style.display = 'flex';
+            alert.innerHTML = '⚠️ Votre lettre de motivation doit contenir au moins 100 caractères.';
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Envoi en cours...';
+        showLoading();
+
+        const { data, error } = await supabase.from('table_policefed_recruitments').insert({
+            civil_id: user.id,
+            nom: document.getElementById('rNom').value.trim(),
+            prenom: document.getElementById('rPrenom').value.trim(),
+            age: parseInt(document.getElementById('rAge').value),
+            motivation,
+            experience: document.getElementById('rExperience').value.trim(),
+            disponibilite: document.getElementById('rDispo').value.trim()
+        }).select().single();
+
+        hideLoading();
+
+        if (error) {
+            if (error.code === '23505') {
+                alert.style.display = 'flex';
+                alert.innerHTML = '⚠️ Vous avez déjà une candidature en cours.';
+            } else {
+                alert.style.display = 'flex';
+                alert.innerHTML = '⚠️ Erreur lors de l\'envoi. Veuillez réessayer.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Soumettre ma Candidature';
+        } else {
+            // Notify supervision/officier
+            await notifyAllSupervision('recruitment', '📝 Nouvelle Candidature', `${user.prenom} ${user.nom} a soumis une candidature.`, data.id, 'recruitment_police');
+            await createLog('CANDIDATURE', `${user.prenom} ${user.nom} a soumis une candidature (ID: ${data.id})`);
+            document.getElementById('recruitmentForm').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'flex';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Plaintes — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="police-complaints.html" class="active">📋 Plaintes</a>
+            <a href="police-recruitment.html" id="navRecruitment" style="display:none">📝 Recrutement</a>
+            <a href="police-personnel.html" id="navPersonnel" style="display:none">👥 Personnel</a>
+            <a href="police-logs.html" id="navLogs" style="display:none">🗂️ Logs</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="split-layout">
+    <!-- Liste -->
+    <div class="split-list">
+        <div class="split-list-header">
+            <h3>📋 Gestion des Plaintes</h3>
+            <div class="split-search">
+                <span class="split-search-icon">🔍</span>
+                <input type="text" placeholder="Rechercher..." id="searchInput" oninput="filterList(this.value)">
+            </div>
+            <div class="split-filters" id="statusFilters">
+                <button class="split-filter-btn active" onclick="setFilter('all', this)">Tout</button>
+                <button class="split-filter-btn" onclick="setFilter('en_attente', this)">En Attente</button>
+                <button class="split-filter-btn" onclick="setFilter('en_cours', this)">En Cours</button>
+                <button class="split-filter-btn" onclick="setFilter('valide', this)">Validé</button>
+            </div>
+        </div>
+        <div class="split-tabs">
+            <div class="split-tab active" onclick="showTab('active', this)">Actives</div>
+            <div class="split-tab" onclick="showTab('closed', this)">📁 Fichier</div>
+        </div>
+        <div class="split-list-content" id="listContent">
+            <div class="empty-state"><div class="empty-state-icon">📋</div><h3>Chargement...</h3></div>
+        </div>
+    </div>
+
+    <!-- Détail -->
+    <div class="split-detail" id="detailArea">
+        <div class="empty-state" style="padding:80px 24px">
+            <div class="empty-state-icon">👈</div>
+            <h3>Sélectionnez une plainte</h3>
+            <p>Cliquez sur une plainte pour la traiter.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+    const user = requireRole('agent');
+    renderAuthNav('police-complaints.html');
+
+    // Show nav links based on role
+    if ((ROLES_LEVEL[user?.role]||0) >= 2) document.getElementById('navRecruitment').style.display = '';
+    if ((ROLES_LEVEL[user?.role]||0) >= 3) { document.getElementById('navPersonnel').style.display = ''; document.getElementById('navLogs').style.display = ''; }
+
+    let complaints = [];
+    let currentTab = 'active';
+    let currentFilter = 'all';
+    let selectedId = null;
+    let msgChannel = null;
+    let listChannel = null;
+
+    async function loadComplaints() {
+        const { data } = await supabase
+            .from('table_policefed_complaints')
+            .select('*, civil:civil_id(nom, prenom), officer:assigned_officer_id(nom, prenom)')
+            .order('updated_at', { ascending: false });
+        complaints = data || [];
+        renderList();
+        subscribeList();
+    }
+
+    function showTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.split-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function setFilter(filter, el) {
+        currentFilter = filter;
+        document.querySelectorAll('.split-filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        renderList();
+    }
+
+    function filterList(q) { renderList(q.toLowerCase()); }
+
+    function renderList(filter = '') {
+        const listEl = document.getElementById('listContent');
+        const filtered = complaints.filter(c => {
+            const inTab = currentTab === 'active' ? c.status !== 'ferme' : c.status === 'ferme';
+            const inFilter = currentFilter === 'all' || c.status === currentFilter;
+            const matchSearch = !filter || c.titre.toLowerCase().includes(filter) || (c.civil && (`${c.civil.prenom} ${c.civil.nom}`).toLowerCase().includes(filter));
+            return inTab && inFilter && matchSearch;
+        });
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>Aucune plainte</h3></div>`;
+            return;
+        }
+        listEl.innerHTML = filtered.map(c => `
+            <div class="list-item ${c.id === selectedId ? 'selected' : ''}" onclick="selectComplaint('${c.id}')">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                    <div class="list-item-title">${escapeHtml(c.titre)}</div>
+                    ${statusBadge(c.status)}
+                </div>
+                <div class="list-item-meta">
+                    <span class="list-item-dot dot-${c.status}"></span>
+                    <span>${c.civil ? `${c.civil.prenom} ${c.civil.nom}` : 'Inconnu'}</span>
+                    <span>· ${formatDate(c.updated_at)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function selectComplaint(id) {
+        selectedId = id;
+        renderList();
+        const c = complaints.find(x => x.id === id);
+        if (!c) return;
+        const isClosed = c.status === 'ferme';
+
+        document.getElementById('detailArea').innerHTML = `
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title">${escapeHtml(c.titre)}</div>
+                    <div class="detail-meta">
+                        ${statusBadge(c.status)}
+                        <span style="font-size:0.82rem;color:var(--text-muted)">Déposé par ${c.civil ? `${c.civil.prenom} ${c.civil.nom}` : 'Inconnu'} · ${formatDateFull(c.created_at)}</span>
+                    </div>
+                    <div class="detail-description">${escapeHtml(c.description)}</div>
+                    ${!isClosed ? `
+                    <div class="detail-actions">
+                        <button class="btn btn-warning btn-sm" onclick="updateStatus('en_attente')">⏳ En Attente</button>
+                        <button class="btn btn-info btn-sm" onclick="updateStatus('en_cours')">🔄 En Cours</button>
+                        <button class="btn btn-success btn-sm" onclick="updateStatus('valide')">✅ Valider</button>
+                        <button class="btn btn-secondary btn-sm" onclick="updateStatus('ferme')">🔒 Clôturer</button>
+                        ${!c.assigned_officer_id ? `<button class="btn btn-primary btn-sm" onclick="assignToMe()">👮 M'assigner</button>` : `<span style="font-size:0.82rem;color:var(--text-muted)">Agent: ${c.officer ? `${c.officer.prenom} ${c.officer.nom}` : 'Inconnu'}</span>`}
+                    </div>` : `<div style="margin-top:14px"><div class="alert alert-info">🔒 Plainte clôturée — consultation en lecture seule (Fichier)</div></div>`}
+                </div>
+                <div class="chat-box">
+                    <div class="chat-header">💬 Messagerie</div>
+                    <div class="chat-messages" id="chatMessages"><div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Chargement...</div></div>
+                    ${!isClosed ? `
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <textarea id="msgInput" placeholder="Répondre au civil..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+                            <button class="btn btn-primary btn-sm" onclick="sendMessage()">Envoyer</button>
+                        </div>
+                        <div class="chat-file-attach">
+                            <label for="fileInput">📎 Joindre</label>
+                            <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx">
+                            <span class="chat-file-name" id="fileName"></span>
+                        </div>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+        document.getElementById('fileInput')?.addEventListener('change', function() { document.getElementById('fileName').textContent = this.files[0]?.name || ''; });
+        await loadMessages(id);
+        subscribeMessages(id);
+    }
+
+    async function updateStatus(status) {
+        showLoading();
+        const { error } = await supabase.from('table_policefed_complaints').update({ status, updated_at: new Date().toISOString() }).eq('id', selectedId);
+        if (!error) {
+            const c = complaints.find(x => x.id === selectedId);
+            if (c) {
+                c.status = status;
+                // Notify civil
+                await createNotification(c.civil_id, 'status', '📋 Statut Mis à Jour', `Votre plainte "${c.titre}" est maintenant : ${STATUS_LABELS[status]}`, selectedId, 'complaint');
+                await createLog('STATUT_PLAINTE', `Plainte "${c.titre}" → ${status} par ${user.prenom} ${user.nom}`);
+            }
+            renderList();
+            selectComplaint(selectedId);
+        }
+        hideLoading();
+        showToast('✅ Statut mis à jour', `Plainte passée à : ${STATUS_LABELS[status]}`, 'success');
+    }
+
+    async function assignToMe() {
+        await supabase.from('table_policefed_complaints').update({ assigned_officer_id: user.id }).eq('id', selectedId);
+        const c = complaints.find(x => x.id === selectedId);
+        if (c) { c.assigned_officer_id = user.id; c.officer = { nom: user.nom, prenom: user.prenom }; }
+        selectComplaint(selectedId);
+        showToast('✅ Assigné', 'Vous êtes maintenant responsable de cette plainte.', 'success');
+        await createLog('ASSIGNATION', `${user.prenom} ${user.nom} s'est assigné la plainte "${c?.titre}"`);
+    }
+
+    async function loadMessages(complaintId) {
+        const { data } = await supabase
+            .from('table_policefed_complaint_messages')
+            .select('*, sender:sender_id(nom, prenom, role)')
+            .eq('complaint_id', complaintId)
+            .order('created_at', { ascending: true });
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        if (!data || data.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:20px">Aucun message.</div>`; return; }
+        container.innerHTML = data.map(msg => {
+            const isSent = msg.sender_id === user.id;
+            const senderName = msg.sender ? `${msg.sender.prenom} ${msg.sender.nom}` : '?';
+            const isPolice = msg.sender && msg.sender.role !== 'civil';
+            return `<div class="msg-row ${isSent ? 'sent' : 'received'}">
+                <div class="msg-avatar ${isPolice && !isSent ? 'police-av' : ''}">${senderName[0]}</div>
+                <div><div class="msg-bubble">${msg.message ? escapeHtml(msg.message) : ''}${msg.file_url ? `<div><a href="${msg.file_url}" target="_blank" class="msg-file-link">📎 ${escapeHtml(msg.file_name || 'Fichier')}</a></div>` : ''}</div>
+                <div class="msg-meta">${senderName} · ${formatDate(msg.created_at)}</div></div>
+            </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeMessages(complaintId) {
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        msgChannel = supabase.channel(`p-complaint-${complaintId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'table_policefed_complaint_messages', filter: `complaint_id=eq.${complaintId}` }, () => loadMessages(complaintId))
+            .subscribe();
+    }
+
+    function subscribeList() {
+        if (listChannel) supabase.removeChannel(listChannel);
+        listChannel = supabase.channel('p-complaints-list')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'table_policefed_complaints' }, () => loadComplaints())
+            .subscribe();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const fileInput = document.getElementById('fileInput');
+        const text = input?.value?.trim();
+        const file = fileInput?.files?.[0];
+        if (!text && !file) return;
+
+        let fileUrl = null, fileName = null;
+        if (file) {
+            showLoading();
+            const path = `complaints/${selectedId}/${Date.now()}_${file.name}`;
+            const { data: upd, error: upe } = await supabase.storage.from('pfl-uploads').upload(path, file);
+            hideLoading();
+            if (!upe) { const { data: u } = supabase.storage.from('pfl-uploads').getPublicUrl(path); fileUrl = u.publicUrl; fileName = file.name; }
+        }
+
+        const { error } = await supabase.from('table_policefed_complaint_messages').insert({ complaint_id: selectedId, sender_id: user.id, message: text || null, file_url: fileUrl, file_name: fileName });
+        if (!error) {
+            if (input) input.value = '';
+            if (fileInput) { fileInput.value = ''; document.getElementById('fileName').textContent = ''; }
+            const c = complaints.find(x => x.id === selectedId);
+            if (c) {
+                await createNotification(c.civil_id, 'message', '💬 Réponse de la Police', `Un agent a répondu sur votre plainte "${c.titre}"`, selectedId, 'complaint');
+                await supabase.from('table_policefed_complaints').update({ updated_at: new Date().toISOString() }).eq('id', selectedId);
+            }
+        }
+    }
+
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    loadComplaints().then(() => { if (urlId) selectComplaint(urlId); });
+</script>
+</body>
+</html>

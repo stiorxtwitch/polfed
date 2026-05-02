@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingOverlay" class="loading-overlay active">
+    <div class="loading-inner">
+        <div class="loading-shield">🛡️</div>
+        <div class="loading-text">Chargement...</div>
+    </div>
+</div>
+
+<!-- Toasts -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Notification Panel -->
+<div id="notifPanel" class="notif-panel"></div>
+
+<!-- Header -->
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text">
+                <span class="logo-title">Police Fédérale</span>
+                <span class="logo-sub">Liège City RP</span>
+            </div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html" class="active">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <div class="nav-dropdown">
+                <button>Section Code ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="https://drive.google.com/REPLACE_CODE_ROUTE" target="_blank" class="dropdown-item">🚗 Code de la Route</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_JUDICIAIRE" target="_blank" class="dropdown-item">⚖️ Code Judiciaire</a>
+                    <a href="https://drive.google.com/REPLACE_LOI_POLICE" target="_blank" class="dropdown-item">🚔 Loi sur la Fonction de Police</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_PENAL" target="_blank" class="dropdown-item">📜 Code Pénal</a>
+                </div>
+            </div>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">
+                🔔 <span class="notif-count" id="notifCount" style="display:none">0</span>
+            </div>
+            <div id="authSection"></div>
+            <button class="hamburger" id="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Contact bar -->
+<div class="contact-bar">
+    <span>📞 Urgences : <strong>101</strong></span>
+    <span>📍 Bassenge, Province de Liège</span>
+    <span>🕐 Disponible 24h/24 · 7j/7</span>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">🛡️</div>
+        <h1 class="hero-title">Police Fédérale<br><span>Liège City RP</span></h1>
+        <p class="hero-subtitle">Servant et protégeant la communauté de Bassenge. Votre sécurité est notre priorité absolue.</p>
+        <div class="hero-actions">
+            <a href="complaint-deposit.html" class="btn btn-gold btn-lg">📋 Déposer une Plainte</a>
+            <a href="recruitment.html" class="btn btn-outline btn-lg">🚔 Nous Rejoindre</a>
+        </div>
+    </div>
+</section>
+
+<!-- Info rapide -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="grid-3">
+            <div class="info-card">
+                <div class="info-card-icon">🚨</div>
+                <div class="info-card-title">Numéro d'Urgence</div>
+                <div class="info-card-text">Appelez le <strong>101</strong> en cas d'urgence. Nos équipes sont disponibles 24h/24, 7j/7 pour toute situation critique.</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">📍</div>
+                <div class="info-card-title">Notre Localisation</div>
+                <div class="info-card-text">Commissariat principal situé à <strong>Bassenge</strong>, Province de Liège. Juridiction sur l'ensemble du secteur.</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">⚖️</div>
+                <div class="info-card-title">Notre Mission</div>
+                <div class="info-card-text">Maintenir l'ordre public, protéger les citoyens et garantir le respect des lois au sein de la communauté.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Rôles police -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">Nos Missions</div>
+            <h2 class="section-title">Le Rôle de la <span>Police Fédérale</span></h2>
+            <p class="section-subtitle">La Police Fédérale de Liège assure de multiples missions au service de la population.</p>
+        </div>
+        <div class="grid-4">
+            <div class="info-card" style="border-top-color:var(--info)">
+                <div class="info-card-icon">🛡️</div>
+                <div class="info-card-title">Protection Civile</div>
+                <div class="info-card-text">Assurer la sécurité des citoyens et protéger les biens.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--success)">
+                <div class="info-card-icon">🔍</div>
+                <div class="info-card-title">Investigation</div>
+                <div class="info-card-text">Mener des enquêtes criminelles et résoudre les affaires.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--warning)">
+                <div class="info-card-icon">🚦</div>
+                <div class="info-card-title">Police de Proximité</div>
+                <div class="info-card-text">Maintenir l'ordre et assurer la sécurité routière.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--danger)">
+                <div class="info-card-icon">📞</div>
+                <div class="info-card-title">Assistance 24/7</div>
+                <div class="info-card-text">Intervenir rapidement sur tous les appels et urgences.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comment nous contacter -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge" style="background:rgba(201,162,39,0.2);color:var(--gold-light)">Contact</div>
+            <h2 class="section-title" style="color:var(--white)">Comment Nous <span>Contacter</span></h2>
+            <p class="section-subtitle">Plusieurs moyens pour entrer en contact avec nos services.</p>
+        </div>
+        <div class="grid-3">
+            <div class="card" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                <div class="card-body text-center">
+                    <div style="font-size:3rem;margin-bottom:14px">📞</div>
+                    <h3 style="color:var(--gold-light);font-size:1.1rem;margin-bottom:8px">Téléphone</h3>
+                    <p style="color:rgba(255,255,255,0.75);font-size:0.9rem">Appelez directement le <strong style="color:white;font-size:1.5rem">101</strong> pour toute urgence ou renseignement.</p>
+                </div>
+            </div>
+            <div class="card" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                <div class="card-body text-center">
+                    <div style="font-size:3rem;margin-bottom:14px">📋</div>
+                    <h3 style="color:var(--gold-light);font-size:1.1rem;margin-bottom:8px">Dépôt de Plainte</h3>
+                    <p style="color:rgba(255,255,255,0.75);font-size:0.9rem">Soumettez votre plainte en ligne via notre formulaire sécurisé.</p>
+                    <a href="complaint-deposit.html" class="btn btn-gold btn-sm mt-4">Déposer une Plainte</a>
+                </div>
+            </div>
+            <div class="card" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
+                <div class="card-body text-center">
+                    <div style="font-size:3rem;margin-bottom:14px">🏛️</div>
+                    <h3 style="color:var(--gold-light);font-size:1.1rem;margin-bottom:8px">En Personne</h3>
+                    <p style="color:rgba(255,255,255,0.75);font-size:0.9rem">Rendez-vous au commissariat de <strong style="color:white">Bassenge</strong>. Ouvert 24h/24.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Recrutement -->
+<section class="section">
+    <div class="container text-center">
+        <div class="recruitment-status-card" style="max-width:700px;margin:0 auto">
+            <div class="rsc-icon">🚔</div>
+            <div class="rsc-title">Rejoignez la Police Fédérale de Liège</div>
+            <div class="rsc-sub">Nous recrutons des candidates et candidats motivés pour renforcer nos équipes. Consultez nos offres d'emploi et postulez dès maintenant.</div>
+            <a href="recruitment.html" class="btn btn-gold btn-lg" style="display:inline-flex">Voir les Offres d'Emploi</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="main-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="header-logo" style="margin-bottom:12px">
+                <div class="logo-shield" style="width:36px;height:42px;font-size:1rem">🛡️</div>
+                <div class="logo-text">
+                    <span class="logo-title">Police Fédérale Liège</span>
+                </div>
+            </div>
+            <p>Servant et protégeant la communauté de Bassenge dans le cadre du City RP de Liège.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Navigation</h4>
+            <a href="index.html">Accueil</a>
+            <a href="about.html">À Propos</a>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+        </div>
+        <div class="footer-col">
+            <h4>Services</h4>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+            <a href="civil-complaints.html">Mes Plaintes</a>
+            <a href="civil-cv.html">Mon Dossier</a>
+        </div>
+        <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="#">📞 101 (Urgences)</a>
+            <a href="#">📍 Bassenge, Liège</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 Police Fédérale Liège City RP — Tous droits réservés</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+    // Render auth nav
+    (function() {
+        const user = getCurrentUser();
+        const authSection = document.getElementById('authSection');
+        const notifBell = document.getElementById('notifBell');
+
+        if (user) {
+            if (notifBell) notifBell.style.display = 'flex';
+            const menuItems = user.role === 'civil'
+                ? `<a href="civil-complaints.html" class="dropdown-item">📋 Mes Plaintes</a>
+                   <a href="civil-cv.html" class="dropdown-item">📄 Mon Dossier</a>
+                   <div class="dropdown-divider"></div>`
+                : `<a href="police-complaints.html" class="dropdown-item">📋 Gestion Plaintes</a>
+                   ${(ROLES_LEVEL[user.role]||0) >= 2 ? '<a href="police-recruitment.html" class="dropdown-item">📝 Recrutement</a>' : ''}
+                   ${(ROLES_LEVEL[user.role]||0) >= 3 ? '<a href="police-personnel.html" class="dropdown-item">👥 Personnel</a><a href="police-logs.html" class="dropdown-item">🗂️ Logs</a>' : ''}
+                   <div class="dropdown-divider"></div>`;
+            authSection.innerHTML = `
+                <div class="nav-dropdown">
+                    <button class="btn-user">
+                        <span class="user-avatar">${user.prenom[0]}${user.nom[0]}</span>
+                        <span class="user-name">${user.prenom}</span>
+                        <span class="arrow-down">▾</span>
+                    </button>
+                    <div class="nav-dropdown-menu user-menu">
+                        <div class="user-menu-header">
+                            <div class="user-menu-name">${user.prenom} ${user.nom}</div>
+                            <div class="user-menu-role">${roleBadge(user.role)}</div>
+                        </div>
+                        ${menuItems}
+                        <a href="#" onclick="logout()" class="dropdown-item text-danger">🚪 Déconnexion</a>
+                    </div>
+                </div>`;
+        } else {
+            authSection.innerHTML = `<a href="login.html" class="btn-connexion">Connexion</a>`;
+        }
+    })();
+</script>
+</body>
+</html>

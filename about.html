@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À Propos — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><div class="loading-shield">🛡️</div><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <div class="logo-shield">🛡️</div>
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="about.html" class="active">À Propos</a>
+            <div class="nav-dropdown">
+                <button>Section Code ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="https://drive.google.com/REPLACE_CODE_ROUTE" target="_blank" class="dropdown-item">🚗 Code de la Route</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_JUDICIAIRE" target="_blank" class="dropdown-item">⚖️ Code Judiciaire</a>
+                    <a href="https://drive.google.com/REPLACE_LOI_POLICE" target="_blank" class="dropdown-item">🚔 Loi sur la Fonction de Police</a>
+                    <a href="https://drive.google.com/REPLACE_CODE_PENAL" target="_blank" class="dropdown-item">📜 Code Pénal</a>
+                </div>
+            </div>
+            <a href="recruitment.html">Recrutement</a>
+            <a href="gallery.html">Galerie</a>
+            <a href="complaint-deposit.html">Dépôt de Plainte</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <h1>🏛️ À Propos de Nous</h1>
+    <p>Découvrez la structure, les valeurs et la mission de la Police Fédérale de Liège</p>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="grid-2" style="margin-bottom:60px">
+            <div>
+                <div class="section-badge">Notre Histoire</div>
+                <h2 class="section-title">La Police Fédérale de <span>Liège</span></h2>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:16px">
+                    La Police Fédérale de Liège, basée à Bassenge, est le corps de police principal du secteur. Elle assure la sécurité et l'ordre public sur l'ensemble de son territoire de compétence.
+                </p>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:16px">
+                    Notre corps de police est structuré selon une hiérarchie claire, avec des agents de terrain, des superviseurs et des officiers de commandement, chacun ayant des responsabilités définies.
+                </p>
+                <p style="color:var(--text-muted);line-height:1.8">
+                    Nous opérons dans le respect des lois belges, notamment le Code Judiciaire, la Loi sur la Fonction de Police et le Code Pénal, garantissant des interventions justes et légales.
+                </p>
+            </div>
+            <div>
+                <img src="https://i.imgur.com/ABOUT_IMAGE.jpg" alt="Police Fédérale Liège"
+                     style="width:100%;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);object-fit:cover;height:320px;background:#e2e8f0"
+                     onerror="this.style.background='linear-gradient(135deg,var(--primary),var(--primary-light))';this.alt='Police Fédérale Liège'">
+            </div>
+        </div>
+
+        <!-- Valeurs -->
+        <div class="section-header">
+            <div class="section-badge">Nos Valeurs</div>
+            <h2 class="section-title">Ce qui Nous <span>Définit</span></h2>
+        </div>
+        <div class="grid-4" style="margin-bottom:60px">
+            <div class="info-card" style="border-top-color:var(--primary-light)">
+                <div class="info-card-icon">⚖️</div>
+                <div class="info-card-title">Justice</div>
+                <div class="info-card-text">Agir avec impartialité et respect du droit pour tous les citoyens.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--gold)">
+                <div class="info-card-icon">🤝</div>
+                <div class="info-card-title">Intégrité</div>
+                <div class="info-card-text">Maintenir une conduite irréprochable dans toutes nos missions.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--success)">
+                <div class="info-card-icon">🛡️</div>
+                <div class="info-card-title">Protection</div>
+                <div class="info-card-text">Protéger chaque citoyen avec dévouement et professionnalisme.</div>
+            </div>
+            <div class="info-card" style="border-top-color:var(--info)">
+                <div class="info-card-icon">💪</div>
+                <div class="info-card-title">Engagement</div>
+                <div class="info-card-text">S'investir pleinement dans notre mission de service public.</div>
+            </div>
+        </div>
+
+        <!-- Hiérarchie -->
+        <div class="section-header">
+            <div class="section-badge">Organisation</div>
+            <h2 class="section-title">Structure <span>Hiérarchique</span></h2>
+            <p class="section-subtitle">Notre organisation est structurée en cadres avec des responsabilités croissantes.</p>
+        </div>
+
+        <div style="max-width:900px;margin:0 auto">
+            <!-- Cadre Officier -->
+            <div style="text-align:center;margin-bottom:40px">
+                <div class="org-card level-1" style="display:inline-block;min-width:280px">
+                    <div style="font-size:2rem;margin-bottom:8px">⭐</div>
+                    <div class="org-card-title">Cadre Officier</div>
+                    <div class="org-card-desc">Commandement suprême · Gestion globale<br>Accès à tous les systèmes</div>
+                    <div style="margin-top:10px"><span class="badge badge-danger">Officier</span></div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-bottom:8px;color:var(--border);font-size:1.5rem">│</div>
+
+            <!-- Cadre Supervision -->
+            <div style="display:flex;justify-content:center;gap:20px;margin-bottom:8px;flex-wrap:wrap">
+                <div class="org-card level-2" style="flex:1;max-width:280px">
+                    <div style="font-size:1.8rem;margin-bottom:8px">🎖️</div>
+                    <div class="org-card-title">Cadre Supervision</div>
+                    <div class="org-card-desc">Gestion du recrutement<br>Encadrement des agents</div>
+                    <div style="margin-top:10px"><span class="badge badge-warning">Supervision</span></div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-bottom:8px;color:var(--border);font-size:1.5rem">│</div>
+
+            <!-- Cadre Agent -->
+            <div style="display:flex;justify-content:center;gap:20px;margin-bottom:40px;flex-wrap:wrap">
+                <div class="org-card level-3" style="flex:1;max-width:280px">
+                    <div style="font-size:1.8rem;margin-bottom:8px">👮</div>
+                    <div class="org-card-title">Cadre Agent</div>
+                    <div class="org-card-desc">Agent de terrain<br>Gestion des plaintes</div>
+                    <div style="margin-top:10px"><span class="badge badge-info">Agent</span></div>
+                </div>
+            </div>
+
+            <!-- Civil -->
+            <div style="background:var(--off-white);border-radius:var(--radius-lg);padding:24px;text-align:center;border:1px solid var(--border)">
+                <div style="font-size:1.8rem;margin-bottom:8px">👤</div>
+                <div style="font-weight:700;font-size:1rem;color:var(--text);margin-bottom:4px">Civils</div>
+                <div style="font-size:0.85rem;color:var(--text-muted)">Citoyens de la communauté · Accès aux services civils du site</div>
+                <div style="margin-top:10px"><span class="badge badge-secondary">Civil</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image galerie about -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">Nos Équipes</div>
+            <h2 class="section-title">En Action sur le <span>Terrain</span></h2>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item"><img src="https://i.imgur.com/ABOUT_IMG1.jpg" alt="Patrouille" onerror="this.src='';this.parentElement.style.background='linear-gradient(135deg,var(--primary),var(--primary-light))'"><div class="gallery-item-overlay">Patrouille de nuit</div></div>
+            <div class="gallery-item"><img src="https://i.imgur.com/ABOUT_IMG2.jpg" alt="Commissariat" onerror="this.src='';this.parentElement.style.background='linear-gradient(135deg,#1a2d5a,var(--primary-light))'"><div class="gallery-item-overlay">Commissariat de Bassenge</div></div>
+            <div class="gallery-item"><img src="https://i.imgur.com/ABOUT_IMG3.jpg" alt="Formation" onerror="this.src='';this.parentElement.style.background='linear-gradient(135deg,#0a2d6b,var(--primary))'"><div class="gallery-item-overlay">Formation continue</div></div>
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="header-logo" style="margin-bottom:12px"><div class="logo-shield" style="width:36px;height:42px;font-size:1rem">🛡️</div><div class="logo-text"><span class="logo-title">Police Fédérale Liège</span></div></div>
+            <p>Servant et protégeant la communauté de Bassenge.</p>
+        </div>
+        <div class="footer-col"><h4>Navigation</h4><a href="index.html">Accueil</a><a href="about.html">À Propos</a><a href="recruitment.html">Recrutement</a><a href="gallery.html">Galerie</a></div>
+        <div class="footer-col"><h4>Services</h4><a href="complaint-deposit.html">Dépôt de Plainte</a><a href="civil-complaints.html">Mes Plaintes</a><a href="civil-cv.html">Mon Dossier</a></div>
+        <div class="footer-col"><h4>Contact</h4><a href="#">📞 101 (Urgences)</a><a href="#">📍 Bassenge, Liège</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 Police Fédérale Liège City RP — Tous droits réservés</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>renderAuthNav('about.html');</script>
+</body>
+</html>
