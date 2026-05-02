@@ -260,12 +260,29 @@
 
         let fileUrl = null, fileName = null;
         if (file) {
-            showLoading();
-            const path = `complaints/${selectedId}/${Date.now()}_${file.name}`;
-            const { data: upd, error: upe } = await supabase.storage.from('pfl-uploads').upload(path, file);
-            hideLoading();
-            if (!upe) { const { data: u } = supabase.storage.from('pfl-uploads').getPublicUrl(path); fileUrl = u.publicUrl; fileName = file.name; }
-        }
+    showLoading();
+    // Sanitize le nom de fichier (espaces, accents, etc. causent un 400)
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `complaints/${selectedId}/${Date.now()}_${safeName}`;
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pfl-uploads')
+        .upload(path, file, {
+            contentType: file.type,  // ← manquait
+            upsert: false
+        });
+    hideLoading();
+
+    if (uploadError) {
+        console.error('Upload error:', uploadError);
+        showToast(`❌ Erreur upload : ${uploadError.message}`, 'error');
+        return;
+    }
+
+    const { data: urlData } = supabase.storage.from('pfl-uploads').getPublicUrl(path);
+    fileUrl = urlData.publicUrl;
+    fileName = file.name; // on garde le nom original pour l'affichage
+}
 
         const { error } = await supabase.from('table_policefed_complaint_messages').insert({ complaint_id: selectedId, sender_id: user.id, message: text || null, file_url: fileUrl, file_name: fileName });
         if (!error) {
