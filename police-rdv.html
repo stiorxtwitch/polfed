@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendez-vous — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#030a14;--panel:rgba(4,12,26,0.97);--blue:#1a56db;--blue-light:#3b82f6;--blue-dim:rgba(26,86,219,0.15);--blue-border:rgba(26,86,219,0.22);--gold:#c9a227;--gold-light:#e4b93a;--gold-dim:rgba(201,162,39,0.15);--gold-border:rgba(201,162,39,0.25);--text:#c5d8f0;--text-bright:#e8f4ff;--muted:#4a7a9b;--green:#22c55e;--green-dim:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);--red:#ef4444;--red-dim:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.25);--yellow:#f59e0b}
+        html,body{min-height:100%;background:var(--bg);font-family:'Exo 2',sans-serif;color:var(--text)}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,86,219,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.03) 1px,transparent 1px);background-size:40px 40px;animation:gridDrift 50s linear infinite}
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:40px 40px}}
+        .t-header{height:56px;background:rgba(3,10,20,0.99);border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100}
+        .t-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent);opacity:0.4}
+        .hdr-left{display:flex;align-items:center;gap:14px}
+        .logo-link{display:flex;align-items:center;gap:9px;text-decoration:none}
+        .logo-link img{width:28px;height:33px;filter:drop-shadow(0 0 6px rgba(201,162,39,0.4))}
+        .logo-txt .m{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;color:#fff;display:block;line-height:1}
+        .logo-txt .s{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block}
+        .divider{width:1px;height:28px;background:var(--blue-border)}
+        .sec-badge{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:2px}
+        .hdr-nav a{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:5px 9px;border-radius:2px;transition:all .15s}
+        .hdr-nav a:hover,.hdr-nav a.active{color:var(--text-bright);background:var(--blue-dim)}
+        .hdr-nav{display:flex;align-items:center;gap:2px}
+        .btn{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:none;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+        .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--blue-border)}.btn-ghost:hover{color:var(--text);border-color:var(--blue-light)}
+        .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-light)}
+        .btn-gold{background:var(--gold);color:#000;font-weight:700}.btn-gold:hover{background:var(--gold-light)}
+        .btn-success{background:var(--green-dim);color:#86efac;border:1px solid var(--green-border)}.btn-success:hover{background:rgba(34,197,94,.25)}
+        .btn-danger{background:var(--red-dim);color:#fca5a5;border:1px solid var(--red-border)}.btn-danger:hover{background:rgba(239,68,68,.25)}
+        .btn-sm{padding:4px 9px;font-size:10px}
+        .btn:disabled{opacity:.45;cursor:not-allowed}
+        .page{position:relative;z-index:1;padding:24px;max-width:1200px;margin:0 auto}
+        .tabs{display:flex;border-bottom:1px solid var(--blue-border);margin-bottom:24px;gap:0}
+        .tab{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:12px 20px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+        .tab:hover{color:var(--text)}.tab.active{color:var(--blue-light);border-bottom-color:var(--blue-light)}
+        .tab-content{display:none}.tab-content.active{display:block}
+        .t-card{background:var(--panel);border:1px solid var(--blue-border);border-radius:8px;overflow:hidden}
+        .t-card-hdr{padding:12px 16px;border-bottom:1px solid var(--blue-border);display:flex;align-items:center;justify-content:space-between}
+        .t-card-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light)}
+        .t-card-body{padding:18px}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        @media(max-width:700px){.grid-2{grid-template-columns:1fr}}
+        .form-group{margin-bottom:16px}
+        .t-label{display:block;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-family:'Rajdhani',sans-serif;font-weight:700}
+        .t-input,.t-select,.t-textarea{width:100%;padding:9px 11px;background:rgba(26,86,219,0.06);border:1px solid var(--blue-border);border-radius:2px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+        .t-input:focus,.t-select:focus,.t-textarea:focus{border-color:var(--blue-light);background:rgba(26,86,219,.1)}
+        .t-select option{background:#050d1a}.t-textarea{resize:vertical;min-height:80px}
+        .t-input::placeholder{color:var(--muted)}
+        .t-table{width:100%;border-collapse:collapse;font-size:12px}
+        .t-table th{padding:8px 12px;background:rgba(26,86,219,.08);border-bottom:1px solid var(--blue-border);font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap}
+        .t-table td{padding:10px 12px;border-bottom:1px solid rgba(26,86,219,.1);vertical-align:middle}
+        .t-table tr:hover td{background:rgba(26,86,219,.04)}.t-table tr:last-child td{border-bottom:none}
+        .t-alert{padding:10px 14px;border-radius:4px;font-size:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px}
+        .ta-info{background:var(--blue-dim);border:1px solid var(--blue-border);color:#93c5fd}
+        .ta-success{background:var(--green-dim);border:1px solid var(--green-border);color:#86efac}
+        .ta-danger{background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5}
+        .empty-state{text-align:center;padding:30px;color:var(--muted);font-size:11px;letter-spacing:1px}
+        .status-badge{font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+        .sb-attente{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d}
+        .sb-confirme{background:var(--blue-dim);border:1px solid var(--blue-border);color:#93c5fd}
+        .sb-complete{background:var(--green-dim);border:1px solid var(--green-border);color:#86efac}
+        .sb-annule{background:rgba(107,114,128,.12);border:1px solid rgba(107,114,128,.3);color:#9ca3af}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--blue-border);border-radius:2px}
+    </style>
+</head>
+<body>
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="divider"></div>
+        <div class="sec-badge">📅 Rendez-vous</div>
+        <nav class="hdr-nav" id="mainNav"></nav>
+    </div>
+    <div class="hdr-right">
+        <a href="police-portal.html" class="btn btn-ghost">← Portail</a>
+    </div>
+</header>
+
+<div class="page">
+    <!-- SQL NOTE:
+    CREATE TABLE table_policefed_rdv (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      agent_id UUID REFERENCES table_policefed_users(id),
+      supervisor_id UUID REFERENCES table_policefed_users(id),
+      formation_id UUID REFERENCES table_policefed_formations(id),
+      date_rdv TIMESTAMPTZ,
+      status TEXT DEFAULT 'en_attente',
+      notes_agent TEXT, notes_supervisor TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    -->
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('book',this)">📅 Prendre un Rendez-vous</div>
+        <div class="tab" onclick="showTab('mine',this)">📋 Mes Rendez-vous</div>
+    </div>
+
+    <!-- TAB: BOOK -->
+    <div class="tab-content active" id="tab-book">
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start">
+            <div class="t-card">
+                <div class="t-card-hdr"><span class="t-card-title">📝 Formulaire de Demande</span></div>
+                <div class="t-card-body">
+                    <div id="bookAlert" style="display:none"></div>
+                    <div id="bookSuccess" style="display:none" class="t-alert ta-success">
+                        ✅ Votre demande a été envoyée avec succès. Elle apparaît dans "Mes Rendez-vous".
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="t-label">Formation concernée *</label>
+                            <select class="t-select" id="rdvFormation"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="t-label">Superviseur / Officier *</label>
+                            <select class="t-select" id="rdvSupervisor"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="t-label">Date et heure souhaitées *</label>
+                        <input type="datetime-local" class="t-input" id="rdvDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="t-label">Message au superviseur</label>
+                        <textarea class="t-textarea" id="rdvNotes" placeholder="Précisez votre demande, vos disponibilités, ou toute information utile..."></textarea>
+                    </div>
+                    <button class="btn btn-gold" id="submitRdvBtn" onclick="submitRdv()" style="width:100%;justify-content:center">
+                        📅 Envoyer la Demande
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info panel -->
+            <div>
+                <div class="t-card" style="margin-bottom:14px">
+                    <div class="t-card-hdr"><span class="t-card-title">ℹ️ Comment ça marche</span></div>
+                    <div class="t-card-body" style="font-size:12px;line-height:1.7;color:var(--muted)">
+                        <div style="margin-bottom:10px;display:flex;gap:8px;align-items:flex-start"><span>1️⃣</span><span>Sélectionnez la <strong style="color:var(--text)">formation</strong> pour laquelle vous demandez un examen.</span></div>
+                        <div style="margin-bottom:10px;display:flex;gap:8px;align-items:flex-start"><span>2️⃣</span><span>Choisissez un <strong style="color:var(--text)">superviseur ou officier</strong> disponible.</span></div>
+                        <div style="margin-bottom:10px;display:flex;gap:8px;align-items:flex-start"><span>3️⃣</span><span>Proposez une <strong style="color:var(--text)">date et heure</strong>.</span></div>
+                        <div style="display:flex;gap:8px;align-items:flex-start"><span>4️⃣</span><span>Le superviseur <strong style="color:var(--text)">confirme ou modifie</strong> le rendez-vous.</span></div>
+                    </div>
+                </div>
+                <div class="t-card" id="formationPreviewCard">
+                    <div class="t-card-hdr"><span class="t-card-title">📚 Formation sélectionnée</span></div>
+                    <div class="t-card-body" id="formationPreview" style="font-size:12px;color:var(--muted)">Sélectionnez une formation pour voir les détails.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: MY RDVs -->
+    <div class="tab-content" id="tab-mine">
+        <div class="t-card">
+            <div class="t-card-hdr">
+                <span class="t-card-title">📋 Mes Rendez-vous</span>
+                <div style="display:flex;gap:6px">
+                    <select class="t-select" id="filterStatus" onchange="loadMyRdv()" style="width:140px;font-size:11px;padding:4px 8px">
+                        <option value="">Tous</option>
+                        <option value="en_attente">En Attente</option>
+                        <option value="confirme">Confirmés</option>
+                        <option value="complete">Complétés</option>
+                        <option value="annule">Annulés</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" onclick="loadMyRdv()">🔄</button>
+                </div>
+            </div>
+            <div class="t-table-wrap" style="overflow-x:auto">
+                <table class="t-table">
+                    <thead>
+                        <tr>
+                            <th>Formation</th>
+                            <th>Superviseur</th>
+                            <th>Date demandée</th>
+                            <th>Statut</th>
+                            <th>Note superviseur</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myRdvTable">
+                        <tr><td colspan="6" class="empty-state">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('agent');
+const isOfficier = (ROLES_LEVEL[currentUser.role]||0) >= 3;
+const isSuperv   = (ROLES_LEVEL[currentUser.role]||0) >= 2;
+
+const navLinks = [
+    { href:'police-complaints.html', label:'📋 Plaintes' },
+    { href:'police-courses.html', label:'📚 Formations' },
+    { href:'police-rdv.html', label:'📅 Rendez-vous', active:true },
+    ...(isSuperv ? [{ href:'police-kahoot-host.html', label:'🎮 Kahoot' }] : [{ href:'police-kahoot-join.html', label:'🎮 Examen' }]),
+    ...(isSuperv ? [{ href:'police-rdv-admin.html', label:'👔 RDV Admin' }] : []),
+    ...(isOfficier ? [{ href:'police-personnel.html', label:'👥 Personnel' }] : []),
+    { href:'police-profile.html', label:'👤 Profil' },
+];
+document.getElementById('mainNav').innerHTML = navLinks.map(l =>
+    `<a href="${l.href}" ${l.active ? 'class="active"' : ''}>${l.label}</a>`
+).join('');
+
+function showTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'mine') loadMyRdv();
+}
+
+const STATUS_MAP = {
+    en_attente: { label:'En Attente', cls:'sb-attente' },
+    confirme:   { label:'Confirmé',   cls:'sb-confirme' },
+    complete:   { label:'Complété',   cls:'sb-complete' },
+    annule:     { label:'Annulé',     cls:'sb-annule' }
+};
+
+async function loadFormData() {
+    const [{ data: formations }, { data: supervisors }] = await Promise.all([
+        supabase.from('table_policefed_formations').select('*').order('ordre'),
+        supabase.from('table_policefed_users').select('id,prenom,nom,grade,matricule,role').in('role',['supervision','officier']).eq('is_active',true)
+    ]);
+
+    const fSel = document.getElementById('rdvFormation');
+    fSel.innerHTML = '<option value="">— Sélectionner une formation —</option>' +
+        (formations||[]).map(f => `<option value="${f.id}">${f.icon||'📚'} ${escapeHtml(f.titre)}</option>`).join('');
+
+    const sSel = document.getElementById('rdvSupervisor');
+    sSel.innerHTML = '<option value="">— Sélectionner un superviseur —</option>' +
+        (supervisors||[]).map(s => `<option value="${s.id}">${escapeHtml(s.prenom)} ${escapeHtml(s.nom)} — ${s.role === 'officier' ? '⭐ Officier' : '🎖️ Supervision'}${s.grade ? ' ('+s.grade+')' : ''}</option>`).join('');
+
+    // Preview on formation change
+    fSel.addEventListener('change', () => {
+        const f = (formations||[]).find(x => x.id === fSel.value);
+        document.getElementById('formationPreview').innerHTML = f
+            ? `<div style="font-size:22px;margin-bottom:6px">${f.icon||'📚'}</div><div style="font-weight:600;color:var(--text-bright);margin-bottom:4px">${escapeHtml(f.titre)}</div><div style="color:var(--muted)">${escapeHtml(f.description||'')}</div>`
+            : 'Sélectionnez une formation pour voir les détails.';
+    });
+}
+
+async function submitRdv() {
+    const alertEl = document.getElementById('bookAlert');
+    alertEl.style.display = 'none';
+    const formation = document.getElementById('rdvFormation').value;
+    const supervisor = document.getElementById('rdvSupervisor').value;
+    const date = document.getElementById('rdvDate').value;
+    const notes = document.getElementById('rdvNotes').value.trim();
+
+    if (!formation || !supervisor || !date) {
+        alertEl.innerHTML = '<div class="t-alert ta-danger">⚠️ Veuillez remplir tous les champs obligatoires.</div>';
+        alertEl.style.display = 'block';
+        return;
+    }
+
+    const btn = document.getElementById('submitRdvBtn');
+    btn.disabled = true; btn.textContent = 'Envoi...';
+
+    const { error } = await supabase.from('table_policefed_rdv').insert({
+        agent_id: currentUser.id,
+        supervisor_id: supervisor,
+        formation_id: formation,
+        date_rdv: new Date(date).toISOString(),
+        notes_agent: notes || null
+    });
+
+    btn.disabled = false; btn.innerHTML = '📅 Envoyer la Demande';
+
+    if (!error) {
+        document.getElementById('bookSuccess').style.display = 'flex';
+        document.getElementById('rdvFormation').value = '';
+        document.getElementById('rdvSupervisor').value = '';
+        document.getElementById('rdvDate').value = '';
+        document.getElementById('rdvNotes').value = '';
+        await createLog('RDV_DEMANDE', `${currentUser.prenom} ${currentUser.nom} a demandé un RDV`);
+        await createNotification(supervisor, 'rdv', '📅 Nouvelle Demande de RDV', `${currentUser.prenom} ${currentUser.nom} souhaite un rendez-vous.`, null, 'rdv');
+        setTimeout(() => document.getElementById('bookSuccess').style.display = 'none', 4000);
+    } else {
+        alertEl.innerHTML = `<div class="t-alert ta-danger">⚠️ Erreur : ${error.message}</div>`;
+        alertEl.style.display = 'block';
+    }
+}
+
+async function loadMyRdv() {
+    const statusFilter = document.getElementById('filterStatus').value;
+    let q = supabase.from('table_policefed_rdv')
+        .select('*, supervisor:supervisor_id(prenom,nom,grade,role), formation:formation_id(titre,icon)')
+        .eq('agent_id', currentUser.id)
+        .order('created_at', { ascending: false });
+    if (statusFilter) q = q.eq('status', statusFilter);
+
+    const { data } = await q;
+    const list = data || [];
+    const tbody = document.getElementById('myRdvTable');
+
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">Aucun rendez-vous trouvé.</div></td></tr>`;
+        return;
+    }
+    const sm = STATUS_MAP;
+    tbody.innerHTML = list.map(r => `
+        <tr>
+            <td>
+                <strong>${r.formation?.icon||'📚'} ${escapeHtml(r.formation?.titre||'—')}</strong>
+            </td>
+            <td>
+                ${escapeHtml(r.supervisor?.prenom||'')} ${escapeHtml(r.supervisor?.nom||'—')}
+                <br><span style="font-size:10px;color:var(--muted)">${r.supervisor?.role==='officier'?'⭐':'🎖️'} ${r.supervisor?.grade||r.supervisor?.role||''}</span>
+            </td>
+            <td style="font-size:11px">${r.date_rdv ? formatDateFull(r.date_rdv) : '—'}</td>
+            <td><span class="status-badge ${(sm[r.status]||sm.en_attente).cls}">${(sm[r.status]||sm.en_attente).label}</span></td>
+            <td style="font-size:11px;max-width:180px">${r.notes_supervisor ? `<em style="color:var(--muted)">"${escapeHtml(r.notes_supervisor)}"</em>` : '—'}</td>
+            <td>
+                ${r.status === 'en_attente' ? `<button class="btn btn-danger btn-sm" onclick="cancelRdv('${r.id}')">✕ Annuler</button>` : ''}
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function cancelRdv(id) {
+    if (!confirm('Annuler ce rendez-vous ?')) return;
+    await supabase.from('table_policefed_rdv').update({ status:'annule', updated_at: new Date().toISOString() }).eq('id', id);
+    await loadMyRdv();
+    showToast('✅', 'Rendez-vous annulé.', 'success');
+}
+
+loadFormData();
+loadMyRdv();
+</script>
+</body>
+</html>
