@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_users (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_users DISABLE ROW LEVEL SECURITY;
 
 -- Table des plaintes
 CREATE TABLE IF NOT EXISTS table_policefed_complaints (
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_complaints (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_complaints DISABLE ROW LEVEL SECURITY;
 
 -- Table des messages de plainte
 CREATE TABLE IF NOT EXISTS table_policefed_complaint_messages (
@@ -41,6 +43,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_complaint_messages (
     file_type VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_complaint_messages DISABLE ROW LEVEL SECURITY;
 
 -- Table des dossiers de recrutement
 CREATE TABLE IF NOT EXISTS table_policefed_recruitments (
@@ -56,6 +59,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_recruitments (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_recruitments DISABLE ROW LEVEL SECURITY;
 
 -- Table des messages de recrutement
 CREATE TABLE IF NOT EXISTS table_policefed_recruitment_messages (
@@ -68,6 +72,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_recruitment_messages (
     file_type VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_recruitment_messages DISABLE ROW LEVEL SECURITY;
 
 -- Table des notifications
 CREATE TABLE IF NOT EXISTS table_policefed_notifications (
@@ -81,6 +86,7 @@ CREATE TABLE IF NOT EXISTS table_policefed_notifications (
     related_type VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_notifications DISABLE ROW LEVEL SECURITY;
 
 -- Table des logs système (Officier uniquement)
 CREATE TABLE IF NOT EXISTS table_policefed_logs (
@@ -92,9 +98,11 @@ CREATE TABLE IF NOT EXISTS table_policefed_logs (
     ip_address VARCHAR(100),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE table_policefed_logs DISABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- Activer le Realtime pour les tables importantes
+-- (ignorer les erreurs si déjà ajoutées)
 -- ============================================================
 ALTER PUBLICATION supabase_realtime ADD TABLE table_policefed_notifications;
 ALTER PUBLICATION supabase_realtime ADD TABLE table_policefed_complaint_messages;
@@ -103,14 +111,12 @@ ALTER PUBLICATION supabase_realtime ADD TABLE table_policefed_complaints;
 ALTER PUBLICATION supabase_realtime ADD TABLE table_policefed_recruitments;
 
 -- ============================================================
--- Bucket de stockage pour les fichiers/photos
--- Créer via le dashboard Supabase: Storage > New Bucket
--- Nom: pfl-uploads  |  Public: true
--- ============================================================
-
--- ============================================================
--- Compte admin de démonstration (à supprimer en production)
+-- Compte admin (officier)
+-- username: admin | password: Admin1234!
 -- ============================================================
 INSERT INTO table_policefed_users (nom, prenom, username, password, role, grade, matricule)
 VALUES ('Admin', 'Système', 'admin', 'Admin1234!', 'officier', 'Commissaire Général', 'MAT-0001')
-ON CONFLICT (username) DO NOTHING;
+ON CONFLICT (username) DO UPDATE SET
+    role = 'officier',
+    is_active = true,
+    password = 'Admin1234!';

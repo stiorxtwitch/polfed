@@ -74,7 +74,7 @@ async function login(username, password) {
             .eq('username', username)
             .eq('password', password)
             .eq('is_active', true)
-            .single();
+            .maybeSingle();
 
         if (error || !data) {
             hideLoading();
@@ -101,7 +101,7 @@ async function register(nom, prenom, username, password) {
             .from('table_policefed_users')
             .select('id')
             .eq('username', username)
-            .single();
+            .maybeSingle();
 
         if (existing) {
             hideLoading();
