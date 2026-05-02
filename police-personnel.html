@@ -22,6 +22,7 @@
             <a href="index.html">Accueil</a>
             <a href="police-complaints.html">📋 Plaintes</a>
             <a href="police-recruitment.html">📝 Recrutement</a>
+            <a href="police-dispatch.html">📡 Dispatch</a>
             <a href="police-personnel.html" class="active">👥 Personnel</a>
             <a href="police-logs.html">🗂️ Logs</a>
         </nav>
@@ -33,17 +34,44 @@
     </div>
 </header>
 
-<div style="padding:28px 24px;max-width:1300px;margin:0 auto">
+<div style="padding:28px 24px;max-width:1400px;margin:0 auto">
+
     <!-- Stats -->
     <div id="statsRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px"></div>
 
+    <!-- Currently on service panel -->
+    <div class="card" style="margin-bottom:28px;border-top:4px solid var(--success)">
+        <div class="card-header" style="background:var(--success);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border:none;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700">🟢 Personnel Actuellement en Service</span>
+            <span id="serviceCount" style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:20px;font-size:0.82rem;font-weight:700">0</span>
+        </div>
+        <div class="table-wrapper" style="border-radius:0 0 var(--radius-lg) var(--radius-lg)">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Grade / Matricule</th>
+                        <th>Rôle</th>
+                        <th>En service depuis</th>
+                        <th>Durée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="serviceTable">
+                    <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Chargement...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start" id="mainGrid">
+
         <!-- Personnel list -->
         <div>
             <div class="card-header" style="background:var(--primary);color:var(--white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border:none">
                 <span style="font-weight:700">👥 Effectifs de la Police</span>
                 <div style="display:flex;gap:8px;align-items:center">
-                    <input type="text" id="searchInput" placeholder="Rechercher..." style="padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.85rem;outline:none" oninput="filterPersonnel(this.value)" placeholder="Rechercher...">
+                    <input type="text" id="searchInput" placeholder="Rechercher..." style="padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.85rem;outline:none" oninput="filterPersonnel(this.value)">
                     <select id="roleFilter" style="padding:6px 10px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.85rem;outline:none" onchange="filterPersonnel()">
                         <option value="all">Tous</option>
                         <option value="officier">Officier</option>
@@ -60,12 +88,13 @@
                             <th>Grade</th>
                             <th>Matricule</th>
                             <th>Rôle</th>
-                            <th>Statut</th>
+                            <th>Statut Compte</th>
+                            <th>Service</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="personnelTable">
-                        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Chargement...</td></tr>
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Chargement...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -73,9 +102,7 @@
 
         <!-- Create form -->
         <div class="card" style="position:sticky;top:90px">
-            <div class="card-header">
-                <span class="card-title">➕ Nouveau Profil Policier</span>
-            </div>
+            <div class="card-header"><span class="card-title">➕ Nouveau Profil Policier</span></div>
             <div class="card-body">
                 <div id="personnelAlert" style="display:none" class="alert alert-danger"></div>
                 <form id="personnelForm" onsubmit="createOfficer(event)">
@@ -160,6 +187,36 @@
     </div>
 </div>
 
+<!-- Modal pointage history -->
+<div class="modal-overlay" id="pointageModal">
+    <div class="modal" style="max-width:680px">
+        <div class="modal-header">
+            <span class="modal-title" id="pointageModalTitle">🕐 Historique Service</span>
+            <span class="modal-close" onclick="closePointageModal()">×</span>
+        </div>
+        <div class="modal-body" style="padding:0">
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Durée</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pointageTable">
+                        <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-dark btn-sm" onclick="closePointageModal()">Fermer</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="js/main.js"></script>
@@ -170,6 +227,13 @@
 
     let personnel = [];
 
+    function formatDurationFromMinutes(min) {
+        if (!min && min !== 0) return '—';
+        const h = Math.floor(min / 60);
+        const m = min % 60;
+        return h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`;
+    }
+
     async function loadPersonnel() {
         const { data } = await supabase
             .from('table_policefed_users')
@@ -179,19 +243,79 @@
         personnel = data || [];
         renderPersonnel();
         renderStats();
+        renderServiceTable();
     }
 
     function renderStats() {
         const officiers = personnel.filter(p => p.role === 'officier').length;
         const superviseurs = personnel.filter(p => p.role === 'supervision').length;
         const agents = personnel.filter(p => p.role === 'agent').length;
-        const civils = personnel.filter(p => p.role === 'civil').length;
+        const onService = personnel.filter(p => p.en_service && p.role !== 'civil').length;
         document.getElementById('statsRow').innerHTML = `
             <div class="stat-card"><div class="stat-icon stat-icon-red">⭐</div><div><div class="stat-value">${officiers}</div><div class="stat-label">Officiers</div></div></div>
             <div class="stat-card"><div class="stat-icon stat-icon-gold">🎖️</div><div><div class="stat-value">${superviseurs}</div><div class="stat-label">Superviseurs</div></div></div>
             <div class="stat-card"><div class="stat-icon stat-icon-blue">👮</div><div><div class="stat-value">${agents}</div><div class="stat-label">Agents</div></div></div>
-            <div class="stat-card"><div class="stat-icon" style="background:#f1f5f9">👤</div><div><div class="stat-value">${civils}</div><div class="stat-label">Civils</div></div></div>
+            <div class="stat-card"><div class="stat-icon stat-icon-green">🟢</div><div><div class="stat-value">${onService}</div><div class="stat-label">En Service</div></div></div>
         `;
+    }
+
+    function renderServiceTable() {
+        const onService = personnel.filter(p => p.en_service && p.role !== 'civil');
+        const count = document.getElementById('serviceCount');
+        const tbody = document.getElementById('serviceTable');
+        count.textContent = onService.length;
+
+        if (onService.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun agent en service.</td></tr>`;
+            return;
+        }
+        const now = Date.now();
+        tbody.innerHTML = onService.map(p => {
+            const start = p.service_start ? new Date(p.service_start).getTime() : 0;
+            const durMin = start ? Math.round((now - start) / 60000) : null;
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">@${escapeHtml(p.username)}</span></td>
+                    <td>${escapeHtml(p.grade || '—')}<br><span style="font-size:0.75rem;color:var(--text-muted)">${escapeHtml(p.matricule || '')}</span></td>
+                    <td>${roleBadge(p.role)}</td>
+                    <td style="font-size:0.82rem">${p.service_start ? formatDateFull(p.service_start) : '—'}</td>
+                    <td><span style="font-family:monospace;font-size:0.85rem;color:var(--success);font-weight:600">${formatDurationFromMinutes(durMin)}</span></td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="forceStopService('${p.id}', '${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}')">🛑 Fin Forcée</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function forceStopService(targetId, targetName) {
+        if (!confirm(`⚠️ Forcer la fin de service de ${targetName} ?\n\nCette action sera enregistrée dans les logs.`)) return;
+        showLoading();
+        const target = personnel.find(p => p.id === targetId);
+        if (target?.en_service && target?.service_start) {
+            const start = new Date(target.service_start).getTime();
+            const durationMin = Math.round((Date.now() - start) / 60000);
+            const { error } = await supabase.from('table_policefed_users').update({
+                en_service: false,
+                service_start: null,
+                dispatch_unit: null
+            }).eq('id', targetId);
+            if (!error) {
+                await supabase.from('table_policefed_pointage').insert({
+                    user_id: targetId,
+                    checked_in_at: target.service_start,
+                    checked_out_at: new Date().toISOString(),
+                    duration_minutes: durationMin,
+                    forced_by: user.id,
+                    notes: `Fin forcée par ${user.prenom} ${user.nom} (${user.grade || user.role})`
+                });
+                await createLog('FIN_SERVICE_FORCEE', `${user.prenom} ${user.nom} a forcé la fin de service de ${targetName} (durée: ${formatDurationFromMinutes(durationMin)})`);
+                await createNotification(targetId, 'service', '🛑 Fin de Service', `Votre service a été terminé de force par ${user.prenom} ${user.nom}`, null, 'system');
+                showToast('✅ Service arrêté', `Le service de ${targetName} a été terminé (${formatDurationFromMinutes(durationMin)}).`, 'success');
+            }
+        }
+        hideLoading();
+        await loadPersonnel();
     }
 
     function renderPersonnel(filter = '', roleF = 'all') {
@@ -202,16 +326,33 @@
             const name = `${p.prenom} ${p.nom} ${p.username}`.toLowerCase();
             return (roleFilter === 'all' || p.role === roleFilter) && (!q || name.includes(q));
         });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Aucun résultat</td></tr>`; return; }
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Aucun résultat</td></tr>`;
+            return;
+        }
         tbody.innerHTML = filtered.map(p => `
             <tr>
-                <td><strong>${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</strong><br><span style="font-size:0.78rem;color:var(--text-muted)">@${escapeHtml(p.username)}</span></td>
+                <td>
+                    <strong>${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</strong>
+                    ${p.en_service ? ' <span class="badge badge-success" style="font-size:0.68rem">● EN SERVICE</span>' : ''}
+                    <br><span style="font-size:0.78rem;color:var(--text-muted)">@${escapeHtml(p.username)}</span>
+                </td>
                 <td>${escapeHtml(p.grade || '—')}</td>
                 <td>${escapeHtml(p.matricule || '—')}</td>
                 <td>${roleBadge(p.role)}</td>
                 <td><span class="badge ${p.is_active ? 'badge-success' : 'badge-danger'}">${p.is_active ? '● Actif' : '○ Désactivé'}</span></td>
                 <td>
+                    ${p.role !== 'civil' ? `
+                        ${p.en_service
+                            ? `<span style="color:var(--success);font-size:0.8rem;font-weight:600">🟢 ${p.service_start ? formatDate(p.service_start) : 'En service'}</span>`
+                            : `<span style="color:var(--text-muted);font-size:0.8rem">○ Hors service</span>`
+                        }
+                    ` : '—'}
+                </td>
+                <td style="display:flex;gap:5px;flex-wrap:wrap">
                     <button class="btn btn-outline-dark btn-sm" onclick="openEdit('${p.id}')">✏️ Modifier</button>
+                    ${p.role !== 'civil' ? `<button class="btn btn-secondary btn-sm" onclick="openPointage('${p.id}', '${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}')">🕐 Service</button>` : ''}
+                    ${p.en_service && p.role !== 'civil' ? `<button class="btn btn-danger btn-sm" onclick="forceStopService('${p.id}', '${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}')">🛑</button>` : ''}
                 </td>
             </tr>
         `).join('');
@@ -228,8 +369,7 @@
         if (existing) { alertEl.style.display = 'flex'; alertEl.innerHTML = "⚠️ Ce nom d'utilisateur existe déjà."; return; }
 
         const btn = document.getElementById('createBtn');
-        btn.disabled = true;
-        btn.textContent = 'Création...';
+        btn.disabled = true; btn.textContent = 'Création...';
         showLoading();
 
         const { data, error } = await supabase.from('table_policefed_users').insert({
@@ -246,14 +386,12 @@
         if (error) {
             alertEl.style.display = 'flex';
             alertEl.innerHTML = `⚠️ Erreur : ${error.message}`;
-            btn.disabled = false;
-            btn.innerHTML = '➕ Créer le Profil';
+            btn.disabled = false; btn.innerHTML = '➕ Créer le Profil';
         } else {
             showToast('✅ Profil créé', `${data.prenom} ${data.nom} ajouté avec succès.`, 'success');
             await createLog('CREATION_PROFIL', `${user.prenom} ${user.nom} a créé le profil ${data.prenom} ${data.nom} (${data.role})`);
             document.getElementById('personnelForm').reset();
-            btn.disabled = false;
-            btn.innerHTML = '➕ Créer le Profil';
+            btn.disabled = false; btn.innerHTML = '➕ Créer le Profil';
             await loadPersonnel();
         }
     }
@@ -296,6 +434,38 @@
             document.getElementById('editAlert').innerHTML = `⚠️ ${error.message}`;
         }
     }
+
+    async function openPointage(targetId, targetName) {
+        document.getElementById('pointageModalTitle').textContent = `🕐 Historique Service — ${targetName}`;
+        document.getElementById('pointageModal').classList.add('active');
+        document.getElementById('pointageTable').innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Chargement...</td></tr>`;
+        const { data } = await supabase
+            .from('table_policefed_pointage')
+            .select('*')
+            .eq('user_id', targetId)
+            .order('checked_in_at', { ascending: false })
+            .limit(20);
+        const list = data || [];
+        if (list.length === 0) {
+            document.getElementById('pointageTable').innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Aucune session enregistrée.</td></tr>`;
+            return;
+        }
+        document.getElementById('pointageTable').innerHTML = list.map(s => `
+            <tr>
+                <td style="font-size:0.82rem">${formatDateFull(s.checked_in_at)}</td>
+                <td style="font-size:0.82rem">${s.checked_out_at ? formatDateFull(s.checked_out_at) : '<span style="color:var(--success)">● En cours</span>'}</td>
+                <td><span style="font-family:monospace;font-weight:600;color:var(--primary)">${formatDurationFromMinutes(s.duration_minutes)}</span></td>
+                <td style="font-size:0.8rem;color:var(--text-muted)">${s.notes ? `<span style="color:var(--warning)">⚠️ ${escapeHtml(s.notes)}</span>` : '—'}</td>
+            </tr>
+        `).join('');
+    }
+
+    function closePointageModal() { document.getElementById('pointageModal').classList.remove('active'); }
+
+    // Close modals on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+    });
 
     loadPersonnel();
 </script>
