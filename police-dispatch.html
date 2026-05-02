@@ -447,13 +447,13 @@ renderAuthNav('police-dispatch.html');
 let currentUnitNum = null;
 const UNIT_COUNT = 8;
 
-const ROLE_LABELS = {
+const DISPATCH_ROLE_LABELS = {
     officier: 'Officier',
     supervision: 'Supervision',
     agent: 'Agent'
 };
 
-const STATUS_LABELS = {
+const DISPATCH_STATUS_LABELS = {
     disponible: 'Disponible',
     en_route: 'En Route...',
     patrouille: 'En Patrouille',
@@ -504,7 +504,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // Show user info
-document.getElementById('userLabel').textContent = `${currentUser.prenom} ${currentUser.nom} — ${ROLE_LABELS[currentUser.role] || currentUser.role}`;
+document.getElementById('userLabel').textContent = `${currentUser.prenom} ${currentUser.nom} — ${DISPATCH_ROLE_LABELS[currentUser.role] || currentUser.role}`;
 if ((ROLES_LEVEL[currentUser.role] || 0) >= 3) document.getElementById('resetBtn').style.display = 'block';
 
 // Build unit cards
@@ -530,7 +530,7 @@ function buildUnitHTML(u) {
     const vInfo = VEHICLE_INFO[vehicle] || VEHICLE_INFO[''];
     const callsign = getCallsign(vehicle, num);
     const vehicleLabel = vehicle || 'Aucun véhicule assigné';
-    const statusBadge = `<span class="unit-status-badge badge-${statut}">${STATUS_LABELS[statut] || statut}</span>`;
+    const statusBadge = `<span class="unit-status-badge badge-${statut}">${DISPATCH_STATUS_LABELS[statut] || statut}</span>`;
     const locOptions = LOCATIONS.map(l => `<option value="${l}" ${l === localisation ? 'selected' : ''}>${l || '— Localisation —'}</option>`).join('');
     const zipDisplay = zip ? `<span class="zip-display">${zip}</span>` : '';
     return `
@@ -628,7 +628,7 @@ function createStaffCard(u) {
     div.dataset.userId = u.id;
     div.innerHTML = `
         <div class="staff-name">${escapeHtml(u.prenom)} ${escapeHtml(u.nom)}</div>
-        <div class="staff-role"><span class="role-dot"></span>${ROLE_LABELS[u.role] || u.role || 'Agent'}</div>
+        <div class="staff-role"><span class="role-dot"></span>${DISPATCH_ROLE_LABELS[u.role] || u.role || 'Agent'}</div>
         ${u.matricule ? `<div class="staff-matricule">${escapeHtml(u.matricule)}</div>` : ''}
     `;
     div.addEventListener('dblclick', () => openStaffModal(u.id));
@@ -679,7 +679,7 @@ function renderMapMarkers(units, users) {
             const members = users.filter(x => x.dispatch_unit === u.num && x.en_service).map(x => `${x.prenom} ${x.nom}`).join(', ') || 'Aucun';
             const zipInfo = u.zip ? `<br><span style="color:#fcd34d;font-weight:700">ZIP: ${u.zip}</span>` : '';
             marker.innerHTML = `<div class="marker-pulse"></div><div class="marker-body">${u.num}</div>
-                <div class="marker-label"><strong>${callsign}</strong><br>${STATUS_LABELS[u.statut || 'hors_service']}<br>
+                <div class="marker-label"><strong>${callsign}</strong><br>${DISPATCH_STATUS_LABELS[u.statut || 'hors_service']}<br>
                 <span style="color:var(--muted);font-size:9px">${loc}</span>${zipInfo}<br>
                 <span style="font-size:9px">${members}</span></div>`;
             container.appendChild(marker);
@@ -732,7 +732,7 @@ async function openStaffModal(id) {
         <div class="info-block"><div class="lbl">Nom</div><div class="val">${escapeHtml(u.nom)}</div></div>
         <div class="info-block"><div class="lbl">Grade</div><div class="val">${escapeHtml(u.grade || '—')}</div></div>
         <div class="info-block"><div class="lbl">Matricule</div><div class="val">${escapeHtml(u.matricule || '—')}</div></div>
-        <div class="info-block"><div class="lbl">Rôle</div><div class="val">${ROLE_LABELS[u.role] || u.role}</div></div>
+        <div class="info-block"><div class="lbl">Rôle</div><div class="val">${DISPATCH_ROLE_LABELS[u.role] || u.role}</div></div>
         <div class="info-block"><div class="lbl">Statut Service</div><div class="val" style="color:var(--green)">${u.en_service ? '✓ En Service' : 'Hors Service'}</div></div>
     `;
     document.getElementById('modal-staff').classList.add('active');
