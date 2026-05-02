@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Opérationnel — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #020810;
+            --green:    #00ff88;
+            --green-dim:#00ff8822;
+            --green-mid:#00ff8855;
+            --gold:     #c9a227;
+            --gold-dim: rgba(201,162,39,0.15);
+            --blue:     #1a56db;
+            --blue-dim: rgba(26,86,219,0.15);
+            --red:      #ff3333;
+            --text:     #a8c8e0;
+            --muted:    #3a6080;
+            --white:    #e8f4ff;
+        }
+
+        html, body {
+            height: 100%; background: var(--bg);
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--green); overflow: hidden;
+        }
+
+        /* ── SCAN LINES ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,255,136,0.012) 2px,
+                rgba(0,255,136,0.012) 4px
+            );
+        }
+        /* moving scan beam */
+        body::after {
+            content: '';
+            position: fixed; left: 0; right: 0; height: 3px; z-index: 1; pointer-events: none;
+            background: linear-gradient(90deg, transparent, var(--green-mid), var(--green), var(--green-mid), transparent);
+            animation: scanBeam 4s linear infinite;
+            opacity: 0.35;
+        }
+        @keyframes scanBeam {
+            0%   { top: -3px; }
+            100% { top: 100%; }
+        }
+
+        /* ── GRID BG ── */
+        .grid-bg {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(0,255,136,0.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,136,0.028) 1px, transparent 1px);
+            background-size: 44px 44px;
+            animation: gridShift 60s linear infinite;
+        }
+        @keyframes gridShift { 0%{background-position:0 0} 100%{background-position:44px 44px} }
+
+        /* ── VIGNETTE ── */
+        .vignette {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(2,8,16,0.85) 100%);
+        }
+
+        /* ── WRAPPER ── */
+        .wrapper {
+            position: relative; z-index: 2;
+            height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px;
+        }
+
+        /* ══════════════════════════════
+           PHASE 1 : TERMINAL SCAN
+        ══════════════════════════════ */
+        #phase-scan {
+            width: 100%; max-width: 640px;
+            opacity: 1; transition: opacity 0.5s;
+        }
+        #phase-scan.hidden { opacity: 0; pointer-events: none; }
+
+        .terminal-box {
+            border: 1px solid var(--green-mid);
+            border-radius: 4px;
+            background: rgba(0,255,136,0.025);
+            box-shadow: 0 0 40px rgba(0,255,136,0.06), inset 0 0 30px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .terminal-title {
+            background: var(--green-dim);
+            border-bottom: 1px solid var(--green-mid);
+            padding: 10px 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .term-dots { display: flex; gap: 6px; }
+        .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .term-dot:nth-child(1) { background: #ff5f57; }
+        .term-dot:nth-child(2) { background: #febc2e; }
+        .term-dot:nth-child(3) { background: #28c840; }
+        .term-label {
+            font-size: 11px; letter-spacing: 3px; color: rgba(0,255,136,0.5);
+            text-transform: uppercase; margin-left: auto;
+        }
+
+        .terminal-body { padding: 22px 24px 24px; min-height: 280px; }
+
+        .term-header {
+            display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+            padding-bottom: 16px; border-bottom: 1px solid rgba(0,255,136,0.12);
+        }
+        .term-shield {
+            width: 48px; height: 56px; object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(0,255,136,0.35));
+            animation: shieldPulse 2s ease-in-out infinite;
+        }
+        @keyframes shieldPulse { 0%,100%{filter:drop-shadow(0 0 12px rgba(0,255,136,0.35))} 50%{filter:drop-shadow(0 0 22px rgba(0,255,136,0.7))} }
+        .term-sys {
+            flex: 1;
+        }
+        .term-sys-title {
+            font-size: 14px; font-weight: 700; letter-spacing: 4px;
+            color: var(--green); text-shadow: 0 0 12px var(--green);
+        }
+        .term-sys-sub { font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-top: 3px; }
+
+        .term-line {
+            font-size: 12px; line-height: 1.9; letter-spacing: 0.5px;
+            opacity: 0; transform: translateY(4px);
+            transition: opacity 0.2s, transform 0.2s;
+            white-space: pre;
+        }
+        .term-line.visible { opacity: 1; transform: translateY(0); }
+        .term-line.ok   .marker { color: var(--green); }
+        .term-line.warn .marker { color: var(--gold); }
+        .term-line.err  .marker { color: var(--red); }
+        .marker { margin-right: 8px; }
+        .val { color: var(--white); font-weight: 600; }
+
+        .cursor-blink {
+            display: inline-block; width: 8px; height: 14px;
+            background: var(--green); vertical-align: middle;
+            animation: blink 0.9s step-end infinite; margin-left: 3px;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* Result line */
+        .term-result {
+            margin-top: 18px; padding: 10px 14px;
+            border: 1px solid; border-radius: 2px;
+            font-size: 13px; letter-spacing: 2px; text-align: center;
+            opacity: 0; transition: opacity 0.4s 0.1s;
+        }
+        .term-result.visible { opacity: 1; }
+        .term-result.ok  { border-color: var(--green); background: rgba(0,255,136,0.07); color: var(--green); text-shadow: 0 0 8px var(--green); }
+        .term-result.err { border-color: var(--red);   background: rgba(255,51,51,0.07);  color: var(--red); }
+
+        /* ══════════════════════════════
+           PHASE 2 : PORTAIL
+        ══════════════════════════════ */
+        #phase-portal {
+            width: 100%; max-width: 860px;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.6s, transform 0.6s;
+            pointer-events: none; position: absolute;
+        }
+        #phase-portal.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+        .portal-header { text-align: center; margin-bottom: 36px; }
+        .portal-shield {
+            width: 64px; height: 74px; object-fit: contain; margin: 0 auto 14px;
+            filter: drop-shadow(0 0 18px rgba(201,162,39,0.5));
+            animation: goldPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes goldPulse { 0%,100%{filter:drop-shadow(0 0 16px rgba(201,162,39,0.4))} 50%{filter:drop-shadow(0 0 30px rgba(201,162,39,0.75))} }
+        .portal-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px; font-weight: 700; letter-spacing: 6px;
+            color: var(--white); text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(201,162,39,0.3);
+        }
+        .portal-subtitle {
+            font-size: 11px; letter-spacing: 3px; color: var(--muted);
+            text-transform: uppercase; margin-top: 5px;
+        }
+
+        .user-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            margin: 14px auto 0; padding: 8px 18px;
+            border: 1px solid var(--gold-dim); border-radius: 2px;
+            background: var(--gold-dim);
+        }
+        .user-badge-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(201,162,39,0.25); border: 1.5px solid var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold);
+        }
+        .user-badge-name { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600; color: var(--white); letter-spacing: 1px; }
+        .user-badge-role { font-size: 10px; letter-spacing: 2px; color: var(--gold); }
+
+        /* Access cards */
+        .portal-cards {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+        @media (max-width: 600px) { .portal-cards { grid-template-columns: 1fr; } }
+
+        .access-card {
+            position: relative; overflow: hidden;
+            border: 1px solid; border-radius: 6px;
+            padding: 36px 28px 32px;
+            cursor: pointer; transition: all 0.25s;
+            text-decoration: none; display: block;
+        }
+        .access-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .access-card::after {
+            content: ''; position: absolute; inset: 0;
+            opacity: 0; transition: opacity 0.25s;
+        }
+        .access-card:hover::after { opacity: 1; }
+
+        /* Pointage card */
+        .card-pointage {
+            border-color: rgba(0,255,136,0.2);
+            background: rgba(0,255,136,0.03);
+        }
+        .card-pointage::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+        .card-pointage::after { background: radial-gradient(ellipse at center, rgba(0,255,136,0.06) 0%, transparent 70%); }
+        .card-pointage:hover { border-color: rgba(0,255,136,0.5); box-shadow: 0 0 30px rgba(0,255,136,0.1); transform: translateY(-3px); }
+
+        /* Dispatch card */
+        .card-dispatch {
+            border-color: rgba(26,86,219,0.25);
+            background: rgba(26,86,219,0.04);
+        }
+        .card-dispatch::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+        .card-dispatch::after { background: radial-gradient(ellipse at center, rgba(26,86,219,0.08) 0%, transparent 70%); }
+        .card-dispatch:hover:not(.locked) { border-color: rgba(26,86,219,0.55); box-shadow: 0 0 30px rgba(26,86,219,0.12); transform: translateY(-3px); }
+
+        /* Locked state */
+        .card-dispatch.locked {
+            opacity: 0.42; cursor: not-allowed; filter: grayscale(0.4);
+        }
+        .card-dispatch.locked:hover { transform: none; box-shadow: none; }
+        .lock-overlay {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(255,51,51,0.12); border: 1px solid rgba(255,51,51,0.3);
+            border-radius: 2px; padding: 3px 8px;
+            font-size: 10px; letter-spacing: 2px; color: #ff6666;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .card-icon { font-size: 3rem; margin-bottom: 14px; display: block; line-height: 1; }
+        .card-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        .card-pointage .card-title { color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
+        .card-dispatch .card-title { color: #6699ff; text-shadow: 0 0 10px rgba(26,86,219,0.3); }
+        .card-dispatch.locked .card-title { color: var(--muted); text-shadow: none; }
+
+        .card-desc {
+            font-size: 12px; letter-spacing: 0.5px;
+            line-height: 1.7; color: rgba(168,200,224,0.65);
+            margin-bottom: 20px;
+        }
+        .card-cta {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+        }
+        .card-pointage .card-cta { color: var(--green); }
+        .card-dispatch .card-cta  { color: #6699ff; }
+        .card-dispatch.locked .card-cta { color: var(--muted); }
+        .cta-arrow { transition: transform 0.2s; }
+        .access-card:hover:not(.locked) .cta-arrow { transform: translateX(5px); }
+
+        /* Clearance badge on dispatch */
+        .clearance-badge {
+            display: inline-block; margin-top: 12px;
+            padding: 3px 10px; border-radius: 2px;
+            font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .clr-supervision { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
+        .clr-agent       { background: rgba(107,114,128,0.12); border: 1px solid rgba(107,114,128,0.3); color: var(--muted); }
+
+        /* Divider corner decoration */
+        .corner-tl, .corner-br {
+            position: absolute; width: 14px; height: 14px;
+            border-color: inherit; border-style: solid; opacity: 0.5;
+        }
+        .corner-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+        .corner-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+        /* Back link */
+        .back-link {
+            text-align: center; margin-top: 22px;
+            font-size: 11px; letter-spacing: 2px; color: var(--muted);
+        }
+        .back-link a {
+            color: var(--muted); text-decoration: none;
+            transition: color 0.2s; border-bottom: 1px solid transparent;
+        }
+        .back-link a:hover { color: var(--text); border-bottom-color: var(--muted); }
+
+        /* Error state */
+        #phase-error {
+            width: 100%; max-width: 500px; text-align: center;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity 0.5s, transform 0.5s;
+            pointer-events: none; position: absolute;
+        }
+        #phase-error.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .error-box {
+            border: 1px solid rgba(255,51,51,0.3); border-radius: 4px;
+            background: rgba(255,51,51,0.04); padding: 36px 32px;
+        }
+        .error-icon { font-size: 3.5rem; margin-bottom: 16px; }
+        .error-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 3px; color: var(--red); margin-bottom: 10px; }
+        .error-msg { font-size: 12px; color: rgba(255,100,100,0.6); letter-spacing: 1px; margin-bottom: 20px; line-height: 1.7; }
+        .btn-retry {
+            display: inline-block; padding: 10px 24px;
+            border: 1px solid rgba(255,51,51,0.4); border-radius: 2px;
+            background: rgba(255,51,51,0.08); color: var(--red);
+            font-family: 'Share Tech Mono', monospace; font-size: 12px; letter-spacing: 2px;
+            text-decoration: none; transition: all 0.2s; cursor: pointer;
+        }
+        .btn-retry:hover { background: rgba(255,51,51,0.15); box-shadow: 0 0 16px rgba(255,51,51,0.15); }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="vignette"></div>
+
+<div class="wrapper">
+
+    <!-- ══ PHASE 1 : TERMINAL SCAN ══ -->
+    <div id="phase-scan">
+        <div class="terminal-box">
+            <div class="terminal-title">
+                <div class="term-dots">
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                    <div class="term-dot"></div>
+                </div>
+                <span class="term-label">SYSTÈME SÉCURISÉ — PFL/OPS v2.6</span>
+            </div>
+            <div class="terminal-body">
+                <div class="term-header">
+                    <img src="https://i.imgur.com/Pe4YRPe.png" class="term-shield" alt="PFL">
+                    <div class="term-sys">
+                        <div class="term-sys-title">POLICE FÉDÉRALE LIÈGE</div>
+                        <div class="term-sys-sub">PORTAIL OPÉRATIONNEL — ACCÈS RESTREINT</div>
+                        <div class="term-sys-sub" id="termTime" style="margin-top:4px;color:rgba(0,255,136,0.4)"></div>
+                    </div>
+                </div>
+                <div id="termLines"></div>
+                <div class="term-result" id="termResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ PHASE 2 : PORTAIL ══ -->
+    <div id="phase-portal">
+        <div class="portal-header">
+            <img src="https://i.imgur.com/Pe4YRPe.png" class="portal-shield" alt="PFL">
+            <div class="portal-title">Portail Opérationnel</div>
+            <div class="portal-subtitle">Police Fédérale Liège — Accès Interne</div>
+            <div style="display:flex;justify-content:center">
+                <div class="user-badge" id="userBadge">
+                    <div class="user-badge-avatar" id="badgeAvatar">??</div>
+                    <div>
+                        <div class="user-badge-name" id="badgeName">—</div>
+                        <div class="user-badge-role" id="badgeRole">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="portal-cards">
+
+            <!-- POINTAGE -->
+            <a href="police-pointage.html" class="access-card card-pointage" id="cardPointage">
+                <div class="corner-tl"></div>
+                <div class="corner-br"></div>
+                <span class="card-icon">🕐</span>
+                <div class="card-title">Pointage</div>
+                <div class="card-desc">Prenez ou terminez votre service. Votre statut est synchronisé en temps réel et persiste même après fermeture du site.</div>
+                <div class="card-cta">Accéder au pointage <span class="cta-arrow">→</span></div>
+            </a>
+
+            <!-- DISPATCH -->
+            <a href="police-dispatch.html" class="access-card card-dispatch" id="cardDispatch">
+                <div class="corner-tl"></div>
+                <div class="corner-br"></div>
+                <div class="lock-overlay" id="lockBadge" style="display:none">🔒 ACCÈS REFUSÉ</div>
+                <span class="card-icon">📡</span>
+                <div class="card-title">Dispatch</div>
+                <div class="card-desc">Gérez les unités en temps réel. Assignez le personnel, suivez les statuts et coordonnez les interventions sur le terrain.</div>
+                <div class="card-cta" id="dispatchCta">Accéder au dispatch <span class="cta-arrow">→</span></div>
+                <div id="dispatchClearance"></div>
+            </a>
+
+        </div>
+
+        <div class="back-link">
+            <a href="police-complaints.html">← Retour au tableau de bord police</a>
+        </div>
+    </div>
+
+    <!-- ══ PHASE 3 : ERREUR ══ -->
+    <div id="phase-error">
+        <div class="error-box">
+            <div class="error-icon">🚫</div>
+            <div class="error-title">ACCÈS REFUSÉ</div>
+            <div class="error-msg" id="errorMsg">Vous n'êtes pas autorisé à accéder à ce portail.<br>Seul le personnel de la Police Fédérale peut y accéder.</div>
+            <a href="login.html" class="btn-retry">← Retour à la connexion</a>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+    // Live clock in terminal
+    function updateTermTime() {
+        const n = new Date();
+        const pad = x => String(x).padStart(2,'0');
+        document.getElementById('termTime').textContent =
+            `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}  ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}  UTC+1`;
+    }
+    setInterval(updateTermTime, 1000);
+    updateTermTime();
+
+    const ROLE_LABELS = {
+        officier:   'Cadre Officier',
+        supervision:'Cadre Supervision',
+        agent:      'Cadre Agent'
+    };
+    const ROLE_LEVEL = { agent: 1, supervision: 2, officier: 3 };
+
+    // ── Terminal line builder ──
+    const linesEl = document.getElementById('termLines');
+    let lineDelay = 0;
+
+    function addLine(text, type = 'ok', marker = '▸', delay = 0) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const div = document.createElement('div');
+                div.className = `term-line ${type}`;
+                div.innerHTML = `<span class="marker">${marker}</span>${text}`;
+                linesEl.appendChild(div);
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => { div.classList.add('visible'); });
+                });
+                resolve();
+            }, delay);
+        });
+    }
+
+    function addBlankLine(delay) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const div = document.createElement('div');
+                div.className = 'term-line visible';
+                div.innerHTML = '&nbsp;';
+                linesEl.appendChild(div);
+                resolve();
+            }, delay);
+        });
+    }
+
+    function showResult(text, type, delay) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const el = document.getElementById('termResult');
+                el.textContent = text;
+                el.className = `term-result ${type}`;
+                requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+                resolve();
+            }, delay);
+        });
+    }
+
+    function val(v) { return `<span class="val">${v}</span>`; }
+
+    // ── Main boot sequence ──
+    async function boot() {
+        const user = getCurrentUser();
+
+        // Step 1 – Connection check
+        await addLine(`INITIALISATION DU SYSTÈME...`, 'ok', '▸', 0);
+        await addLine(`CONNEXION AU SERVEUR PFL/OPS ${val('gktawbapos[...]')}`, 'ok', '▸', 220);
+        await addLine(`PROTOCOLE DE SÉCURITÉ ${val('TLS 1.3')} — OK`, 'ok', '▸', 480);
+        await addBlankLine(720);
+
+        // Step 2 – Auth check
+        await addLine(`LECTURE JETON D'AUTHENTIFICATION...`, 'ok', '▸', 820);
+
+        if (!user) {
+            await addLine(`ERREUR — AUCUNE SESSION ACTIVE DÉTECTÉE`, 'err', '✕', 1100);
+            await showResult('⛔  AUTHENTIFICATION REQUISE', 'err', 1400);
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2200);
+            return;
+        }
+
+        await addLine(`SESSION ACTIVE — ID ${val(user.id?.slice(0,8)?.toUpperCase() + '...')}`, 'ok', '▸', 1050);
+        await addBlankLine(1250);
+
+        // Step 3 – Identity
+        await addLine(`VÉRIFICATION DE L'IDENTITÉ...`, 'ok', '▸', 1350);
+        await addLine(`NOM        ${val(user.nom?.toUpperCase())}`, 'ok', '▸', 1600);
+        await addLine(`PRÉNOM     ${val(user.prenom)}`, 'ok', '▸', 1820);
+        await addLine(`USERNAME   ${val('@' + user.username)}`, 'ok', '▸', 2030);
+
+        const grade = user.grade || '—';
+        const matricule = user.matricule || '—';
+        await addLine(`GRADE      ${val(grade)}`, 'ok', '▸', 2250);
+        await addLine(`MATRICULE  ${val(matricule)}`, 'ok', '▸', 2460);
+        await addBlankLine(2650);
+
+        // Step 4 – Role check
+        await addLine(`ANALYSE DES PERMISSIONS...`, 'ok', '▸', 2750);
+        await addLine(`RÔLE       ${val(ROLE_LABELS[user.role] || user.role?.toUpperCase() || '?')}`, 'ok', '▸', 3000);
+
+        // Reject civilians
+        if (user.role === 'civil' || !ROLE_LEVEL[user.role]) {
+            await addLine(`NIVEAU D'ACCÈS — ${val('INSUFFISANT')}`, 'err', '✕', 3200);
+            await addLine(`RÉSERVÉ AU PERSONNEL DE LA POLICE FÉDÉRALE`, 'err', '✕', 3450);
+            await showResult('⛔  ACCÈS REFUSÉ — PERSONNEL AUTORISÉ UNIQUEMENT', 'err', 3700);
+            setTimeout(() => {
+                document.getElementById('phase-scan').classList.add('hidden');
+                document.getElementById('phase-error').classList.add('visible');
+                document.getElementById('errorMsg').textContent = `Le compte "${user.username}" est un compte civil.\nCe portail est réservé au personnel assermenté de la Police Fédérale de Liège.`;
+            }, 4400);
+            return;
+        }
+
+        const level = ROLE_LEVEL[user.role] || 0;
+        const levelStr = level >= 3 ? 'OFFICIER [3]' : level >= 2 ? 'SUPERVISION [2]' : 'AGENT [1]';
+        await addLine(`NIVEAU     ${val(levelStr)}`, 'ok', '▸', 3200);
+
+        // Check is_active
+        if (user.is_active === false) {
+            await addLine(`STATUT COMPTE — ${val('DÉSACTIVÉ')}`, 'err', '✕', 3450);
+            await showResult('⛔  COMPTE DÉSACTIVÉ — CONTACTEZ UN OFFICIER', 'err', 3700);
+            setTimeout(() => {
+                document.getElementById('phase-scan').classList.add('hidden');
+                document.getElementById('phase-error').classList.add('visible');
+                document.getElementById('errorMsg').textContent = 'Votre compte a été désactivé.\nContactez un officier pour réactiver votre accès.';
+            }, 4400);
+            return;
+        }
+
+        await addLine(`STATUT COMPTE — ${val('ACTIF ✓')}`, 'ok', '▸', 3450);
+        await addBlankLine(3650);
+
+        // Step 5 – Access summary
+        await addLine(`MODULES AUTORISÉS :`, 'ok', '▸', 3750);
+        await addLine(`  [✓] POINTAGE — ${val('ACCÈS AUTORISÉ')}`, 'ok', '▸', 3980);
+
+        if (level >= 2) {
+            await addLine(`  [✓] DISPATCH — ${val('ACCÈS AUTORISÉ')}`, 'ok', '▸', 4200);
+        } else {
+            await addLine(`  [✗] DISPATCH — ${val('ACCÈS RESTREINT')} (SUPERVISION+)`, 'warn', '▸', 4200);
+        }
+
+        await showResult('✓  AUTHENTIFICATION RÉUSSIE — BIENVENUE ' + user.prenom?.toUpperCase() + ' ' + user.nom?.toUpperCase(), 'ok', 4500);
+
+        // Transition to portal
+        setTimeout(() => {
+            // Fill portal data
+            const initials = (user.prenom?.[0] || '') + (user.nom?.[0] || '');
+            document.getElementById('badgeAvatar').textContent = initials.toUpperCase();
+            document.getElementById('badgeName').textContent = `${user.prenom} ${user.nom}`;
+
+            let roleLabel = ROLE_LABELS[user.role] || user.role;
+            if (user.matricule) roleLabel += ' — ' + user.matricule;
+            document.getElementById('badgeRole').textContent = roleLabel;
+
+            // Dispatch access
+            const dispatchCard = document.getElementById('cardDispatch');
+            if (level < 2) {
+                dispatchCard.classList.add('locked');
+                dispatchCard.removeAttribute('href');
+                dispatchCard.style.cursor = 'not-allowed';
+                dispatchCard.addEventListener('click', e => e.preventDefault());
+                document.getElementById('lockBadge').style.display = 'block';
+                document.getElementById('dispatchCta').innerHTML = '🔒 Accès refusé <span class="cta-arrow"></span>';
+                document.getElementById('dispatchClearance').innerHTML = '<span class="clearance-badge clr-agent">Requis : Supervision ou Officier</span>';
+            } else {
+                document.getElementById('dispatchClearance').innerHTML =
+                    `<span class="clearance-badge clr-supervision">Accréditation ${level >= 3 ? 'Officier' : 'Supervision'} ✓</span>`;
+            }
+
+            // Swap phases
+            document.getElementById('phase-scan').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('phase-portal').classList.add('visible');
+            }, 100);
+        }, 5300);
+    }
+
+    boot();
+</script>
+</body>
+</html>
