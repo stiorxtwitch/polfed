@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil — Police Fédérale Liège</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* === BASE === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg:#030a14; --panel:rgba(4,12,26,0.97);
+            --blue:#1a56db; --blue-light:#3b82f6; --blue-dim:rgba(26,86,219,0.15); --blue-border:rgba(26,86,219,0.22);
+            --gold:#c9a227; --gold-light:#e4b93a; --gold-dim:rgba(201,162,39,0.15); --gold-border:rgba(201,162,39,0.25);
+            --text:#c5d8f0; --text-bright:#e8f4ff; --muted:#4a7a9b;
+            --green:#22c55e; --green-dim:rgba(34,197,94,0.15); --green-border:rgba(34,197,94,0.25);
+            --red:#ef4444; --red-dim:rgba(239,68,68,0.15); --red-border:rgba(239,68,68,0.25);
+            --yellow:#f59e0b; --purple:#a855f7;
+        }
+        html,body { min-height:100%; background:var(--bg); font-family:'Exo 2',sans-serif; color:var(--text); }
+        body::before { content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+            background-image:linear-gradient(rgba(26,86,219,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,0.03) 1px,transparent 1px);
+            background-size:40px 40px; animation:gridDrift 50s linear infinite; }
+        @keyframes gridDrift{0%{background-position:0 0}100%{background-position:40px 40px}}
+
+        /* HEADER */
+        .t-header { height:56px; background:rgba(3,10,20,0.99); border-bottom:1px solid var(--blue-border); display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; z-index:100; }
+        .t-header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold),var(--blue),transparent); opacity:0.4; }
+        .hdr-left { display:flex; align-items:center; gap:14px; }
+        .logo-link { display:flex; align-items:center; gap:9px; text-decoration:none; }
+        .logo-link img { width:28px; height:33px; filter:drop-shadow(0 0 6px rgba(201,162,39,0.4)); }
+        .logo-txt .m { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; letter-spacing:3px; color:#fff; display:block; line-height:1; }
+        .logo-txt .s { font-size:9px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; display:block; }
+        .divider { width:1px; height:28px; background:var(--blue-border); }
+        .sec-badge { font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; color:var(--gold); background:var(--gold-dim); border:1px solid var(--gold-border); padding:3px 10px; border-radius:2px; }
+        .hdr-nav { display:flex; align-items:center; gap:2px; }
+        .hdr-nav a { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); text-decoration:none; padding:5px 9px; border-radius:2px; transition:all 0.15s; }
+        .hdr-nav a:hover,.hdr-nav a.active { color:var(--text-bright); background:var(--blue-dim); }
+        .hdr-right { display:flex; align-items:center; gap:10px; }
+        .t-user { font-size:11px; color:var(--muted); }
+        .t-user span { color:var(--text); font-weight:600; }
+        .btn { font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:6px 12px; border:none; border-radius:2px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
+        .btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--blue-border); }
+        .btn-ghost:hover { color:var(--text); border-color:var(--blue-light); }
+        .btn-primary { background:var(--blue); color:#fff; }
+        .btn-primary:hover { background:var(--blue-light); }
+        .btn-gold { background:var(--gold); color:#000; }
+        .btn-gold:hover { background:var(--gold-light); }
+        .btn-success { background:var(--green-dim); color:#86efac; border:1px solid var(--green-border); }
+        .btn-sm { padding:4px 9px; font-size:10px; }
+
+        /* PAGE */
+        .page { position:relative; z-index:1; padding:24px; max-width:1320px; margin:0 auto; }
+        .grid-main { display:grid; grid-template-columns:300px 1fr; gap:20px; align-items:start; }
+        .grid-right { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media(max-width:900px){ .grid-main{grid-template-columns:1fr} .grid-right{grid-template-columns:1fr} }
+
+        /* PROFILE CARD */
+        .profile-card { background:var(--panel); border:1px solid var(--blue-border); border-radius:8px; overflow:hidden; }
+        .profile-card::before { content:''; display:block; height:4px; background:linear-gradient(90deg,var(--blue),var(--gold)); }
+        .profile-body { padding:24px; text-align:center; }
+        .avatar { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--blue-dim),var(--gold-dim)); border:2px solid var(--gold-border); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:700; color:var(--gold-light); }
+        .profile-name { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; letter-spacing:2px; color:var(--text-bright); margin-bottom:4px; }
+        .profile-username { font-size:11px; color:var(--muted); letter-spacing:1px; margin-bottom:12px; }
+        .profile-grade { font-size:12px; color:var(--text); margin-bottom:4px; }
+        .profile-matricule { font-size:11px; color:var(--muted); letter-spacing:2px; margin-bottom:16px; font-family:'Rajdhani',sans-serif; }
+        .role-display { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:2px; font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:20px; }
+        .rd-officier { background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; }
+        .rd-supervision { background:rgba(167,139,250,0.12); border:1px solid rgba(167,139,250,0.3); color:#a78bfa; }
+        .rd-agent { background:var(--blue-dim); border:1px solid var(--blue-border); color:#93c5fd; }
+        .rd-civil { background:rgba(107,114,128,0.12); border:1px solid rgba(107,114,128,0.3); color:#9ca3af; }
+
+        /* PERMISSIONS */
+        .perms-section { border-top:1px solid var(--blue-border); padding:16px; text-align:left; }
+        .perms-title { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+        .perm-row { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:11px; }
+        .perm-icon { width:16px; text-align:center; }
+        .perm-ok { color:var(--green); }
+        .perm-no { color:rgba(107,114,128,0.5); text-decoration:line-through; }
+
+        /* SERVICE CARD */
+        .t-card { background:var(--panel); border:1px solid var(--blue-border); border-radius:8px; overflow:hidden; }
+        .t-card-hdr { padding:11px 14px; border-bottom:1px solid var(--blue-border); display:flex; align-items:center; justify-content:space-between; }
+        .t-card-title { font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--blue-light); }
+        .t-card-body { padding:14px; }
+
+        /* STAT BLOCKS */
+        .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .stat-block { background:rgba(26,86,219,0.06); border:1px solid var(--blue-border); border-radius:6px; padding:12px; text-align:center; }
+        .stat-val { font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; color:var(--text-bright); line-height:1; }
+        .stat-lbl { font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-top:3px; }
+
+        /* BADGES */
+        .badge-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:10px; }
+        .badge-item { background:rgba(201,162,39,0.06); border:1px solid var(--gold-border); border-radius:6px; padding:12px 8px; text-align:center; cursor:default; transition:all 0.15s; }
+        .badge-item:hover { background:var(--gold-dim); transform:translateY(-2px); }
+        .badge-icon { font-size:2rem; margin-bottom:6px; }
+        .badge-name { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; color:var(--gold-light); text-transform:uppercase; }
+        .badge-date { font-size:9px; color:var(--muted); margin-top:2px; }
+
+        /* FORMATION PROGRESS */
+        .formation-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(26,86,219,0.1); }
+        .formation-row:last-child { border-bottom:none; }
+        .f-icon { width:32px; height:32px; background:var(--blue-dim); border:1px solid var(--blue-border); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+        .f-name { flex:1; font-size:12px; color:var(--text); font-weight:500; }
+        .f-status { font-family:'Rajdhani',sans-serif; font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:2px 7px; border-radius:2px; }
+        .fs-done { background:var(--green-dim); border:1px solid var(--green-border); color:#86efac; }
+        .fs-todo { background:rgba(107,114,128,0.12); border:1px solid rgba(107,114,128,0.3); color:#9ca3af; }
+
+        /* EXAM HISTORY */
+        .exam-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(26,86,219,0.1); font-size:11px; }
+        .exam-row:last-child { border-bottom:none; }
+        .exam-score { font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; margin-left:auto; }
+        .score-pass { color:var(--green); }
+        .score-fail { color:var(--red); }
+
+        /* SEARCH (officers) */
+        .search-bar { display:flex; gap:8px; margin-bottom:16px; }
+        .search-input { flex:1; padding:8px 11px; background:rgba(26,86,219,0.06); border:1px solid var(--blue-border); border-radius:2px; color:var(--text); font-family:'Exo 2',sans-serif; font-size:12px; outline:none; }
+        .search-input:focus { border-color:var(--blue-light); }
+
+        /* TABLE */
+        .t-table { width:100%; border-collapse:collapse; font-size:11px; }
+        .t-table th { padding:8px 10px; background:rgba(26,86,219,0.08); border-bottom:1px solid var(--blue-border); font-family:'Rajdhani',sans-serif; font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); text-align:left; }
+        .t-table td { padding:9px 10px; border-bottom:1px solid rgba(26,86,219,0.08); vertical-align:middle; }
+        .t-table tr:hover td { background:rgba(26,86,219,0.04); }
+        .t-table tr:last-child td { border-bottom:none; }
+
+        ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-thumb { background:var(--blue-border); border-radius:2px; }
+        .empty-state { text-align:center; padding:30px; color:var(--muted); font-size:11px; letter-spacing:1px; }
+    </style>
+</head>
+<body>
+
+<!-- SQL NOTES:
+CREATE TABLE table_policefed_badges_earned (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES table_policefed_users(id),
+  titre TEXT NOT NULL,
+  description TEXT,
+  icon TEXT DEFAULT '🏅',
+  type TEXT DEFAULT 'kahoot',
+  reference_id UUID,
+  awarded_by UUID REFERENCES table_policefed_users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE table_policefed_formations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  titre TEXT NOT NULL, description TEXT, content TEXT,
+  ordre INT DEFAULT 0, icon TEXT DEFAULT '📚',
+  badge_icon TEXT DEFAULT '🏅', badge_titre TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE table_policefed_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES table_policefed_users(id),
+  formation_id UUID REFERENCES table_policefed_formations(id),
+  completed BOOLEAN DEFAULT false, completed_at TIMESTAMPTZ,
+  UNIQUE(user_id, formation_id)
+);
+-->
+
+<header class="t-header">
+    <div class="hdr-left">
+        <a href="index.html" class="logo-link">
+            <img src="https://i.imgur.com/Pe4YRPe.png" alt="PFL">
+            <div class="logo-txt"><span class="m">Police Fédérale</span><span class="s">Liège City RP</span></div>
+        </a>
+        <div class="divider"></div>
+        <div class="sec-badge">👤 Profil</div>
+        <nav class="hdr-nav" id="mainNav"></nav>
+    </div>
+    <div class="hdr-right">
+        <div class="t-user">Connecté : <span id="userLabel">—</span></div>
+        <a href="police-portal.html" class="btn btn-ghost">← Portail</a>
+    </div>
+</header>
+
+<div class="page" id="pageContent" style="display:none">
+
+    <!-- Search bar (officers only) -->
+    <div id="searchSection" style="display:none;margin-bottom:20px">
+        <div class="t-card">
+            <div class="t-card-hdr"><span class="t-card-title">🔍 Consulter un Profil Agent</span></div>
+            <div class="t-card-body">
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchAgentInput" placeholder="Rechercher par nom, prénom ou matricule..." oninput="searchAgents(this.value)">
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-main">
+        <!-- LEFT: profile card -->
+        <div>
+            <div class="profile-card">
+                <div class="profile-body">
+                    <div class="avatar" id="avatarEl">??</div>
+                    <div class="profile-name" id="profileName">—</div>
+                    <div class="profile-username" id="profileUsername">—</div>
+                    <div class="profile-grade" id="profileGrade">—</div>
+                    <div class="profile-matricule" id="profileMatricule">—</div>
+                    <div id="roleBadgeEl"></div>
+                </div>
+                <div class="perms-section">
+                    <div class="perms-title">Permissions</div>
+                    <div id="permsList"></div>
+                </div>
+                <div class="perms-section" style="border-top:1px solid var(--blue-border)">
+                    <div class="perms-title">Statut de Service</div>
+                    <div id="serviceStatus" style="font-size:12px;margin-top:4px"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: stats, badges, formations, exams -->
+        <div>
+            <!-- Stats -->
+            <div class="stats-grid" style="margin-bottom:16px">
+                <div class="stat-block">
+                    <div class="stat-val" id="statHours">0h</div>
+                    <div class="stat-lbl">Heures de service</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val" id="statBadges">0</div>
+                    <div class="stat-lbl">Badges obtenus</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val" id="statExams">0</div>
+                    <div class="stat-lbl">Examens réussis</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val" id="statSessions">0</div>
+                    <div class="stat-lbl">Sessions de service</div>
+                </div>
+            </div>
+
+            <div class="grid-right">
+                <!-- Badges -->
+                <div class="t-card">
+                    <div class="t-card-hdr"><span class="t-card-title">🏅 Badges Obtenus</span></div>
+                    <div class="t-card-body">
+                        <div class="badge-grid" id="badgesGrid">
+                            <div class="empty-state">Aucun badge</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formations -->
+                <div class="t-card">
+                    <div class="t-card-hdr"><span class="t-card-title">📚 Formations</span></div>
+                    <div class="t-card-body" id="formationsList">
+                        <div class="empty-state">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam history -->
+            <div class="t-card" style="margin-top:16px">
+                <div class="t-card-hdr"><span class="t-card-title">📝 Historique Examens (Kahoot)</span></div>
+                <div class="t-card-body" id="examHistory">
+                    <div class="empty-state">Aucun examen passé</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script>
+const currentUser = requireRole('agent');
+if (!currentUser) throw new Error('Not logged in');
+
+const ROLE_LABELS = { officier:'Officier', supervision:'Supervision', agent:'Agent', civil:'Civil' };
+const ROLE_LEVEL = { civil:0, agent:1, supervision:2, officier:3 };
+const isOfficier = (ROLE_LEVEL[currentUser.role]||0) >= 3;
+const isSuperv   = (ROLE_LEVEL[currentUser.role]||0) >= 2;
+
+// Determine which profile to show (officer can view others via ?id=)
+const urlId = new URLSearchParams(window.location.search).get('id');
+const targetId = (isOfficier && urlId) ? urlId : currentUser.id;
+
+// Build nav
+const navLinks = [
+    { href:'police-complaints.html', label:'📋 Plaintes' },
+    { href:'police-courses.html', label:'📚 Formations' },
+    { href:'police-rdv.html', label:'📅 Rendez-vous' },
+    ...(isSuperv ? [{ href:'police-kahoot-host.html', label:'🎮 Kahoot' }] : [{ href:'police-kahoot-join.html', label:'🎮 Examen' }]),
+    ...(isSuperv ? [{ href:'police-rdv-admin.html', label:'👔 RDV Admin' }] : []),
+    ...(isOfficier ? [{ href:'police-personnel.html', label:'👥 Personnel' }] : []),
+    { href:'police-profile.html', label:'👤 Profil', active: true },
+];
+document.getElementById('mainNav').innerHTML = navLinks.map(l =>
+    `<a href="${l.href}" ${l.active ? 'class="active"' : ''}>${l.label}</a>`
+).join('');
+
+document.getElementById('userLabel').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+if (isOfficier) document.getElementById('searchSection').style.display = 'block';
+
+async function loadProfile(userId) {
+    const { data: u } = await supabase.from('table_policefed_users').select('*').eq('id', userId).single();
+    if (!u) return;
+
+    // Basic info
+    const initials = (u.prenom?.[0]||'') + (u.nom?.[0]||'');
+    document.getElementById('avatarEl').textContent = initials.toUpperCase();
+    document.getElementById('profileName').textContent = `${u.prenom} ${u.nom}`;
+    document.getElementById('profileUsername').textContent = `@${u.username}`;
+    document.getElementById('profileGrade').textContent = u.grade || 'Aucun grade';
+    document.getElementById('profileMatricule').textContent = u.matricule ? `MAT. ${u.matricule}` : '';
+
+    // Role badge
+    const roleClass = { officier:'rd-officier', supervision:'rd-supervision', agent:'rd-agent', civil:'rd-civil' }[u.role] || 'rd-civil';
+    const roleIcons = { officier:'⭐', supervision:'🎖️', agent:'👮', civil:'👤' };
+    document.getElementById('roleBadgeEl').innerHTML = `<div class="role-display ${roleClass}">${roleIcons[u.role]||'👤'} ${ROLE_LABELS[u.role]||u.role}</div>`;
+
+    // Permissions
+    const lvl = ROLE_LEVEL[u.role]||0;
+    const perms = [
+        { label:'Gestion des plaintes', min:1 },
+        { label:'Dépôt de plainte (civil)', min:0 },
+        { label:'Accès formation & cours', min:1 },
+        { label:'Prise de rendez-vous', min:1 },
+        { label:'Rejoindre un Kahoot', min:1 },
+        { label:'Gestion recrutement', min:2 },
+        { label:'Créer des Kahoots', min:2 },
+        { label:'Admin rendez-vous', min:2 },
+        { label:'Dispatch tactique', min:2 },
+        { label:'Gestion du personnel', min:3 },
+        { label:'Logs système', min:3 },
+        { label:'Voir tous les profils', min:3 },
+    ];
+    document.getElementById('permsList').innerHTML = perms.map(p => `
+        <div class="perm-row ${lvl >= p.min ? 'perm-ok' : 'perm-no'}">
+            <span class="perm-icon">${lvl >= p.min ? '✓' : '✕'}</span>
+            <span>${p.label}</span>
+        </div>
+    `).join('');
+
+    // Service status
+    const serviceEl = document.getElementById('serviceStatus');
+    if (u.en_service) {
+        const since = new Date(u.service_start);
+        const mins = Math.round((Date.now() - since.getTime()) / 60000);
+        serviceEl.innerHTML = `<span style="color:var(--green);font-weight:600">🟢 En service</span> depuis ${formatDate(u.service_start)} (${mins} min)`;
+    } else {
+        serviceEl.innerHTML = `<span style="color:var(--muted)">○ Hors service</span>`;
+    }
+
+    // Stats
+    const { data: pointages } = await supabase.from('table_policefed_pointage').select('duration_minutes').eq('user_id', userId);
+    const totalMin = (pointages||[]).reduce((a,p) => a + (p.duration_minutes||0), 0);
+    document.getElementById('statHours').textContent = `${(totalMin/60).toFixed(1)}h`;
+    document.getElementById('statSessions').textContent = (pointages||[]).length;
+
+    // Badges
+    const { data: badges } = await supabase.from('table_policefed_badges_earned').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    document.getElementById('statBadges').textContent = (badges||[]).length;
+    document.getElementById('badgesGrid').innerHTML = (badges||[]).length === 0
+        ? '<div class="empty-state" style="font-size:10px">Aucun badge obtenu</div>'
+        : (badges||[]).map(b => `
+            <div class="badge-item" title="${b.description||b.titre}">
+                <div class="badge-icon">${b.icon||'🏅'}</div>
+                <div class="badge-name">${escapeHtml(b.titre)}</div>
+                <div class="badge-date">${formatDate(b.created_at)}</div>
+            </div>
+        `).join('');
+
+    // Formations
+    const { data: formations } = await supabase.from('table_policefed_formations').select('*').order('ordre');
+    const { data: progress } = await supabase.from('table_policefed_progress').select('*').eq('user_id', userId);
+    const progressMap = {};
+    (progress||[]).forEach(p => progressMap[p.formation_id] = p);
+    document.getElementById('formationsList').innerHTML = (formations||[]).length === 0
+        ? '<div class="empty-state" style="font-size:10px">Aucune formation</div>'
+        : (formations||[]).map(f => {
+            const done = progressMap[f.id]?.completed;
+            return `
+                <div class="formation-row">
+                    <div class="f-icon">${f.icon||'📚'}</div>
+                    <div class="f-name">${escapeHtml(f.titre)}</div>
+                    <div class="f-status ${done ? 'fs-done' : 'fs-todo'}">${done ? '✓ Lu' : '○ À lire'}</div>
+                </div>
+            `;
+        }).join('');
+
+    // Exam/Kahoot history
+    const { data: parts } = await supabase
+        .from('table_policefed_kahoot_participants')
+        .select('*, session:session_id(titre, pass_score, created_at)')
+        .eq('user_id', userId).eq('finished', true)
+        .order('joined_at', { ascending: false });
+
+    const passed = (parts||[]).filter(p => p.passed).length;
+    document.getElementById('statExams').textContent = passed;
+
+    document.getElementById('examHistory').innerHTML = (parts||[]).length === 0
+        ? '<div class="empty-state" style="font-size:10px">Aucun examen passé</div>'
+        : (parts||[]).map(p => `
+            <div class="exam-row">
+                <div>${p.session?.titre ? escapeHtml(p.session.titre) : 'Examen'}</div>
+                <div style="font-size:10px;color:var(--muted)">${formatDate(p.joined_at)}</div>
+                <div class="exam-score ${p.passed ? 'score-pass' : 'score-fail'}">${p.score}% ${p.passed ? '✓' : '✕'}</div>
+                ${p.badge_awarded ? '<span style="font-size:10px;color:var(--gold)">🏅</span>' : ''}
+            </div>
+        `).join('');
+
+    document.getElementById('pageContent').style.display = 'block';
+}
+
+// Officer: search agents
+let searchTimeout;
+async function searchAgents(q) {
+    clearTimeout(searchTimeout);
+    const res = document.getElementById('searchResults');
+    if (!q || q.length < 2) { res.innerHTML = ''; return; }
+    searchTimeout = setTimeout(async () => {
+        const { data } = await supabase.from('table_policefed_users').select('id,prenom,nom,grade,matricule,role').neq('role','civil').ilike('nom', `%${q}%`).limit(8);
+        if (!data || data.length === 0) { res.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px">Aucun résultat</div>'; return; }
+        res.innerHTML = `<table class="t-table"><thead><tr><th>Nom</th><th>Grade</th><th>Matricule</th><th>Rôle</th><th></th></tr></thead><tbody>` +
+            data.map(u => `<tr>
+                <td><strong>${escapeHtml(u.prenom)} ${escapeHtml(u.nom)}</strong></td>
+                <td style="color:var(--muted)">${escapeHtml(u.grade||'—')}</td>
+                <td style="font-family:Rajdhani,sans-serif;letter-spacing:1px">${escapeHtml(u.matricule||'—')}</td>
+                <td>${u.role}</td>
+                <td><a href="police-profile.html?id=${u.id}" class="btn btn-ghost btn-sm">Voir →</a></td>
+            </tr>`).join('') + '</tbody></table>';
+    }, 300);
+}
+
+loadProfile(targetId);
+</script>
+</body>
+</html>
