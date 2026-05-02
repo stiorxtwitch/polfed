@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pointage Service — Police Fédérale Liège</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loadingOverlay" class="loading-overlay active"><div class="loading-inner"><img src="https://i.imgur.com/Pe4YRPe.png" class="loading-shield" alt="Police Fédérale Liège"><div class="loading-text">Chargement...</div></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<div id="notifPanel" class="notif-panel"></div>
+
+<header class="main-header">
+    <div class="header-inner">
+        <a href="index.html" class="header-logo">
+            <img src="https://i.imgur.com/Pe4YRPe.png" class="logo-shield" alt="Police Fédérale Liège">
+            <div class="logo-text"><span class="logo-title">Police Fédérale</span><span class="logo-sub">Liège City RP</span></div>
+        </a>
+        <nav class="main-nav" id="mainNav">
+            <a href="index.html">Accueil</a>
+            <a href="police-complaints.html">📋 Plaintes</a>
+            <a href="police-recruitment.html" id="navRecruit" style="display:none">📝 Recrutement</a>
+            <a href="police-personnel.html" id="navPersonnel" style="display:none">👥 Personnel</a>
+            <a href="police-dispatch.html" id="navDispatch" style="display:none">📡 Dispatch</a>
+            <a href="police-pointage.html" class="active">🕐 Mon Service</a>
+            <a href="police-logs.html" id="navLogs" style="display:none">🗂️ Logs</a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-bell" id="notifBell" onclick="toggleNotifPanel()" style="display:none">🔔 <span class="notif-count" id="notifCount" style="display:none">0</span></div>
+            <div id="authSection"></div>
+            <button class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('open')"><span></span><span></span><span></span></button>
+        </div>
+    </div>
+</header>
+
+<div style="padding:32px 24px;max-width:1100px;margin:0 auto">
+
+    <!-- My Service Card -->
+    <div style="display:grid;grid-template-columns:400px 1fr;gap:28px;align-items:start">
+
+        <!-- Left: my status -->
+        <div>
+            <div class="card" style="border-top:4px solid var(--primary);margin-bottom:20px">
+                <div class="card-body" style="text-align:center;padding:36px 28px">
+                    <div id="serviceStatusIcon" style="font-size:5rem;margin-bottom:12px">🔴</div>
+                    <div id="serviceStatusTitle" style="font-size:1.5rem;font-weight:800;color:var(--primary);margin-bottom:6px">Hors Service</div>
+                    <div id="serviceStatusSub" style="font-size:0.9rem;color:var(--text-muted);margin-bottom:28px">Vous n'êtes pas en service actuellement.</div>
+                    <div id="serviceDuration" style="display:none;background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:24px;font-size:1.1rem;font-weight:700;color:var(--primary);font-family:monospace">
+                        00:00:00
+                    </div>
+                    <button id="toggleBtn" onclick="toggleService()" class="btn btn-success btn-lg" style="width:100%;justify-content:center">
+                        ✅ Prendre Service
+                    </button>
+                    <div style="margin-top:14px;font-size:0.8rem;color:var(--text-muted)">
+                        Votre statut est sauvegardé même si vous quittez le site.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats perso -->
+            <div class="card" style="border-top:4px solid var(--gold)">
+                <div class="card-header"><span class="card-title">📊 Mon Historique (7 derniers jours)</span></div>
+                <div class="card-body" style="padding:20px">
+                    <div id="myStats" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="stat-card"><div class="stat-icon stat-icon-blue">⏱️</div><div><div class="stat-value" id="totalHours">—</div><div class="stat-label">Heures totales</div></div></div>
+                        <div class="stat-card"><div class="stat-icon stat-icon-green">📅</div><div><div class="stat-value" id="sessionCount">—</div><div class="stat-label">Sessions</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: team status + history -->
+        <div>
+            <!-- Team currently on duty -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header" style="background:var(--primary);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border:none">
+                    <span style="font-weight:700">🟢 Personnel Actuellement en Service</span>
+                    <span id="onServiceCount" style="background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:20px;font-size:0.82rem;font-weight:700">0</span>
+                </div>
+                <div class="table-wrapper" style="border-radius:0 0 var(--radius-lg) var(--radius-lg)">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Grade</th>
+                                <th>Rôle</th>
+                                <th>En service depuis</th>
+                                <th>Durée</th>
+                                <th id="forceStopHeader" style="display:none">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="onServiceTable">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- My recent sessions -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">📜 Mes Dernières Sessions</span></div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Début</th>
+                                <th>Fin</th>
+                                <th>Durée</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionsTable">
+                            <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/nav-render.js"></script>
+<script>
+// ============================================================
+// POINTAGE — Police Fédérale Liège
+// Tables Supabase requises :
+//
+// -- Déjà nécessaire depuis dispatch :
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS en_service BOOLEAN DEFAULT false;
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS service_start TIMESTAMPTZ;
+// ALTER TABLE table_policefed_users ADD COLUMN IF NOT EXISTS dispatch_unit INT;
+//
+// CREATE TABLE table_policefed_pointage (
+//   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+//   user_id UUID REFERENCES table_policefed_users(id),
+//   checked_in_at TIMESTAMPTZ NOT NULL,
+//   checked_out_at TIMESTAMPTZ,
+//   duration_minutes INT,
+//   forced_by UUID REFERENCES table_policefed_users(id),
+//   notes TEXT,
+//   created_at TIMESTAMPTZ DEFAULT NOW()
+// );
+// ============================================================
+
+const user = requireRole('agent');
+renderAuthNav('police-pointage.html');
+
+const isOfficier = (ROLES_LEVEL[user?.role] || 0) >= 3;
+const isSupervision = (ROLES_LEVEL[user?.role] || 0) >= 2;
+
+// Show nav items based on role
+if (isSupervision) document.getElementById('navRecruit').style.display = '';
+if (isSupervision) document.getElementById('navDispatch').style.display = '';
+if (isOfficier) document.getElementById('navPersonnel').style.display = '';
+if (isOfficier) document.getElementById('navLogs').style.display = '';
+if (isOfficier) document.getElementById('forceStopHeader').style.display = '';
+
+let serviceTimer = null;
+let currentStatus = null;
+
+// Duration formatter
+function formatDuration(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function formatDurationFromMinutes(min) {
+    if (!min) return '—';
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`;
+}
+
+// Load and render my status
+async function loadMyStatus() {
+    const { data: me } = await supabase
+        .from('table_policefed_users')
+        .select('en_service, service_start')
+        .eq('id', user.id)
+        .single();
+    currentStatus = me;
+    renderMyStatus(me);
+}
+
+function renderMyStatus(me) {
+    const icon = document.getElementById('serviceStatusIcon');
+    const title = document.getElementById('serviceStatusTitle');
+    const sub = document.getElementById('serviceStatusSub');
+    const durDiv = document.getElementById('serviceDuration');
+    const btn = document.getElementById('toggleBtn');
+
+    if (me?.en_service) {
+        icon.textContent = '🟢';
+        title.style.color = 'var(--success)';
+        title.textContent = 'En Service';
+        sub.textContent = `Service débuté le ${formatDateFull(me.service_start)}`;
+        durDiv.style.display = 'block';
+        btn.className = 'btn btn-danger btn-lg';
+        btn.innerHTML = '🔴 Terminer Service';
+
+        // Start live timer
+        if (serviceTimer) clearInterval(serviceTimer);
+        const startTime = new Date(me.service_start).getTime();
+        serviceTimer = setInterval(() => {
+            durDiv.textContent = formatDuration(Date.now() - startTime);
+        }, 1000);
+    } else {
+        icon.textContent = '🔴';
+        title.style.color = 'var(--primary)';
+        title.textContent = 'Hors Service';
+        sub.textContent = 'Vous n\'êtes pas en service actuellement.';
+        durDiv.style.display = 'none';
+        btn.className = 'btn btn-success btn-lg';
+        btn.innerHTML = '✅ Prendre Service';
+        if (serviceTimer) { clearInterval(serviceTimer); serviceTimer = null; }
+    }
+}
+
+async function toggleService() {
+    showLoading();
+    const isOn = currentStatus?.en_service;
+    if (isOn) {
+        // End service
+        const start = new Date(currentStatus.service_start).getTime();
+        const durationMin = Math.round((Date.now() - start) / 60000);
+        await supabase.from('table_policefed_users').update({
+            en_service: false,
+            service_start: null,
+            dispatch_unit: null
+        }).eq('id', user.id);
+        await supabase.from('table_policefed_pointage').insert({
+            user_id: user.id,
+            checked_in_at: currentStatus.service_start,
+            checked_out_at: new Date().toISOString(),
+            duration_minutes: durationMin
+        });
+        await createLog('FIN_SERVICE', `${user.prenom} ${user.nom} a terminé son service (${durationMin} min)`);
+        showToast('🔴 Fin de Service', `Service de ${formatDurationFromMinutes(durationMin)} enregistré.`, 'success');
+    } else {
+        // Start service
+        const now = new Date().toISOString();
+        await supabase.from('table_policefed_users').update({
+            en_service: true,
+            service_start: now
+        }).eq('id', user.id);
+        await createLog('DEBUT_SERVICE', `${user.prenom} ${user.nom} a pris son service`);
+        showToast('🟢 Service Démarré', 'Votre prise de service a été enregistrée.', 'success');
+    }
+    hideLoading();
+    await loadMyStatus();
+    await loadOnService();
+    await loadMySessions();
+    await loadMyStats();
+}
+
+// Force stop service (officers)
+async function forceStopService(targetId, targetName) {
+    if (!confirm(`⚠️ Forcer la fin de service de ${targetName} ?`)) return;
+    showLoading();
+    const { data: target } = await supabase.from('table_policefed_users').select('en_service, service_start').eq('id', targetId).single();
+    if (target?.en_service) {
+        const start = new Date(target.service_start).getTime();
+        const durationMin = Math.round((Date.now() - start) / 60000);
+        await supabase.from('table_policefed_users').update({
+            en_service: false,
+            service_start: null,
+            dispatch_unit: null
+        }).eq('id', targetId);
+        await supabase.from('table_policefed_pointage').insert({
+            user_id: targetId,
+            checked_in_at: target.service_start,
+            checked_out_at: new Date().toISOString(),
+            duration_minutes: durationMin,
+            forced_by: user.id,
+            notes: `Fin forcée par ${user.prenom} ${user.nom}`
+        });
+        await createLog('FIN_SERVICE_FORCEE', `${user.prenom} ${user.nom} a forcé la fin de service de ${targetName} (${durationMin} min)`);
+        await createNotification(targetId, 'service', '⚠️ Fin de Service', `Votre service a été terminé par ${user.prenom} ${user.nom}`, null, 'system');
+        showToast('✅ Service terminé', `Le service de ${targetName} a été arrêté.`, 'success');
+    }
+    hideLoading();
+    await loadOnService();
+}
+
+// Load all currently on service
+async function loadOnService() {
+    const { data } = await supabase
+        .from('table_policefed_users')
+        .select('*')
+        .eq('en_service', true)
+        .neq('role', 'civil')
+        .order('service_start', { ascending: true });
+
+    const tbody = document.getElementById('onServiceTable');
+    const count = document.getElementById('onServiceCount');
+    const list = data || [];
+    count.textContent = list.length;
+
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun agent en service actuellement.</td></tr>`;
+        return;
+    }
+
+    const now = Date.now();
+    tbody.innerHTML = list.map(p => {
+        const start = new Date(p.service_start).getTime();
+        const durMin = Math.round((now - start) / 60000);
+        const isMe = p.id === user.id;
+        return `
+            <tr ${isMe ? 'style="background:rgba(26,86,219,0.05)"' : ''}>
+                <td>
+                    <strong>${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}</strong>
+                    ${isMe ? ' <span class="badge badge-info" style="font-size:0.7rem">MOI</span>' : ''}
+                    <br><span style="font-size:0.75rem;color:var(--text-muted)">@${escapeHtml(p.username)}</span>
+                </td>
+                <td>${escapeHtml(p.grade || '—')}</td>
+                <td>${roleBadge(p.role)}</td>
+                <td style="font-size:0.82rem">${formatDateFull(p.service_start)}</td>
+                <td>
+                    <span style="font-family:monospace;font-size:0.85rem;color:var(--success);font-weight:600">
+                        ${formatDurationFromMinutes(durMin)}
+                    </span>
+                </td>
+                <td id="forceStopHeader" style="${isOfficier && !isMe ? '' : 'display:none'}">
+                    ${isOfficier && !isMe ? `<button class="btn btn-danger btn-sm" onclick="forceStopService('${p.id}', '${escapeHtml(p.prenom)} ${escapeHtml(p.nom)}')">🛑 Forcer Fin</button>` : '—'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Load my recent sessions
+async function loadMySessions() {
+    const { data } = await supabase
+        .from('table_policefed_pointage')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('checked_in_at', { ascending: false })
+        .limit(10);
+
+    const tbody = document.getElementById('sessionsTable');
+    const list = data || [];
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Aucune session enregistrée.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(s => `
+        <tr>
+            <td style="font-size:0.82rem">${formatDateFull(s.checked_in_at)}</td>
+            <td style="font-size:0.82rem">${s.checked_out_at ? formatDateFull(s.checked_out_at) : '<span style="color:var(--success)">● En cours</span>'}</td>
+            <td><span style="font-family:monospace;font-weight:600;color:var(--primary)">${formatDurationFromMinutes(s.duration_minutes)}</span></td>
+            <td style="font-size:0.8rem;color:var(--text-muted)">${s.notes ? `⚠️ ${escapeHtml(s.notes)}` : '—'}</td>
+        </tr>
+    `).join('');
+}
+
+// Load my stats (7 days)
+async function loadMyStats() {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+        .from('table_policefed_pointage')
+        .select('duration_minutes, checked_in_at')
+        .eq('user_id', user.id)
+        .gte('checked_in_at', sevenDaysAgo);
+
+    const list = data || [];
+    const totalMin = list.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+    document.getElementById('totalHours').textContent = `${(totalMin / 60).toFixed(1)}h`;
+    document.getElementById('sessionCount').textContent = list.length;
+}
+
+// Auto-refresh on-service table every 30s
+setInterval(loadOnService, 30000);
+
+// Init
+(async () => {
+    await Promise.all([loadMyStatus(), loadOnService(), loadMySessions(), loadMyStats()]);
+    hideLoading();
+})();
+</script>
+</body>
+</html>
