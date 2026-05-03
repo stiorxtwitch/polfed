@@ -560,7 +560,6 @@ function showQuestion() {
     pollAnswers();
 }
 
-let pollInterval = null;
 async function pollAnswers() {
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(async () => {
