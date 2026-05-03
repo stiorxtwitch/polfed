@@ -206,6 +206,9 @@ CREATE TABLE table_policefed_kahoot_participants (
                     <button class="btn btn-gold btn-sm" onclick="addQuestion()">+ Ajouter une Question</button>
                 </div>
                 <div class="t-card-body">
+                    <button id="presetBtn" onclick="loadPresetQuestions()" style="display:none;width:100%;justify-content:center;margin-bottom:14px;padding:12px;background:linear-gradient(90deg,rgba(201,162,39,0.12),rgba(26,86,219,0.12));border:1px solid rgba(201,162,39,0.35);border-radius:4px;color:var(--gold-light);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex-direction:column;gap:3px" class="btn">
+                        ⚡ Auto-générer les questions présets
+                    </button>
                     <div class="q-list" id="questionList"></div>
                     <div id="noQuestions" class="empty-state">
                         Aucune question. Cliquez sur "+ Ajouter une Question" pour commencer.
@@ -332,17 +335,44 @@ let currentQIdx = -1;
 let realtimeChannel = null;
 
 // Load formations
+let formationsCache = [];
 (async () => {
-    const { data } = await supabase.from('table_policefed_formations').select('id,titre,icon').order('ordre');
+    const { data } = await supabase.from('table_policefed_formations').select('id,titre,icon,questions_preset').order('ordre');
+    formationsCache = data || [];
     const sel = document.getElementById('sessionFormation');
     sel.innerHTML = '<option value="">— Aucune (examen général) —</option>' +
-        (data||[]).map(f => `<option value="${f.id}">${f.icon||'📚'} ${escapeHtml(f.titre)}</option>`).join('');
+        formationsCache.map(f => `<option value="${f.id}">${f.icon||'📚'} ${escapeHtml(f.titre)}</option>`).join('');
+
+    // Show/hide auto-load button when formation is selected
+    sel.addEventListener('change', () => {
+        const f = formationsCache.find(x => x.id === sel.value);
+        const presetBtn = document.getElementById('presetBtn');
+        if (f && f.questions_preset && f.questions_preset.length > 0) {
+            presetBtn.style.display = 'flex';
+            presetBtn.textContent = `⚡ Auto-générer les ${f.questions_preset.length} questions — ${f.icon||'📚'} ${f.titre}`;
+        } else {
+            presetBtn.style.display = 'none';
+        }
+    });
 })();
+
+function loadPresetQuestions() {
+    const sel = document.getElementById('sessionFormation');
+    const f = formationsCache.find(x => x.id === sel.value);
+    if (!f || !f.questions_preset || f.questions_preset.length === 0) return;
+    if (questions.length > 0 && !confirm(`Remplacer les ${questions.length} questions actuelles par les ${f.questions_preset.length} questions du cours "${f.titre}" ?`)) return;
+    questions = f.questions_preset.map(q => ({
+        q: q.q || '', opts: q.opts || ['','','',''],
+        correct: typeof q.correct === 'number' ? q.correct : 0,
+        time: q.time || 15
+    }));
+    renderQuestions();
+    showToast('⚡ Questions chargées', `${questions.length} questions QCM importées depuis le cours.`, 'success');
+}
 
 // ── QUESTION BUILDER ──
 function addQuestion() {
-    const idx = questions.length;
-    questions.push({ q:'', opts:['','','',''], correct:0, time:20 });
+    questions.push({ q:'', opts:['','','',''], correct:0, time:15 });
     renderQuestions();
 }
 
@@ -368,7 +398,7 @@ function renderQuestions() {
                 <div class="q-correct-hint">Bonne réponse : <strong>${['A','B','C','D'][q.correct]}</strong> — Cliquez sur une option pour changer</div>
                 <div class="q-timer-row">
                     <span class="q-timer-label">Temps</span>
-                    <input class="q-timer-input" type="number" value="${q.time}" min="5" max="120" onchange="questions[${i}].time=parseInt(this.value)||20">
+                    <input class="q-timer-input" type="number" value="${q.time}" min="5" max="60" onchange="questions[${i}].time=parseInt(this.value)||15">
                     <span style="font-size:9px;color:var(--muted)">sec</span>
                 </div>
                 <button class="q-del" onclick="deleteQuestion(${i})">✕ Suppr</button>

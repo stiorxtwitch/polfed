@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{--bg:#020810;--green:#00ff88;--green-dim:#00ff8822;--green-mid:#00ff8855;--gold:#c9a227;--gold-dim:rgba(201,162,39,0.15);--blue:#1a56db;--blue-dim:rgba(26,86,219,0.15);--red:#ff3333;--purple:#a855f7;--text:#a8c8e0;--muted:#3a6080;--white:#e8f4ff}
+        :root{--bg:#020810;--green:#00ff88;--green-dim:#00ff8822;--green-mid:#00ff8855;--gold:#c9a227;--gold-dim:rgba(201,162,39,0.15);--blue:#1a56db;--blue-dim:rgba(26,86,219,0.15);--red:#ff3333;--text:#a8c8e0;--muted:#3a6080;--white:#e8f4ff}
         html,body{height:100%;background:var(--bg);font-family:'Share Tech Mono',monospace;color:var(--green);overflow:hidden}
         body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.012) 2px,rgba(0,255,136,0.012) 4px)}
         body::after{content:'';position:fixed;left:0;right:0;height:3px;z-index:1;pointer-events:none;background:linear-gradient(90deg,transparent,var(--green-mid),var(--green),var(--green-mid),transparent);animation:scanBeam 4s linear infinite;opacity:0.35}
@@ -15,112 +15,97 @@
         .grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,255,136,0.028) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.028) 1px,transparent 1px);background-size:44px 44px;animation:gridShift 60s linear infinite}
         @keyframes gridShift{0%{background-position:0 0}100%{background-position:44px 44px}}
         .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(2,8,16,0.85) 100%)}
-        .wrapper{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
-
-        /* TERMINAL */
-        #phase-scan{width:100%;max-width:640px;opacity:1;transition:opacity .5s}
+        .wrapper{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+        #phase-scan{width:100%;max-width:640px;opacity:1;transition:opacity 0.5s}
         #phase-scan.hidden{opacity:0;pointer-events:none}
-        .terminal-box{border:1px solid var(--green-mid);border-radius:4px;background:rgba(0,255,136,0.025);box-shadow:0 0 40px rgba(0,255,136,0.06),inset 0 0 30px rgba(0,0,0,.4);overflow:hidden}
+        .terminal-box{border:1px solid var(--green-mid);border-radius:4px;background:rgba(0,255,136,0.025);box-shadow:0 0 40px rgba(0,255,136,0.06),inset 0 0 30px rgba(0,0,0,0.4);overflow:hidden}
         .terminal-title{background:var(--green-dim);border-bottom:1px solid var(--green-mid);padding:10px 16px;display:flex;align-items:center;gap:10px}
-        .term-dots{display:flex;gap:6px}.term-dot{width:10px;height:10px;border-radius:50%}
+        .term-dots{display:flex;gap:6px}
+        .term-dot{width:10px;height:10px;border-radius:50%}
         .term-dot:nth-child(1){background:#ff5f57}.term-dot:nth-child(2){background:#febc2e}.term-dot:nth-child(3){background:#28c840}
         .term-label{font-size:11px;letter-spacing:3px;color:rgba(0,255,136,0.5);text-transform:uppercase;margin-left:auto}
-        .terminal-body{padding:22px 24px 24px;min-height:260px}
-        .term-header{display:flex;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid rgba(0,255,136,0.12)}
-        .term-shield{width:46px;height:54px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,255,136,0.35));animation:shieldPulse 2s ease-in-out infinite}
+        .terminal-body{padding:22px 24px 24px;min-height:280px}
+        .term-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,136,0.12)}
+        .term-shield{width:48px;height:56px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,255,136,0.35));animation:shieldPulse 2s ease-in-out infinite}
         @keyframes shieldPulse{0%,100%{filter:drop-shadow(0 0 12px rgba(0,255,136,0.35))}50%{filter:drop-shadow(0 0 22px rgba(0,255,136,0.7))}}
         .term-sys-title{font-size:14px;font-weight:700;letter-spacing:4px;color:var(--green);text-shadow:0 0 12px var(--green)}
         .term-sys-sub{font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:3px}
-        .term-line{font-size:12px;line-height:1.85;letter-spacing:.5px;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;white-space:pre}
+        .term-line{font-size:12px;line-height:1.9;letter-spacing:0.5px;opacity:0;transform:translateY(4px);transition:opacity 0.2s,transform 0.2s;white-space:pre}
         .term-line.visible{opacity:1;transform:translateY(0)}
-        .term-line.err .marker{color:var(--red)}.term-line.warn .marker{color:var(--gold)}
-        .marker{margin-right:8px}.val{color:var(--white);font-weight:600}
-        .term-result{margin-top:16px;padding:10px 14px;border:1px solid;border-radius:2px;font-size:12px;letter-spacing:2px;text-align:center;opacity:0;transition:opacity .4s .1s}
+        .term-line.ok .marker{color:var(--green)}.term-line.warn .marker{color:var(--gold)}.term-line.err .marker{color:var(--red)}
+        .marker{margin-right:8px}
+        .val{color:var(--white);font-weight:600}
+        .term-result{margin-top:18px;padding:10px 14px;border:1px solid;border-radius:2px;font-size:13px;letter-spacing:2px;text-align:center;opacity:0;transition:opacity 0.4s 0.1s}
         .term-result.visible{opacity:1}
         .term-result.ok{border-color:var(--green);background:rgba(0,255,136,0.07);color:var(--green);text-shadow:0 0 8px var(--green)}
         .term-result.err{border-color:var(--red);background:rgba(255,51,51,0.07);color:var(--red)}
-
-        /* PORTAL */
-        #phase-portal{width:100%;max-width:960px;opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;pointer-events:none;position:absolute;padding:10px 0}
+        #phase-portal{width:100%;max-width:1020px;opacity:0;transform:translateY(20px);transition:opacity 0.6s,transform 0.6s;pointer-events:none;position:absolute;overflow-y:auto;max-height:calc(100vh - 40px)}
         #phase-portal.visible{opacity:1;transform:translateY(0);pointer-events:all}
-        .portal-header{text-align:center;margin-bottom:22px}
-        .portal-shield{width:56px;height:66px;object-fit:contain;margin:0 auto 10px;filter:drop-shadow(0 0 18px rgba(201,162,39,0.5));animation:goldPulse 2.5s ease-in-out infinite}
+        .portal-header{text-align:center;margin-bottom:26px}
+        .portal-shield{width:62px;height:72px;object-fit:contain;margin:0 auto 12px;filter:drop-shadow(0 0 18px rgba(201,162,39,0.5));animation:goldPulse 2.5s ease-in-out infinite}
         @keyframes goldPulse{0%,100%{filter:drop-shadow(0 0 16px rgba(201,162,39,0.4))}50%{filter:drop-shadow(0 0 30px rgba(201,162,39,0.75))}}
-        .portal-title{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;letter-spacing:6px;color:var(--white);text-transform:uppercase;text-shadow:0 0 20px rgba(201,162,39,0.3)}
-        .portal-subtitle{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:4px}
-        .user-badge{display:inline-flex;align-items:center;gap:10px;margin:10px auto 0;padding:6px 14px;border:1px solid var(--gold-dim);border-radius:2px;background:var(--gold-dim)}
-        .user-badge-avatar{width:26px;height:26px;border-radius:50%;background:rgba(201,162,39,0.25);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--gold)}
-        .user-badge-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--white);letter-spacing:1px}
-        .user-badge-role{font-size:9px;letter-spacing:2px;color:var(--gold)}
-
-        /* CARDS 2x2 */
-        .portal-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-        @media(max-width:600px){.portal-cards{grid-template-columns:1fr}}
-        .access-card{position:relative;overflow:hidden;border:1px solid;border-radius:6px;padding:22px 20px 20px;cursor:pointer;transition:all .25s;text-decoration:none;display:block}
+        .portal-title{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:6px;color:var(--white);text-transform:uppercase;text-shadow:0 0 20px rgba(201,162,39,0.3)}
+        .portal-subtitle{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:5px}
+        .user-badge{display:inline-flex;align-items:center;gap:10px;margin:12px auto 0;padding:8px 18px;border:1px solid var(--gold-dim);border-radius:2px;background:var(--gold-dim)}
+        .user-badge-avatar{width:28px;height:28px;border-radius:50%;background:rgba(201,162,39,0.25);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--gold)}
+        .user-badge-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;color:var(--white);letter-spacing:1px}
+        .user-badge-role{font-size:10px;letter-spacing:2px;color:var(--gold)}
+        .portal-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        @media(max-width:760px){.portal-cards{grid-template-columns:1fr}}
+        @media(min-width:761px) and (max-width:980px){.portal-cards{grid-template-columns:1fr 1fr}}
+        .access-card{position:relative;overflow:hidden;border:1px solid;border-radius:6px;padding:26px 20px 22px;cursor:pointer;transition:all 0.25s;text-decoration:none;display:block}
         .access-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-        .access-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s}
+        .access-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.25s}
         .access-card:hover::after{opacity:1}
-        .corner-tl,.corner-br{position:absolute;width:12px;height:12px;border-color:inherit;border-style:solid;opacity:.5}
-        .corner-tl{top:8px;left:8px;border-width:2px 0 0 2px}.corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0}
-        .card-icon{font-size:2.2rem;margin-bottom:8px;display:block;line-height:1}
-        .card-title{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
-        .card-desc{font-size:11px;letter-spacing:.3px;line-height:1.65;color:rgba(168,200,224,0.55);margin-bottom:13px}
-        .card-cta{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:7px}
-        .cta-arrow{transition:transform .2s}.access-card:hover:not(.locked) .cta-arrow{transform:translateX(5px)}
-        .clearance-badge{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:2px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase}
-        .lock-overlay{position:absolute;top:10px;right:10px;background:rgba(255,51,51,0.12);border:1px solid rgba(255,51,51,0.3);border-radius:2px;padding:2px 7px;font-size:9px;letter-spacing:2px;color:#ff6666}
-
-        /* GREEN — Pointage */
         .card-pointage{border-color:rgba(0,255,136,0.2);background:rgba(0,255,136,0.03)}
         .card-pointage::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
         .card-pointage::after{background:radial-gradient(ellipse at center,rgba(0,255,136,0.06) 0%,transparent 70%)}
-        .card-pointage:hover{border-color:rgba(0,255,136,0.5);box-shadow:0 0 28px rgba(0,255,136,0.1);transform:translateY(-3px)}
-        .card-pointage .card-title{color:var(--green);text-shadow:0 0 10px rgba(0,255,136,0.3)}
-        .card-pointage .card-cta{color:var(--green)}
-        .clr-green{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.22);color:rgba(0,255,136,0.7)}
-
-        /* BLUE — Dispatch */
+        .card-pointage:hover{border-color:rgba(0,255,136,0.5);box-shadow:0 0 30px rgba(0,255,136,0.1);transform:translateY(-3px)}
+        .card-formation{border-color:rgba(201,162,39,0.25);background:rgba(201,162,39,0.04)}
+        .card-formation::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+        .card-formation::after{background:radial-gradient(ellipse at center,rgba(201,162,39,0.08) 0%,transparent 70%)}
+        .card-formation:hover{border-color:rgba(201,162,39,0.55);box-shadow:0 0 30px rgba(201,162,39,0.12);transform:translateY(-3px)}
         .card-dispatch{border-color:rgba(26,86,219,0.25);background:rgba(26,86,219,0.04)}
         .card-dispatch::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
         .card-dispatch::after{background:radial-gradient(ellipse at center,rgba(26,86,219,0.08) 0%,transparent 70%)}
-        .card-dispatch:hover:not(.locked){border-color:rgba(26,86,219,0.55);box-shadow:0 0 28px rgba(26,86,219,0.12);transform:translateY(-3px)}
-        .card-dispatch .card-title{color:#6699ff;text-shadow:0 0 10px rgba(26,86,219,0.3)}
-        .card-dispatch .card-cta{color:#6699ff}
-        .card-dispatch.locked{opacity:.42;cursor:not-allowed;filter:grayscale(.4)}
+        .card-dispatch:hover:not(.locked){border-color:rgba(26,86,219,0.55);box-shadow:0 0 30px rgba(26,86,219,0.12);transform:translateY(-3px)}
+        .card-dispatch.locked{opacity:0.42;cursor:not-allowed;filter:grayscale(0.4)}
         .card-dispatch.locked:hover{transform:none;box-shadow:none}
-        .card-dispatch.locked .card-title,.card-dispatch.locked .card-cta{color:var(--muted);text-shadow:none}
+        .lock-overlay{position:absolute;top:12px;right:12px;background:rgba(255,51,51,0.12);border:1px solid rgba(255,51,51,0.3);border-radius:2px;padding:3px 8px;font-size:10px;letter-spacing:2px;color:#ff6666}
+        .card-icon{font-size:2.4rem;margin-bottom:10px;display:block;line-height:1}
+        .card-title{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:7px}
+        .card-pointage .card-title{color:var(--green);text-shadow:0 0 10px rgba(0,255,136,0.3)}
+        .card-formation .card-title{color:var(--gold);text-shadow:0 0 10px rgba(201,162,39,0.3)}
+        .card-dispatch .card-title{color:#6699ff;text-shadow:0 0 10px rgba(26,86,219,0.3)}
+        .card-dispatch.locked .card-title{color:var(--muted);text-shadow:none}
+        .card-desc{font-size:10px;letter-spacing:0.5px;line-height:1.75;color:rgba(168,200,224,0.6);margin-bottom:12px}
+        .card-links{display:flex;flex-direction:column;gap:3px;margin:8px 0 12px}
+        .card-link-item{font-size:9px;letter-spacing:1.5px;color:rgba(201,162,39,0.5);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+        .card-link-item::before{content:'›'}
+        .card-cta{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+        .card-pointage .card-cta{color:var(--green)}
+        .card-formation .card-cta{color:var(--gold)}
+        .card-dispatch .card-cta{color:#6699ff}
+        .card-dispatch.locked .card-cta{color:var(--muted)}
+        .cta-arrow{transition:transform 0.2s}
+        .access-card:hover:not(.locked) .cta-arrow{transform:translateX(5px)}
+        .clearance-badge{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:2px;font-size:9px;letter-spacing:2px;text-transform:uppercase}
         .clr-supervision{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);color:#c084fc}
         .clr-agent{background:rgba(107,114,128,0.12);border:1px solid rgba(107,114,128,0.3);color:var(--muted)}
-
-        /* GOLD — Formation */
-        .card-formation{border-color:rgba(201,162,39,0.22);background:rgba(201,162,39,0.03)}
-        .card-formation::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-        .card-formation::after{background:radial-gradient(ellipse at center,rgba(201,162,39,0.07) 0%,transparent 70%)}
-        .card-formation:hover{border-color:rgba(201,162,39,0.55);box-shadow:0 0 28px rgba(201,162,39,0.1);transform:translateY(-3px)}
-        .card-formation .card-title{color:var(--gold);text-shadow:0 0 10px rgba(201,162,39,0.3)}
-        .card-formation .card-cta{color:var(--gold)}
-        .clr-gold{background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.25);color:rgba(201,162,39,0.8)}
-
-        /* PURPLE — Kahoot */
-        .card-kahoot{border-color:rgba(168,85,247,0.22);background:rgba(168,85,247,0.03)}
-        .card-kahoot::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
-        .card-kahoot::after{background:radial-gradient(ellipse at center,rgba(168,85,247,0.08) 0%,transparent 70%)}
-        .card-kahoot:hover{border-color:rgba(168,85,247,0.55);box-shadow:0 0 28px rgba(168,85,247,0.1);transform:translateY(-3px)}
-        .card-kahoot .card-title{color:#c084fc;text-shadow:0 0 10px rgba(168,85,247,0.3)}
-        .card-kahoot .card-cta{color:#c084fc}
-        .clr-purple{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#d8b4fe}
-
-        .back-link{text-align:center;margin-top:12px;font-size:10px;letter-spacing:1.5px;color:var(--muted)}
-        .back-link a{color:var(--muted);text-decoration:none;transition:color .2s;border-bottom:1px solid transparent}
+        .corner-tl,.corner-br{position:absolute;width:14px;height:14px;border-color:inherit;border-style:solid;opacity:0.5}
+        .corner-tl{top:8px;left:8px;border-width:2px 0 0 2px}
+        .corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0}
+        .back-link{text-align:center;margin-top:16px;font-size:11px;letter-spacing:2px;color:var(--muted)}
+        .back-link a{color:var(--muted);text-decoration:none;transition:color 0.2s;border-bottom:1px solid transparent}
         .back-link a:hover{color:var(--text);border-bottom-color:var(--muted)}
-
-        /* Error */
-        #phase-error{width:100%;max-width:500px;text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s;pointer-events:none;position:absolute}
+        #phase-error{width:100%;max-width:500px;text-align:center;opacity:0;transform:translateY(10px);transition:opacity 0.5s,transform 0.5s;pointer-events:none;position:absolute}
         #phase-error.visible{opacity:1;transform:translateY(0);pointer-events:all}
         .error-box{border:1px solid rgba(255,51,51,0.3);border-radius:4px;background:rgba(255,51,51,0.04);padding:36px 32px}
+        .error-icon{font-size:3.5rem;margin-bottom:16px}
         .error-title{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:3px;color:var(--red);margin-bottom:10px}
         .error-msg{font-size:12px;color:rgba(255,100,100,0.6);letter-spacing:1px;margin-bottom:20px;line-height:1.7}
-        .btn-retry{display:inline-block;padding:10px 24px;border:1px solid rgba(255,51,51,0.4);border-radius:2px;background:rgba(255,51,51,0.08);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-decoration:none;cursor:pointer}
+        .btn-retry{display:inline-block;padding:10px 24px;border:1px solid rgba(255,51,51,0.4);border-radius:2px;background:rgba(255,51,51,0.08);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-decoration:none;transition:all 0.2s;cursor:pointer}
+        .btn-retry:hover{background:rgba(255,51,51,0.15)}
     </style>
 </head>
 <body>
@@ -128,190 +113,180 @@
 <div class="vignette"></div>
 <div class="wrapper">
 
-    <!-- TERMINAL BOOT -->
-    <div id="phase-scan">
-        <div class="terminal-box">
-            <div class="terminal-title">
-                <div class="term-dots"><div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div></div>
-                <span class="term-label">SYSTÈME SÉCURISÉ — PFL/OPS v3.0</span>
-            </div>
-            <div class="terminal-body">
-                <div class="term-header">
-                    <img src="https://i.imgur.com/Pe4YRPe.png" class="term-shield" alt="PFL">
-                    <div>
-                        <div class="term-sys-title">POLICE FÉDÉRALE LIÈGE</div>
-                        <div class="term-sys-sub">PORTAIL OPÉRATIONNEL — ACCÈS RESTREINT</div>
-                        <div class="term-sys-sub" id="termTime" style="margin-top:4px;color:rgba(0,255,136,0.4)"></div>
-                    </div>
-                </div>
-                <div id="termLines"></div>
-                <div class="term-result" id="termResult"></div>
-            </div>
+<div id="phase-scan">
+    <div class="terminal-box">
+        <div class="terminal-title">
+            <div class="term-dots"><div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div></div>
+            <span class="term-label">SYSTÈME SÉCURISÉ — PFL/OPS v2.7</span>
         </div>
-    </div>
-
-    <!-- PORTAL -->
-    <div id="phase-portal">
-        <div class="portal-header">
-            <img src="https://i.imgur.com/Pe4YRPe.png" class="portal-shield" alt="PFL">
-            <div class="portal-title">Portail Opérationnel</div>
-            <div class="portal-subtitle">Police Fédérale Liège — Accès Interne</div>
-            <div style="display:flex;justify-content:center">
-                <div class="user-badge">
-                    <div class="user-badge-avatar" id="badgeAvatar">??</div>
-                    <div><div class="user-badge-name" id="badgeName">—</div><div class="user-badge-role" id="badgeRole">—</div></div>
+        <div class="terminal-body">
+            <div class="term-header">
+                <img src="https://i.imgur.com/Pe4YRPe.png" class="term-shield" alt="PFL">
+                <div>
+                    <div class="term-sys-title">POLICE FÉDÉRALE LIÈGE</div>
+                    <div class="term-sys-sub">PORTAIL OPÉRATIONNEL — ACCÈS RESTREINT</div>
+                    <div class="term-sys-sub" id="termTime" style="margin-top:4px;color:rgba(0,255,136,0.4)"></div>
                 </div>
             </div>
-        </div>
-
-        <div class="portal-cards">
-            <!-- POINTAGE -->
-            <a href="police-pointage.html" class="access-card card-pointage">
-                <div class="corner-tl"></div><div class="corner-br"></div>
-                <span class="card-icon">🕐</span>
-                <div class="card-title">Pointage Service</div>
-                <div class="card-desc">Prenez ou terminez votre service. Statut synchronisé en temps réel sur toutes les interfaces.</div>
-                <div class="card-cta">Accéder au pointage <span class="cta-arrow">→</span></div>
-                <span class="clearance-badge clr-green">Tous agents ✓</span>
-            </a>
-
-            <!-- DISPATCH -->
-            <a href="police-dispatch.html" class="access-card card-dispatch" id="cardDispatch">
-                <div class="corner-tl"></div><div class="corner-br"></div>
-                <div class="lock-overlay" id="lockBadge" style="display:none">🔒 ACCÈS REFUSÉ</div>
-                <span class="card-icon">📡</span>
-                <div class="card-title">Dispatch Tactique</div>
-                <div class="card-desc">Gérez les unités en temps réel. Assignez le personnel, suivez les statuts et coordonnez les interventions.</div>
-                <div class="card-cta" id="dispatchCta">Accéder au dispatch <span class="cta-arrow">→</span></div>
-                <div id="dispatchClearance"></div>
-            </a>
-
-            <!-- FORMATION -->
-            <a href="police-courses.html" class="access-card card-formation">
-                <div class="corner-tl"></div><div class="corner-br"></div>
-                <span class="card-icon">📚</span>
-                <div class="card-title">Portail Formation</div>
-                <div class="card-desc">Cours (Code de la Route · Judiciaire · LFP · Armes), progression, rendez-vous d'examen et certifications.</div>
-                <div class="card-cta">Accéder aux formations <span class="cta-arrow">→</span></div>
-                <span class="clearance-badge clr-gold">Tous agents ✓</span>
-            </a>
-
-            <!-- KAHOOT -->
-            <a href="#" class="access-card card-kahoot" id="cardKahoot">
-                <div class="corner-tl"></div><div class="corner-br"></div>
-                <span class="card-icon">🎮</span>
-                <div class="card-title" id="kahootTitle">Examens Kahoot</div>
-                <div class="card-desc" id="kahootDesc">Rejoignez une session d'examen en ligne avec le code fourni par votre superviseur.</div>
-                <div class="card-cta" id="kahootCta">Rejoindre un examen <span class="cta-arrow">→</span></div>
-                <div id="kahootClearance"></div>
-            </a>
-        </div>
-
-        <div class="back-link">
-            <a href="police-complaints.html">← Tableau de bord</a> &nbsp;·&nbsp;
-            <a href="police-profile.html">👤 Mon Profil</a> &nbsp;·&nbsp;
-            <a href="police-rdv.html">📅 Mes RDV</a> &nbsp;·&nbsp;
-            <a href="police-examen.html">📝 Mes Examens</a>
-        </div>
-    </div>
-
-    <!-- ERROR -->
-    <div id="phase-error">
-        <div class="error-box">
-            <div style="font-size:3.5rem;margin-bottom:16px">🚫</div>
-            <div class="error-title">ACCÈS REFUSÉ</div>
-            <div class="error-msg" id="errorMsg">Vous n'êtes pas autorisé à accéder à ce portail.</div>
-            <a href="login.html" class="btn-retry">← Retour à la connexion</a>
+            <div id="termLines"></div>
+            <div class="term-result" id="termResult"></div>
         </div>
     </div>
 </div>
 
+<div id="phase-portal">
+    <div class="portal-header">
+        <img src="https://i.imgur.com/Pe4YRPe.png" class="portal-shield" alt="PFL">
+        <div class="portal-title">Portail Opérationnel</div>
+        <div class="portal-subtitle">Police Fédérale Liège — Accès Interne</div>
+        <div style="display:flex;justify-content:center">
+            <div class="user-badge">
+                <div class="user-badge-avatar" id="badgeAvatar">??</div>
+                <div>
+                    <div class="user-badge-name" id="badgeName">—</div>
+                    <div class="user-badge-role" id="badgeRole">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="portal-cards">
+        <!-- POINTAGE -->
+        <a href="police-pointage.html" class="access-card card-pointage">
+            <div class="corner-tl"></div><div class="corner-br"></div>
+            <span class="card-icon">🕐</span>
+            <div class="card-title">Pointage</div>
+            <div class="card-desc">Prenez ou terminez votre service. Statut synchronisé en temps réel avec le dispatch et le personnel.</div>
+            <div class="card-cta">Accéder <span class="cta-arrow">→</span></div>
+        </a>
+
+        <!-- FORMATION -->
+        <a href="police-courses.html" class="access-card card-formation">
+            <div class="corner-tl"></div><div class="corner-br"></div>
+            <span class="card-icon">🎓</span>
+            <div class="card-title">Formation</div>
+            <div class="card-desc">Cours réglementaires, examens en ligne et certifications officielles de la Police Fédérale.</div>
+            <div class="card-links" id="formationLinks">
+                <div class="card-link-item">📚 Cours &amp; formations</div>
+                <div class="card-link-item">📝 Examens &amp; certifications</div>
+                <div class="card-link-item">📅 Prise de rendez-vous</div>
+                <div class="card-link-item" id="kahootLink">🎮 Rejoindre un examen</div>
+            </div>
+            <div class="card-cta">Accéder <span class="cta-arrow">→</span></div>
+        </a>
+
+        <!-- DISPATCH -->
+        <a href="police-dispatch.html" class="access-card card-dispatch" id="cardDispatch">
+            <div class="corner-tl"></div><div class="corner-br"></div>
+            <div class="lock-overlay" id="lockBadge" style="display:none">🔒 ACCÈS REFUSÉ</div>
+            <span class="card-icon">📡</span>
+            <div class="card-title">Dispatch</div>
+            <div class="card-desc">Gérez les unités en temps réel. Assignez le personnel, suivez les statuts et coordonnez les interventions.</div>
+            <div class="card-cta" id="dispatchCta">Accéder <span class="cta-arrow">→</span></div>
+            <div id="dispatchClearance"></div>
+        </a>
+    </div>
+
+    <div class="back-link">
+        <a href="police-complaints.html">← Tableau de bord</a>
+        &nbsp;·&nbsp;
+        <a href="police-profile.html">👤 Mon Profil</a>
+        &nbsp;·&nbsp;
+        <a href="police-rdv-admin.html" id="rdvAdminLink" style="display:none">👔 Admin RDV</a>
+        &nbsp;·&nbsp;
+        <a href="police-personnel.html" id="personnelLink" style="display:none">👥 Personnel</a>
+    </div>
+</div>
+
+<div id="phase-error">
+    <div class="error-box">
+        <div class="error-icon">🚫</div>
+        <div class="error-title">ACCÈS REFUSÉ</div>
+        <div class="error-msg" id="errorMsg">Vous n'êtes pas autorisé à accéder à ce portail.</div>
+        <a href="login.html" class="btn-retry">← Retour à la connexion</a>
+    </div>
+</div>
+
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="js/main.js"></script>
 <script>
-function updateTermTime(){const n=new Date(),p=x=>String(x).padStart(2,'0');document.getElementById('termTime').textContent=`${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}  UTC+1`;}
-setInterval(updateTermTime,1000);updateTermTime();
-const ROLE_LABELS={officier:'Cadre Officier',supervision:'Cadre Supervision',agent:'Cadre Agent'};
-const ROLE_LEVEL={agent:1,supervision:2,officier:3};
-const linesEl=document.getElementById('termLines');
-function addLine(text,type='ok',marker='▸',delay=0){return new Promise(r=>{setTimeout(()=>{const d=document.createElement('div');d.className=`term-line ${type}`;d.innerHTML=`<span class="marker">${marker}</span>${text}`;linesEl.appendChild(d);requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('visible')));r();},delay);})}
-function addBlankLine(delay){return new Promise(r=>setTimeout(()=>{const d=document.createElement('div');d.className='term-line visible';d.innerHTML='&nbsp;';linesEl.appendChild(d);r();},delay));}
-function showResult(text,type,delay){return new Promise(r=>setTimeout(()=>{const el=document.getElementById('termResult');el.textContent=text;el.className=`term-result ${type}`;requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('visible')));r();},delay));}
-function val(v){return`<span class="val">${v}</span>`;}
-
-async function boot(){
-    const user=getCurrentUser();
-    await addLine(`INITIALISATION DU SYSTÈME...`,'ok','▸',0);
-    await addLine(`CONNEXION AU SERVEUR PFL/OPS ${val('gktawbapos[...]')}`,'ok','▸',200);
-    await addLine(`PROTOCOLE ${val('TLS 1.3')} — CHIFFREMENT ACTIF`,'ok','▸',440);
-    await addBlankLine(660);
-    await addLine(`LECTURE JETON D'AUTHENTIFICATION...`,'ok','▸',760);
-    if(!user){await addLine(`ERREUR — AUCUNE SESSION ACTIVE`,'err','✕',1000);await showResult('⛔  AUTHENTIFICATION REQUISE','err',1280);setTimeout(()=>window.location.href='login.html',2100);return;}
-    await addLine(`SESSION ACTIVE — ID ${val((user.id?.slice(0,8)?.toUpperCase()||'??')+'...')}`,'ok','▸',980);
-    await addBlankLine(1180);
-    await addLine(`VÉRIFICATION IDENTITÉ...`,'ok','▸',1280);
-    await addLine(`NOM        ${val((user.nom||'—').toUpperCase())}`,'ok','▸',1500);
-    await addLine(`PRÉNOM     ${val(user.prenom||'—')}`,'ok','▸',1700);
-    await addLine(`GRADE      ${val(user.grade||'—')}`,'ok','▸',1900);
-    await addLine(`MATRICULE  ${val(user.matricule||'—')}`,'ok','▸',2100);
-    await addBlankLine(2300);
-    await addLine(`ANALYSE DES PERMISSIONS...`,'ok','▸',2400);
-    await addLine(`RÔLE       ${val(ROLE_LABELS[user.role]||user.role?.toUpperCase()||'?')}`,'ok','▸',2620);
-    if(user.role==='civil'||!ROLE_LEVEL[user.role]){await addLine(`NIVEAU — ${val('INSUFFISANT')}`,'err','✕',2820);await showResult('⛔  ACCÈS REFUSÉ — PERSONNEL AUTORISÉ UNIQUEMENT','err',3100);setTimeout(()=>{document.getElementById('phase-scan').classList.add('hidden');document.getElementById('phase-error').classList.add('visible');document.getElementById('errorMsg').textContent=`Compte civil non autorisé. Ce portail est réservé au personnel assermenté de la Police Fédérale de Liège.`;},3800);return;}
-    if(user.is_active===false){await addLine(`STATUT — ${val('COMPTE DÉSACTIVÉ')}`,'err','✕',2820);await showResult('⛔  COMPTE DÉSACTIVÉ','err',3100);setTimeout(()=>{document.getElementById('phase-scan').classList.add('hidden');document.getElementById('phase-error').classList.add('visible');document.getElementById('errorMsg').textContent='Votre compte a été désactivé. Contactez un officier.';},3800);return;}
-    const level=ROLE_LEVEL[user.role]||0;
-    const ls=level>=3?'OFFICIER [3]':level>=2?'SUPERVISION [2]':'AGENT [1]';
-    await addLine(`NIVEAU     ${val(ls)}`,'ok','▸',2820);
-    await addLine(`STATUT     ${val('ACTIF ✓')}`,'ok','▸',3020);
-    await addBlankLine(3220);
-    await addLine(`MODULES AUTORISÉS :`,'ok','▸',3320);
-    await addLine(`  [✓] POINTAGE            — ${val('AUTORISÉ')}`,'ok','▸',3520);
-    await addLine(`  [✓] PORTAIL FORMATION   — ${val('AUTORISÉ')}`,'ok','▸',3720);
-    if(level>=2){
-        await addLine(`  [✓] DISPATCH TACTIQUE  — ${val('AUTORISÉ')}`,'ok','▸',3920);
-        await addLine(`  [✓] CRÉER KAHOOT       — ${val('AUTORISÉ')}`,'ok','▸',4120);
-    }else{
-        await addLine(`  [✗] DISPATCH TACTIQUE  — ${val('RESTREINT')} (SUPERVISION+)`,'warn','▸',3920);
-        await addLine(`  [✓] REJOINDRE KAHOOT   — ${val('AUTORISÉ')}`,'ok','▸',4120);
+    function updateTermTime(){const n=new Date(),p=x=>String(x).padStart(2,'0');document.getElementById('termTime').textContent=`${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}  UTC+1`}
+    setInterval(updateTermTime,1000);updateTermTime();
+    const ROLE_LABELS={officier:'Cadre Officier',supervision:'Cadre Supervision',agent:'Cadre Agent'};
+    const ROLE_LEVEL={agent:1,supervision:2,officier:3};
+    const linesEl=document.getElementById('termLines');
+    function addLine(text,type='ok',marker='▸',delay=0){return new Promise(r=>setTimeout(()=>{const d=document.createElement('div');d.className=`term-line ${type}`;d.innerHTML=`<span class="marker">${marker}</span>${text}`;linesEl.appendChild(d);requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('visible')));r()},delay))}
+    function addBlank(delay){return new Promise(r=>setTimeout(()=>{const d=document.createElement('div');d.className='term-line visible';d.innerHTML='&nbsp;';linesEl.appendChild(d);r()},delay))}
+    function showResult(text,type,delay){return new Promise(r=>setTimeout(()=>{const e=document.getElementById('termResult');e.textContent=text;e.className=`term-result ${type}`;requestAnimationFrame(()=>requestAnimationFrame(()=>e.classList.add('visible')));r()},delay))}
+    function v(x){return`<span class="val">${x}</span>`}
+    async function boot(){
+        const user=getCurrentUser();
+        await addLine(`INITIALISATION DU SYSTÈME...`,'ok','▸',0);
+        await addLine(`CONNEXION AU SERVEUR ${v('gktawbapos[...]')}`,'ok','▸',220);
+        await addLine(`PROTOCOLE ${v('TLS 1.3')} — CHIFFREMENT ACTIF`,'ok','▸',480);
+        await addBlank(720);
+        await addLine(`LECTURE JETON D'AUTHENTIFICATION...`,'ok','▸',820);
+        if(!user){await addLine(`ERREUR — AUCUNE SESSION DÉTECTÉE`,'err','✕',1100);await showResult('⛔  AUTHENTIFICATION REQUISE','err',1400);setTimeout(()=>{window.location.href='login.html'},2200);return}
+        await addLine(`SESSION ACTIVE — ID ${v(user.id?.slice(0,8)?.toUpperCase()+'...')}`,'ok','▸',1050);
+        await addBlank(1250);
+        await addLine(`VÉRIFICATION DE L'IDENTITÉ...`,'ok','▸',1350);
+        await addLine(`NOM        ${v(user.nom?.toUpperCase())}`,'ok','▸',1600);
+        await addLine(`PRÉNOM     ${v(user.prenom)}`,'ok','▸',1820);
+        await addLine(`GRADE      ${v(user.grade||'—')}`,'ok','▸',2030);
+        await addLine(`MATRICULE  ${v(user.matricule||'—')}`,'ok','▸',2240);
+        await addBlank(2430);
+        await addLine(`ANALYSE DES PERMISSIONS...`,'ok','▸',2530);
+        await addLine(`RÔLE       ${v(ROLE_LABELS[user.role]||user.role?.toUpperCase()||'?')}`,'ok','▸',2780);
+        if(user.role==='civil'||!ROLE_LEVEL[user.role]){
+            await addLine(`NIVEAU D'ACCÈS — ${v('INSUFFISANT')}`,'err','✕',2980);
+            await showResult('⛔  ACCÈS REFUSÉ — PERSONNEL AUTORISÉ UNIQUEMENT','err',3200);
+            setTimeout(()=>{document.getElementById('phase-scan').classList.add('hidden');document.getElementById('phase-error').classList.add('visible');document.getElementById('errorMsg').textContent=`Compte civil "${user.username}" — portail réservé au personnel assermenté.`},4000);return
+        }
+        if(user.is_active===false){
+            await addLine(`STATUT COMPTE — ${v('DÉSACTIVÉ')}`,'err','✕',2980);
+            await showResult('⛔  COMPTE DÉSACTIVÉ — CONTACTEZ UN OFFICIER','err',3200);
+            setTimeout(()=>{document.getElementById('phase-scan').classList.add('hidden');document.getElementById('phase-error').classList.add('visible');document.getElementById('errorMsg').textContent='Compte désactivé. Contactez un officier.'},4000);return
+        }
+        const level=ROLE_LEVEL[user.role]||0;
+        const lvlStr=level>=3?'OFFICIER [3]':level>=2?'SUPERVISION [2]':'AGENT [1]';
+        await addLine(`NIVEAU     ${v(lvlStr)}`,'ok','▸',2980);
+        await addLine(`STATUT     ${v('ACTIF ✓')}`,'ok','▸',3180);
+        await addBlank(3380);
+        await addLine(`MODULES AUTORISÉS :`,'ok','▸',3480);
+        await addLine(`  [✓] POINTAGE   — ${v('AUTORISÉ')}`,'ok','▸',3700);
+        await addLine(`  [✓] FORMATION  — ${v('AUTORISÉ')}`,'ok','▸',3900);
+        if(level>=2){await addLine(`  [✓] DISPATCH   — ${v('AUTORISÉ')}`,'ok','▸',4100)}
+        else{await addLine(`  [✗] DISPATCH   — ${v('RESTREINT')} (SUPERVISION+)`,'warn','▸',4100)}
+        await showResult('✓  BIENVENUE '+user.prenom?.toUpperCase()+' '+user.nom?.toUpperCase(),'ok',4400);
+        setTimeout(()=>{
+            const ini=(user.prenom?.[0]||'')+(user.nom?.[0]||'');
+            document.getElementById('badgeAvatar').textContent=ini.toUpperCase();
+            document.getElementById('badgeName').textContent=`${user.prenom} ${user.nom}`;
+            let rl=ROLE_LABELS[user.role]||user.role;
+            if(user.matricule)rl+=' — '+user.matricule;
+            document.getElementById('badgeRole').textContent=rl;
+            if(level>=2){
+                document.getElementById('kahootLink').textContent='🎮 Créer & Gérer les Kahoots';
+                document.getElementById('rdvAdminLink').style.display='inline';
+            }
+            if(level>=3){document.getElementById('personnelLink').style.display='inline'}
+            const dc=document.getElementById('cardDispatch');
+            if(level<2){
+                dc.classList.add('locked');dc.removeAttribute('href');
+                dc.addEventListener('click',e=>e.preventDefault());
+                document.getElementById('lockBadge').style.display='block';
+                document.getElementById('dispatchCta').innerHTML='🔒 Accès refusé <span class="cta-arrow"></span>';
+                document.getElementById('dispatchClearance').innerHTML='<span class="clearance-badge clr-agent">Requis : Supervision ou Officier</span>';
+            }else{
+                document.getElementById('dispatchClearance').innerHTML=`<span class="clearance-badge clr-supervision">Accréditation ${level>=3?'Officier':'Supervision'} ✓</span>`
+            }
+            document.getElementById('phase-scan').classList.add('hidden');
+            setTimeout(()=>document.getElementById('phase-portal').classList.add('visible'),100);
+        },5200)
     }
-    await showResult(`✓  AUTHENTIFICATION RÉUSSIE — BIENVENUE ${(user.prenom||'').toUpperCase()} ${(user.nom||'').toUpperCase()}`,'ok',4400);
-
-    setTimeout(()=>{
-        document.getElementById('badgeAvatar').textContent=((user.prenom?.[0]||'')+(user.nom?.[0]||'')).toUpperCase();
-        document.getElementById('badgeName').textContent=`${user.prenom||''} ${user.nom||''}`;
-        let rl=ROLE_LABELS[user.role]||user.role||'—';
-        if(user.matricule)rl+=' — '+user.matricule;
-        document.getElementById('badgeRole').textContent=rl;
-
-        if(level<2){
-            const d=document.getElementById('cardDispatch');
-            d.classList.add('locked');d.removeAttribute('href');d.style.cursor='not-allowed';
-            d.addEventListener('click',e=>e.preventDefault());
-            document.getElementById('lockBadge').style.display='block';
-            document.getElementById('dispatchCta').innerHTML='🔒 Accès refusé <span class="cta-arrow"></span>';
-            document.getElementById('dispatchClearance').innerHTML='<span class="clearance-badge clr-agent">Requis : Supervision ou Officier</span>';
-        }else{
-            document.getElementById('dispatchClearance').innerHTML=`<span class="clearance-badge clr-supervision">Accréditation ${level>=3?'Officier':'Supervision'} ✓</span>`;
-        }
-
-        const k=document.getElementById('cardKahoot');
-        if(level>=2){
-            k.setAttribute('href','police-kahoot-host.html');
-            document.getElementById('kahootTitle').textContent='Créer Examen';
-            document.getElementById('kahootDesc').textContent='Créez des sessions d\'examen interactives. Questions pré-construites par cours ou personnalisées, résultats en direct.';
-            document.getElementById('kahootCta').innerHTML='Créer une session <span class="cta-arrow">→</span>';
-            document.getElementById('kahootClearance').innerHTML='<span class="clearance-badge clr-purple">Supervision / Officier ✓</span>';
-        }else{
-            k.setAttribute('href','police-kahoot-join.html');
-            document.getElementById('kahootClearance').innerHTML='<span class="clearance-badge clr-green">Tous agents ✓</span>';
-        }
-
-        document.getElementById('phase-scan').classList.add('hidden');
-        setTimeout(()=>document.getElementById('phase-portal').classList.add('visible'),100);
-    },5200);
-}
-boot();
+    boot();
 </script>
 </body>
 </html>
