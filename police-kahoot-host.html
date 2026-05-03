@@ -333,6 +333,7 @@ let questions = [];
 let participants = [];
 let currentQIdx = -1;
 let realtimeChannel = null;
+let pollInterval = null;
 
 // Load formations
 let formationsCache = [];
@@ -431,7 +432,7 @@ async function launchSession() {
 
     const { data, error } = await supabase.from('table_policefed_kahoot').insert({
         code, titre, formation_id, created_by: currentUser.id,
-        questions: JSON.stringify(questions), status:'waiting',
+        questions: questions, status:'waiting',
         current_question:-1, pass_score
     }).select().single();
 
@@ -454,38 +455,70 @@ function startWaitingRoom() {
     document.getElementById('codeDisplay').textContent = session.code;
     document.getElementById('waitingTitle').textContent = session.titre;
 
-    if (realtimeChannel) supabase.removeChannel(realtimeChannel);
-    realtimeChannel = supabase.channel(`kahoot-host-${session.id}`)
-        .on('postgres_changes', { event:'INSERT', schema:'public', table:'table_policefed_kahoot_participants', filter:`session_id=eq.${session.id}` },
-            () => refreshParticipants())
-        .subscribe();
+    // Nettoyer ancienne souscription et polling
+    if (realtimeChannel) { supabase.removeChannel(realtimeChannel); realtimeChannel = null; }
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+
+    // Tentative Realtime (INSERT + UPDATE)
+    try {
+        realtimeChannel = supabase.channel(`kahoot-host-${session.id}`)
+            .on('postgres_changes', {
+                event: '*', schema: 'public',
+                table: 'table_policefed_kahoot_participants',
+                filter: `session_id=eq.${session.id}`
+            }, () => refreshParticipants())
+            .subscribe((status) => {
+                console.log('[Realtime] status:', status);
+            });
+    } catch(e) {
+        console.warn('[Realtime] non disponible, fallback polling uniquement');
+    }
+
+    // Polling de sécurité toutes les 2.5s (fonctionne même sans Realtime activé)
+    pollInterval = setInterval(() => refreshParticipants(), 2500);
 
     refreshParticipants();
 }
 
 async function refreshParticipants() {
-    const { data } = await supabase.from('table_policefed_kahoot_participants')
+    if (!session) return;
+    const { data, error } = await supabase
+        .from('table_policefed_kahoot_participants')
         .select('*, user:user_id(prenom,nom,role)')
         .eq('session_id', session.id);
-    participants = data||[];
+
+    if (error) { console.warn('[refreshParticipants]', error.message); return; }
+
+    participants = data || [];
     document.getElementById('participantCount').textContent = participants.length;
     const startBtn = document.getElementById('startBtn');
-    startBtn.disabled = participants.length === 0;
-    if (participants.length > 0) startBtn.innerHTML = `▶ Lancer l'Examen (${participants.length})`;
+
+    if (participants.length > 0) {
+        startBtn.disabled = false;
+        startBtn.innerHTML = `▶ Lancer l'Examen (${participants.length} participant${participants.length > 1 ? 's' : ''})`;
+        startBtn.style.opacity = '1';
+    } else {
+        startBtn.disabled = true;
+        startBtn.innerHTML = `▶ En attente de participants...`;
+        startBtn.style.opacity = '0.5';
+    }
 
     document.getElementById('participantsList').innerHTML = participants.map(p => {
-        const name = p.user ? `${p.user.prenom} ${p.user.nom}` : (p.user_name||'Agent');
-        const initials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+        const name = p.user ? `${p.user.prenom} ${p.user.nom}` : (p.user_name || 'Agent');
+        const initials = name.split(' ').map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
         return `<div class="participant-chip">
             <div class="p-avatar">${initials}</div>
-            <div><div class="p-name">${escapeHtml(name)}</div><div class="p-role">${p.user?.role||'—'}</div></div>
+            <div><div class="p-name">${escapeHtml(name)}</div><div class="p-role">${p.user?.role || '—'}</div></div>
         </div>`;
     }).join('');
 }
 
 async function startSession() {
+    if (participants.length === 0) { alert("Aucun participant connecté !"); return; }
+    // Stopper le polling de la salle d'attente
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    if (realtimeChannel) { supabase.removeChannel(realtimeChannel); realtimeChannel = null; }
     await supabase.from('table_policefed_kahoot').update({ status:'active', current_question:0, updated_at:new Date().toISOString() }).eq('id', session.id);
-    if (realtimeChannel) supabase.removeChannel(realtimeChannel);
     currentQIdx = 0;
     goPhase(3);
     showQuestion();
